@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Fentra Brand Film</title>
+<meta name="viewport" content="width=1080, height=1920">
+<link rel="stylesheet" href="../node_modules/@fontsource/inter-tight/300.css">
+<link rel="stylesheet" href="../node_modules/@fontsource/inter-tight/400.css">
+<link rel="stylesheet" href="../node_modules/@fontsource/inter-tight/500.css">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "../node_modules/three/build/three.module.js",
+  "three/addons/": "../node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="frame">
+  <canvas id="gl" width="1080" height="1920"></canvas>
+
+  <!-- SHOT 2 — abstract discovery interface (no readable text by design) -->
+  <div id="ui">
+    <div id="uiStage">
+      <div id="panel">
+        <div class="search">
+          <svg class="mag" viewBox="0 0 40 40"><circle cx="17" cy="17" r="10.5"/><line x1="25" y1="25" x2="33" y2="33"/></svg>
+          <div class="q"><i></i><i></i><i></i></div>
+          <span class="caret"></span>
+          <span class="scan"></span>
+        </div>
+        <div class="cards">
+          <div class="card" id="c0"><div class="thumb"><canvas width="256" height="256"></canvas></div><div class="lines"><b></b><s></s><s class="short"></s></div></div>
+          <div class="card" id="c1"><div class="thumb"><canvas width="256" height="256"></canvas></div><div class="lines"><b></b><s></s><s class="short"></s></div><span class="dot"></span></div>
+          <div class="card" id="c2"><div class="thumb"><canvas width="256" height="256"></canvas></div><div class="lines"><b></b><s></s><s class="short"></s></div></div>
+        </div>
+        <div class="rail"><span class="railPulse"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOT 4 — WEB / SEO / GEO anchored to the building -->
+  <svg id="lines" width="1080" height="1920" viewBox="0 0 1080 1920">
+    <line id="spine" x1="0" y1="0" x2="0" y2="0"/>
+  </svg>
+  <div id="labels">
+    <div class="lab" id="lab0"><span class="pt"></span><span class="ld"></span><span class="tx">WEB</span></div>
+    <div class="lab" id="lab1"><span class="pt"></span><span class="ld"></span><span class="tx">SEO</span></div>
+    <div class="lab" id="lab2"><span class="pt"></span><span class="ld"></span><span class="tx">GEO</span></div>
+  </div>
+
+  <!-- Statements -->
+  <div class="stmt" id="s1">İyi olmak yetmez.</div>
+  <div class="stmt" id="s2a">Müşteriler sizi aramaz.</div>
+  <div class="stmt" id="s2b">Sizi bulurlar.</div>
+  <div class="stmt" id="s3a">Bazıları sadece vardır.</div>
+  <div class="stmt" id="s3b">Bazıları bulunur.</div>
+  <div class="stmt small" id="s4">Biz işletmeleri dijitalde<br>daha görünür hale getiriyoruz.</div>
+
+  <!-- SHOTS 5–6 — brand reveal / end frame -->
+  <div id="endBg"></div>
+  <div id="end">
+    <div id="logoSlot"><img id="logo" alt=""></div>
+    <div id="services">WEB&nbsp;&nbsp;•&nbsp;&nbsp;SEO&nbsp;&nbsp;•&nbsp;&nbsp;GEO</div>
+    <div id="tag1">Dijitalde daha görünür.<br>Daha güçlü.</div>
+    <div id="tag2">Görünür olmak tesadüf değildir.</div>
+    <div id="handle">@fentra.digital</div>
+  </div>
+  <svg id="hair" width="1080" height="1920" viewBox="0 0 1080 1920"><line id="hairline" x1="0" y1="0" x2="0" y2="0"/></svg>
+
+  <div id="grain"></div>
+</div>
+<script type="module" src="film.js"></script>
+</body>
+</html>

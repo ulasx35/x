@@ -1,0 +1,94 @@
+:root {
+  /* Fentra accent — replace with the exact brand hex if different (also BLUE in film.js) */
+  --blue: #3d74f0;
+  --blue-soft: rgba(61, 116, 240, 0.45);
+  --ink: #ece7e0;
+  --stone: #b9b1a6;
+  --muted: #8d877f;
+  --bg: #0c0c0e;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+body { font-family: "Inter Tight", sans-serif; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+#frame { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+#gl { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+
+/* ---------- statements ---------- */
+.stmt {
+  position: absolute; left: 0; right: 0; top: 1330px;
+  text-align: center; font-weight: 300; font-size: 78px; line-height: 1.12;
+  letter-spacing: -0.018em; color: var(--ink); opacity: 0;
+  text-shadow: 0 2px 40px rgba(0, 0, 0, 0.55);
+  will-change: opacity, transform, filter;
+}
+.stmt.small { font-size: 52px; line-height: 1.22; letter-spacing: -0.01em; top: 1360px; }
+
+/* ---------- discovery interface ---------- */
+#ui { position: absolute; inset: 0; opacity: 0; perspective: 1800px; }
+#uiStage { position: absolute; inset: 0; transform-style: preserve-3d; }
+#panel {
+  position: absolute; left: 120px; top: 520px; width: 840px; height: 720px;
+  transform-origin: 50% 40%;
+}
+.search {
+  position: relative; height: 112px; border-radius: 56px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035));
+  border: 1px solid rgba(255,255,255,0.13);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08);
+  display: flex; align-items: center; padding: 0 44px; overflow: hidden;
+}
+.mag { width: 40px; height: 40px; fill: none; stroke: var(--stone); stroke-width: 2.2; stroke-linecap: round; flex: none; }
+.q { display: flex; gap: 14px; margin-left: 30px; align-items: center; }
+.q i { display: block; height: 14px; border-radius: 7px; background: rgba(236,231,224,0.55); width: 0; }
+.caret { display: block; width: 2px; height: 40px; background: var(--ink); margin-left: 12px; border-radius: 1px; }
+.scan { position: absolute; left: 0; bottom: -1px; height: 2px; width: 0; background: linear-gradient(90deg, transparent, var(--blue)); }
+
+.cards { margin-top: 30px; display: flex; flex-direction: column; gap: 22px; padding-left: 56px; }
+.card {
+  position: relative; height: 176px; border-radius: 30px; display: flex; align-items: center; padding: 0 26px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.025));
+  border: 1px solid rgba(255,255,255,0.09);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+  opacity: 0;
+}
+.thumb { width: 128px; height: 128px; border-radius: 20px; overflow: hidden; flex: none; background: #151619; }
+.thumb canvas { width: 128px; height: 128px; display: block; }
+.lines { margin-left: 30px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
+.lines b { display: block; height: 16px; width: 62%; border-radius: 8px; background: rgba(236,231,224,0.5); }
+.lines s { display: block; height: 10px; width: 84%; border-radius: 5px; background: rgba(236,231,224,0.17); }
+.lines s.short { width: 46%; }
+.card .dot { position: absolute; right: 30px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--blue); opacity: 0; box-shadow: 0 0 22px var(--blue); }
+.rail { position: absolute; left: 18px; top: 142px; width: 1px; height: 572px; background: rgba(255,255,255,0.08); overflow: hidden; }
+.railPulse { position: absolute; left: 0; width: 1px; height: 180px; top: -180px; background: linear-gradient(180deg, transparent, var(--blue)); }
+
+/* ---------- WEB / SEO / GEO labels ---------- */
+#lines, #hair { position: absolute; inset: 0; pointer-events: none; }
+#spine, #hairline { stroke: var(--blue); stroke-width: 2; stroke-linecap: round; }
+#labels { position: absolute; inset: 0; }
+.lab { position: absolute; left: 0; top: 0; display: flex; align-items: center; opacity: 0; white-space: nowrap; }
+.lab .pt { width: 9px; height: 9px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 18px var(--blue); margin-left: -4.5px; flex: none; }
+.lab .ld { height: 1px; width: 70px; background: rgba(236,231,224,0.55); margin: 0 18px 0 12px; transform-origin: 0 50%; }
+.lab .tx { font-weight: 500; font-size: 34px; letter-spacing: 0.36em; color: var(--ink); text-shadow: 0 2px 24px rgba(0,0,0,0.7); }
+
+/* ---------- end frame ---------- */
+#endBg {
+  position: absolute; inset: 0; opacity: 0;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 46%, #1b1b1e 0%, #121214 45%, #0b0b0c 100%);
+}
+#end { position: absolute; inset: 0; opacity: 1; pointer-events: none; }
+#logoSlot {
+  position: absolute; left: 190px; width: 700px; top: 700px; height: 260px;
+  display: flex; align-items: center; justify-content: center; opacity: 0;
+}
+#logo { max-width: 560px; max-height: 200px; display: none; }
+#services, #tag1, #tag2, #handle { position: absolute; left: 0; right: 0; text-align: center; opacity: 0; }
+#services { top: 1052px; font-weight: 500; font-size: 26px; letter-spacing: 0.42em; color: var(--stone); padding-left: 0.42em; }
+#tag1 { top: 1130px; font-weight: 300; font-size: 50px; line-height: 1.22; letter-spacing: -0.012em; color: var(--ink); }
+#tag2 { top: 1110px; font-weight: 300; font-size: 50px; letter-spacing: -0.012em; color: var(--ink); }
+#handle { top: 1218px; font-weight: 400; font-size: 27px; letter-spacing: 0.16em; color: var(--muted); }
+
+/* ---------- film grain (animated per frame) ---------- */
+#grain { position: absolute; inset: -128px; opacity: 0.075; pointer-events: none; background-size: 512px 512px; }
