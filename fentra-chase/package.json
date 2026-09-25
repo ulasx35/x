@@ -1,0 +1,15 @@
+{
+  "name": "fentra-chase-film",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "frames": "node scripts/render.mjs",
+    "audio": "python3 scripts/audio.py",
+    "encode": "python3 scripts/encode.py",
+    "build": "npm run frames && npm run audio && npm run encode"
+  },
+  "dependencies": {
+    
+    "@fontsource/inter-tight": "5.1.0"
+  }
+}
