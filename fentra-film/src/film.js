@@ -11,7 +11,7 @@ import { Reflector } from 'three/addons/objects/Reflector.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const W = 1080, H = 1920;
-const BLUE_HEX = '#3d74f0'; // Fentra accent (also --blue in style.css)
+const BLUE_HEX = '#1c73fd'; // Fentra accent (also --blue in style.css)
 
 // ---------------------------------------------------------------- utilities
 function mulberry32(a) {
@@ -830,8 +830,8 @@ function renderAt(t) {
       c.style.opacity = (a * dim).toFixed(4);
       const lift = i === 1 ? found : 0;
       c.style.transform = `translateY(${((1 - a) * 26).toFixed(2)}px) translateX(${(lift * 14).toFixed(2)}px) scale(${(1 + lift * 0.025).toFixed(4)})`;
-      c.style.borderColor = i === 1 ? `rgba(61,116,240,${(0.09 + found * 0.6).toFixed(3)})` : 'rgba(255,255,255,0.09)';
-      c.style.boxShadow = i === 1 ? `0 24px 60px rgba(0,0,0,0.45), 0 0 ${(found * 60).toFixed(1)}px rgba(61,116,240,${(found * 0.22).toFixed(3)})` : '0 24px 60px rgba(0,0,0,0.45)';
+      c.style.borderColor = i === 1 ? `rgba(28,115,253,${(0.09 + found * 0.6).toFixed(3)})` : 'rgba(255,255,255,0.09)';
+      c.style.boxShadow = i === 1 ? `0 24px 60px rgba(0,0,0,0.45), 0 0 ${(found * 60).toFixed(1)}px rgba(28,115,253,${(found * 0.22).toFixed(3)})` : '0 24px 60px rgba(0,0,0,0.45)';
     });
     el.dot.style.opacity = found.toFixed(3);
     // blue pulse descending the rail and resolving on the found card

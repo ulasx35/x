@@ -1,7 +1,7 @@
 :root {
   /* Fentra accent — replace with the exact brand hex if different (also BLUE in film.js) */
-  --blue: #3d74f0;
-  --blue-soft: rgba(61, 116, 240, 0.45);
+  --blue: #1c73fd;
+  --blue-soft: rgba(28, 115, 253, 0.45);
   --ink: #ece7e0;
   --stone: #b9b1a6;
   --muted: #8d877f;
@@ -83,7 +83,7 @@ body { font-family: "Inter Tight", sans-serif; color: var(--ink); -webkit-font-s
   position: absolute; left: 190px; width: 700px; top: 700px; height: 260px;
   display: flex; align-items: center; justify-content: center; opacity: 0;
 }
-#logo { max-width: 560px; max-height: 200px; display: none; }
+#logo { width: 500px; height: auto; display: none; }
 #services, #tag1, #tag2, #handle { position: absolute; left: 0; right: 0; text-align: center; opacity: 0; }
 #services { top: 1052px; font-weight: 500; font-size: 26px; letter-spacing: 0.42em; color: var(--stone); padding-left: 0.42em; }
 #tag1 { top: 1130px; font-weight: 300; font-size: 50px; line-height: 1.22; letter-spacing: -0.012em; color: var(--ink); }
