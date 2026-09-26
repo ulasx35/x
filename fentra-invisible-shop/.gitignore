@@ -1,0 +1,4 @@
+node_modules/
+output/_*
+output/stills/
+output/cues.json

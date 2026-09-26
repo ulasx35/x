@@ -1,0 +1,16 @@
+{
+  "name": "fentra-invisible-shop-film",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "frames": "node scripts/render.mjs",
+    "audio": "python3 scripts/audio.py",
+    "encode": "python3 scripts/encode.py",
+    "build": "npm run frames && npm run audio && npm run encode"
+  },
+  "dependencies": {
+    "@fontsource/fraunces": "^5.3.0",
+    "@fontsource/instrument-serif": "^5.3.0",
+    "@fontsource/manrope": "^5.3.0"
+  }
+}
