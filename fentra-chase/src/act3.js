@@ -134,11 +134,26 @@ function drawOffice(ctx, cam, t, opts = {}) {
       ctx.restore();
     }
   }
+  { // chair column and star base (visible between his legs)
+    const b = cam.project([0.05, 0.08, -2.75]), cTop = cam.project([0.05, 0.44, -2.75]), s1 = cam.scaleAt([0.05, 0.1, -2.75]);
+    if (b[2] > 0) {
+      ctx.save(); ctx.fillStyle = '#141416';
+      ctx.fillRect(b[0] - s1 * 0.025, cTop[1], s1 * 0.05, b[1] - cTop[1]);
+      for (const a of [-2.6, -1.2, 0, 1.2, 2.6]) { ctx.beginPath(); ctx.moveTo(b[0], b[1]); ctx.lineTo(b[0] + Math.sin(a) * s1 * 0.34, b[1] + Math.cos(a) * s1 * 0.07 + s1 * 0.03); ctx.lineWidth = s1 * 0.03; ctx.strokeStyle = '#141416'; ctx.stroke(); ctx.beginPath(); ctx.arc(b[0] + Math.sin(a) * s1 * 0.34, b[1] + Math.cos(a) * s1 * 0.07 + s1 * 0.05, s1 * 0.025, 0, TAU); ctx.fill(); }
+      ctx.fillStyle = rgb(O.leather); ctx.beginPath(); ctx.roundRect(cTop[0] - s1 * 0.27, cTop[1] - s1 * 0.06, s1 * 0.54, s1 * 0.08, s1 * 0.03); ctx.fill();
+      ctx.restore();
+    }
+  }
   if (opts.man) opts.man(ctx);
-  // desk
-  f([[-0.95, 0.72, -1.35], [0.95, 0.72, -1.35], [0.95, 0.0, -1.35], [-0.95, 0.0, -1.35]].map((p) => p), O.desk);
-  f([[-0.97, 0.72, -2.25], [0.97, 0.72, -2.25], [0.97, 0.76, -1.33], [-0.97, 0.76, -1.33]], O.deskTop);
-  f([[-0.97, 0.72, -1.33], [0.97, 0.72, -1.33], [0.97, 0.76, -1.33], [-0.97, 0.76, -1.33]], mix(O.deskTop, hex('#c9a27a'), 0.2));
+  // desk: slab top on slim legs + a drawer pedestal on the right, so his legs stay visible underneath
+  f([[-0.95, 0.0, -1.42], [-0.91, 0.0, -1.42], [-0.91, 0.72, -1.42], [-0.95, 0.72, -1.42]], O.charcoal);
+  f([[0.46, 0.0, -1.4], [0.95, 0.0, -1.4], [0.95, 0.72, -1.4], [0.46, 0.72, -1.4]], O.desk);
+  for (const y of [0.24, 0.48]) f([[0.48, y, -1.395], [0.93, y, -1.395], [0.93, y + 0.012, -1.395], [0.48, y + 0.012, -1.395]], hex('#241a14'));
+  f([[-0.97, 0.72, -2.25], [0.97, 0.72, -2.25], [0.97, 0.765, -1.33], [-0.97, 0.765, -1.33]], O.deskTop);
+  f([[-0.97, 0.72, -1.33], [0.97, 0.72, -1.33], [0.97, 0.765, -1.33], [-0.97, 0.765, -1.33]], mix(O.deskTop, hex('#c9a27a'), 0.2));
+  // keyboard under his hands
+  f([[-0.2, 0.768, -2.16], [0.24, 0.768, -2.16], [0.24, 0.768, -2.0], [-0.2, 0.768, -2.0]], hex('#1d1e22'));
+  if (opts.arms) opts.arms(ctx);
   // monitor (seen from behind-left, screen facing him), soft screen glow
   const mc = [-0.5, 1.08, -1.95];
   f([[-0.8, 0.9, -1.72], [-0.2, 0.9, -2.12], [-0.2, 1.27, -2.12], [-0.8, 1.27, -1.72]], hex('#17181b'));
@@ -166,13 +181,16 @@ function drawOffice(ctx, cam, t, opts = {}) {
   ctx.fillStyle = hz; ctx.fillRect(0, 0, W, H);
 }
 const SEAT = [0.05, 0, -2.6];
-function drawSeated(ctx, cam, pose) {
+function drawSeated(ctx, cam, pose, part) {
   const T = actorT(cam, SEAT);
-  figure(ctx, (g) => manSeated(g, T, pose), {
+  const kb = cam.project([0.02, 0.775, -2.08]);
+  const handsY = (T.oy - kb[1]) / T.s;
+  figure(ctx, (g) => manSeated(g, T, { ...pose, part, handsY }), {
     rims: [{ dir: [1, -0.3], color: WARM, a: 0.45, w: T.s * 0.01 }, { dir: [-1, 0], color: hex('#bcd2ff'), a: 0.25 + (pose.ping || 0) * 0.25, w: T.s * 0.008 }],
     spots: [{ x: T.ox - T.s * 0.3, y: T.oy - T.s * 1.35, r: T.s * 0.45, color: [200, 220, 255], a: 0.12 + (pose.ping || 0) * 0.14 }, { x: T.ox + T.s * 0.4, y: T.oy - T.s * 1.25, r: T.s * 0.6, color: [255, 200, 140], a: 0.18 }],
   });
 }
+const seated = (cam, pose) => ({ man: (c) => drawSeated(c, cam, pose), arms: (c) => drawSeated(c, cam, pose, 'arms') });
 
 // ---------------------------------------------------------------- S20: match cut — the torch becomes the globe lamp; pull back into the office
 function S20(ctx, t) {
@@ -182,7 +200,7 @@ function S20(ctx, t) {
   const tgt = lerp3([0.62, 1.12, -1.65], [0.0, 1.08, -2.6], sstep(0.15, 0.85, u));
   cam.set(pos, tgt, lerp(40, 38, u));
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
-  drawOffice(ctx, cam, t, { man: (c) => drawSeated(c, cam, { expr: { yaw: -0.3, gazeX: -0.7, brow: 0.1, smile: 0.05 }, lightSide: 1 }) });
+  drawOffice(ctx, cam, t, seated(cam, { expr: { yaw: -0.3, gazeX: -0.7, brow: 0.1, smile: 0.05 }, lightSide: 1 }));
   const white = 1 - sstep(0.0, 0.7, lt);
   if (white > 0) { ctx.fillStyle = `rgba(255,246,232,${white})`; ctx.fillRect(0, 0, W, H); }
 }
@@ -202,9 +220,9 @@ function card(ctx, x, y, w, title, sub, a, slide) {
   ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(ix - 14, iy - 11, 28, 19, 5); ctx.fill();
   ctx.beginPath(); ctx.moveTo(ix - 6, iy + 7); ctx.lineTo(ix - 10, iy + 15); ctx.lineTo(ix + 1, iy + 7); ctx.fill();
   ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
-  ctx.fillStyle = '#17191d'; ctx.font = '500 38px "Inter Tight"';
+  ctx.fillStyle = '#17191d'; ctx.font = '600 36px "Manrope"';
   ctx.fillText(title, x + 124, sub ? y + 76 : y + h / 2 + 13);
-  if (sub) { ctx.fillStyle = '#6a6d73'; ctx.font = '400 29px "Inter Tight"'; ctx.fillText(sub, x + 124, y + 124); }
+  if (sub) { ctx.fillStyle = '#6a6d73'; ctx.font = '400 27px "Manrope"'; ctx.fillText(sub, x + 124, y + 124); }
   ctx.fillStyle = rgb(BLUE); ctx.beginPath(); ctx.arc(x + w - 36, y + 38, 7, 0, TAU); ctx.fill();
   ctx.restore();
 }
@@ -262,7 +280,7 @@ function S22(ctx, t) {
     figure(c, (g) => personSide(g, T, pose, CUSTOMERS[0], { props: true }), { alpha: 0.85, rims: [{ dir: [0, -1], color: WARM, a: 0.4, w: 3 }], blur: 1.5 });
     c.restore();
   };
-  drawOffice(ctx, cam, t, { ping, corridor: walker, man: (c) => drawSeated(c, cam, { lean, ping, expr: { yaw: lerp(-0.3, -0.22, lean), gazeX: -0.7, brow: 0.2 + smile * 0.2, smile: smile * 0.55, eyeL: 1 - smile * 0.12, eyeR: 1 - smile * 0.12 }, lightSide: 1 }) });
+  drawOffice(ctx, cam, t, { ping, corridor: walker, ...seated(cam, { lean, ping, expr: { yaw: lerp(-0.3, -0.22, lean), gazeX: -0.7, brow: 0.2 + smile * 0.2, smile: smile * 0.55, eyeL: 1 - smile * 0.12, eyeR: 1 - smile * 0.12 }, lightSide: 1 }) });
 }
 
 // ---------------------------------------------------------------- S23: he turns to us — one small wink
@@ -272,7 +290,7 @@ function S23(ctx, t) {
   const turn = easeIO(inv(0.15, 1.0, lt));
   const wink = win(lt, 3.3, 3.42, 3.62, 3.78);
   const expr = { yaw: lerp(-0.22, 0.0, turn), gazeX: lerp(-0.7, 0, turn), brow: 0.3 - wink * 0.2, browR: -wink * 0.5, smile: 0.55 + wink * 0.15, smirk: wink * 0.6, eyeL: 0.9, eyeR: 0.9 * (1 - wink) };
-  drawOffice(ctx, cam, t, { man: (c) => drawSeated(c, cam, { lean: 1, expr, lightSide: 1 }) });
+  drawOffice(ctx, cam, t, seated(cam, { lean: 1, expr, lightSide: 1 }));
   // end transition begins: the room settles into darkness around the lamp
   const d = sstep(4.2, 4.8, lt);
   if (d > 0) { ctx.fillStyle = `rgba(14,14,16,${d})`; ctx.fillRect(0, 0, W, H); }
@@ -296,17 +314,32 @@ function S24(ctx, t) {
   }
   const hl = easeOut(inv(1.4, 2.1, lt));
   if (hl > 0) { ctx.fillStyle = rgb(BLUE); ctx.fillRect(W / 2 - 60 * hl, 872, 120 * hl, 3); }
+  const fade = (a0) => sstep(a0, a0 + 0.7, lt);
   const txt = (s, y, font, col, a0, spacing = 0) => {
-    const a = sstep(a0, a0 + 0.6, lt); if (a <= 0) return;
+    const a = fade(a0); if (a <= 0) return;
     ctx.save(); ctx.globalAlpha = a; ctx.font = font; ctx.fillStyle = col; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     if (spacing) ctx.letterSpacing = `${spacing}px`;
     ctx.fillText(s, W / 2 + spacing / 2, y + (1 - easeOut(a)) * 10); ctx.restore();
   };
-  txt('Web  •  SEO  •  GEO', 935, '500 27px "Inter Tight"', '#b9b1a6', 1.7, 9);
-  txt('Dijitalde görünür olun.', 1050, '300 56px "Inter Tight"', '#efe9e1', 2.35);
-  txt('Birlikte başlayalım.', 1150, '300 40px "Inter Tight"', '#a9a298', 3.2);
-  txt('Birlikte büyüyelim.', 1206, '300 40px "Inter Tight"', '#a9a298', 3.45);
-  txt('@fentra.digital', 1420, '400 29px "Inter Tight"', '#8d877f', 4.1, 4);
+  txt('WEB  ·  SEO  ·  GEO', 930, '600 24px "Manrope"', '#b9b1a6', 1.7, 10);
+  { // "Dijitalde görünür olun." — the key word set in italic Fentra blue
+    const a = fade(2.35);
+    if (a > 0) {
+      ctx.save(); ctx.globalAlpha = a; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+      const y = 1045 + (1 - easeOut(a)) * 10;
+      const p1 = 'Dijitalde ', p2 = 'görünür', p3 = ' olun.';
+      ctx.font = '500 66px "Playfair Display"'; const w1 = ctx.measureText(p1).width, w3 = ctx.measureText(p3).width;
+      ctx.font = 'italic 500 66px "Playfair Display"'; const w2 = ctx.measureText(p2).width;
+      let x = W / 2 - (w1 + w2 + w3) / 2;
+      ctx.font = '500 66px "Playfair Display"'; ctx.fillStyle = '#f1ebe2'; ctx.fillText(p1, x, y); x += w1;
+      ctx.font = 'italic 500 66px "Playfair Display"'; ctx.fillStyle = '#4d8dff'; ctx.fillText(p2, x, y); x += w2;
+      ctx.font = '500 66px "Playfair Display"'; ctx.fillStyle = '#f1ebe2'; ctx.fillText(p3, x, y);
+      ctx.restore();
+    }
+  }
+  txt('Birlikte başlayalım.', 1150, 'italic 400 42px "Playfair Display"', '#b3aca1', 3.2);
+  txt('Birlikte büyüyelim.', 1208, 'italic 400 42px "Playfair Display"', '#b3aca1', 3.5);
+  txt('@fentra.digital', 1420, '500 26px "Manrope"', '#8d877f', 4.1, 5);
 }
 
 export const ACT3 = [

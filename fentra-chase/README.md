@@ -11,11 +11,23 @@ Everything is rendered in code and is fully deterministic, so any change re-rend
 
 - **Picture** (`src/`): a 2.5D graphic-novel animation drawn in Canvas2D.
   - The neighbourhood (`world.js`) is real 3D geometry seen through a perspective camera: stone facades, the same lanterns everywhere, wet-stone reflections, haze. That keeps the architecture and geography stable from shot to shot.
-  - The characters (`characters.js`) are vector rigs with fixed palettes. The businessman is designed once and reused in every view (side run, back, front, seated). The run cycle is solved with inverse kinematics against planted toes, so the feet never slide.
+  - The characters are split across two files. `faces.js` holds the faces, hats and props. `rig.js` holds the bodies.
+    - Limbs are drawn as anatomical outlines (thigh, knee, calf, ankle, shoulder, elbow) rather than tubes. Hands have real shapes: a loose running fist, a relaxed hanging hand, a grip.
+    - The run and walk cycles are keyframed from standard running poses (heel recovery, knee drive, reach, planted stance with heel roll), with pelvic rotation and counter-swinging arms. The feet are solved by inverse kinematics, so they never slide.
+    - The back-view run is driven by the same motion data, so the legs bend correctly.
+    - The businessman is designed once and reused in every view. Seated at his desk he is drawn full-body: legs and shoes under the desk, hands on the keyboard.
   - `engine.js` handles per-figure lighting (rim light, torch spots, cast shadows) and the mirror reflections on wet stone.
 - **Sound** (`scripts/audio.py`): fully synthesized and synced to cue times exported from the animation (`output/cues.json`).
   - Foley: footsteps on wet stone, the pursuers' steps, breathing, coat rustle, flashlight clicks.
   - Score: a staccato suspense cue that drops to near-silence at the dead end, a curious celesta reveal, a warm electric-piano office theme, one notification chime, a tiny glockenspiel on the wink, and a resolved chord for the logo.
+
+## Typography
+
+- Narration captions: Playfair Display italic (cinematic subtitle style, soft shadow band for legibility).
+- End frame: a Playfair Display headline with the word *görünür* in italic Fentra blue, the service line in widely tracked Manrope capitals, and the closing lines in italic serif.
+- Interface cards: Manrope.
+
+All fonts are bundled locally with full Turkish glyphs (ç ğ ı İ ö ş ü).
 
 ## Shot list
 

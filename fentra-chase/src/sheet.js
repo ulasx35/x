@@ -1,6 +1,6 @@
 // Character model sheet (turnaround / expressions) — used to lock designs before animating.
 import { W, H, figure } from './engine.js';
-import { MAN, CUSTOMERS, gait, RUN, manSide, manFront, manBack, personFront, faceFront, hatFront, manSeated } from './characters.js';
+import { MAN, CUSTOMERS, gait, RUN, WALK, manSide, manFront, manBack, personFront, personSide, faceFront, hatFront, manSeated } from './characters.js';
 
 export async function boot(canvas) {
   const ctx = canvas.getContext('2d');
@@ -19,10 +19,12 @@ export async function boot(canvas) {
     manFront(ctx, { ox: 150, oy: 1080, s: 250, dir: 1 }, { head: { gazeX: 0 } });
     manFront(ctx, { ox: 420, oy: 1080, s: 250, dir: 1 }, { crouch: 0.6, cover: 1, head: { eyeL: 1, eyeR: 1, brow: 1, gazeX: -0.6 } });
     manBack(ctx, { ox: 680, oy: 1080, s: 250, dir: 1 }, {});
-    manBack(ctx, { ox: 920, oy: 1080, s: 250, dir: 1 }, { phase: 0.25 });
+    manBack(ctx, { ox: 920, oy: 1080, s: 250, dir: 1 }, { phase: 0.3 });
     lab('front · cower · back · back run', 20, 620);
+    // seated (replaces a face in the sheet)
+    manSeated(ctx, { ox: 940, oy: 1440, s: 280, dir: 1 }, { expr: { yaw: -0.2 } });
     // row 3: faces
-    const exprs = [{}, { brow: 1.2, knit: 0.4, gazeX: -0.8 }, { smile: 0.8, eyeL: 0.8, eyeR: 0.8 }, { smile: 0.9, eyeR: 0.0, browR: -0.4, yaw: 0.1 }];
+    const exprs = [{}, { brow: 1.2, knit: 0.4, gazeX: -0.8 }, { smile: 0.9, eyeR: 0.0, browR: -0.4, yaw: 0.1 }];
     exprs.forEach((e, i) => {
       const T = { ox: 140 + i * 265, oy: 1400, s: 1100, dir: 1 };
       faceFront(ctx, T, [0, 0], MAN, e, 'man', -1);

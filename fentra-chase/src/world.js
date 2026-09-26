@@ -204,7 +204,7 @@ function drawGround(ctx, cam, extra) {
     }
     // joints (only near the camera)
     const step = G.kind === 'slab' ? 0.6 : 0.3;
-    const lw = (p) => Math.max(0.5, cam.scaleAt(p) * (G.kind === 'slab' ? 0.012 : 0.02));
+    const lw = (p) => clamp(cam.scaleAt(p) * (G.kind === 'slab' ? 0.012 : 0.02), 0.5, 2.2);
     for (let x = G.x0; x <= G.x1 + 1e-6; x += step) {
       const a = [x, 0.001, Math.max(G.z0, cam.pos[2] - 26)], b = [x, 0.001, Math.min(G.z1, cam.pos[2] + 26)];
       if (a[2] < b[2]) line3(ctx, cam, a, b, G.kind === 'slab' ? 'rgba(8,9,12,0.16)' : 'rgba(8,9,12,0.3)', lw([x, 0, cam.pos[2] - 3]));

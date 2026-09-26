@@ -1,6 +1,6 @@
 // Fentra — "Görünür" (animated brand film). Deterministic: every frame is a pure function of time t.
 import { W, H, clamp, lerp, inv, sstep, easeIO, easeOut, easeIn, sine, win, lerp3, TAU, mulberry32, noise1, hex, rgb, mix, Cam, figure, castShadow, glow, softDisc, beam, scratch, peek, fogged } from './engine.js';
-import { MAN, CUSTOMERS, gait, RUN, WALK, footfalls, manSide, manFront, manBack, personSide, personFront, personBack, faceFront, hatFront, manSeated, handOnWall, headProfile, tr } from './characters.js';
+import { MAN, CUSTOMERS, gait, RUN, WALK, footfalls, manSide, manFront, manBack, personSide, personFront, personBack, faceFront, hatFront, manSeated, headProfile, tr } from './characters.js';
 import { renderWorld, groundPool, reflection, LAMPS, lampPos } from './world.js';
 import { ACT2 } from './act2.js';
 import { ACT3, initAct3 } from './act3.js';
@@ -154,8 +154,8 @@ function S3(ctx, t) {
   for (const f of falls) {
     const age = t - f; if (age < 0 || age > 0.5) continue;
     const pf = gait(f - MAN_T0, RUN);
-    const leg = pf.legs.reduce((a, b) => (a.toe[1] < b.toe[1] ? a : b));
-    const fx = T.ox + T.s * leg.toe[0] - T.s * 0.03;
+    const leg = pf.legs.reduce((a, b) => (a.ankle[1] < b.ankle[1] ? a : b));
+    const fx = T.ox + T.s * (leg.ankle[0] + 0.1);
     const r = mulberry32(Math.floor(f * 1000));
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     for (let k = 0; k < 14; k++) {
@@ -387,14 +387,20 @@ export const VO = [
 ];
 function captions(ctx, t) {
   for (const v of VO) {
-    const a = win(t, v.t0 - 0.15, v.t0 + 0.3, v.t1 + 0.1, v.t1 + 0.5);
+    const a = win(t, v.t0 - 0.15, v.t0 + 0.35, v.t1 + 0.1, v.t1 + 0.55);
     if (a <= 0.001) continue;
-    ctx.save();
-    ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = '300 46px "Inter Tight"'; ctx.fillStyle = '#efe9e1';
-    ctx.shadowColor = 'rgba(0,0,0,0.7)'; ctx.shadowBlur = 24;
     const lines = v.text.split('\n');
-    lines.forEach((ln, i) => ctx.fillText(ln, W / 2, 1440 + (i - (lines.length - 1) / 2) * 60 + (1 - easeOut(inv(v.t0 - 0.15, v.t0 + 0.4, t))) * 8));
+    const cy = 1430, lh = 66;
+    ctx.save();
+    // soft shadow band for legibility (no box)
+    const band = ctx.createRadialGradient(W / 2, cy, 10, W / 2, cy, 520);
+    band.addColorStop(0, `rgba(4,5,8,${0.42 * a})`); band.addColorStop(1, 'rgba(4,5,8,0)');
+    ctx.save(); ctx.translate(W / 2, cy); ctx.scale(1, 0.32); ctx.translate(-W / 2, -cy); ctx.fillStyle = band; ctx.fillRect(0, cy - 520, W, 1040); ctx.restore();
+    ctx.globalAlpha = a; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = 'italic 500 52px "Playfair Display"'; ctx.fillStyle = '#f3ede4';
+    ctx.shadowColor = 'rgba(0,0,0,0.65)'; ctx.shadowBlur = 18; ctx.shadowOffsetY = 2;
+    const rise = (1 - easeOut(inv(v.t0 - 0.15, v.t0 + 0.45, t))) * 10;
+    lines.forEach((ln, i) => ctx.fillText(ln, W / 2, cy + (i - (lines.length - 1) / 2) * lh + rise));
     ctx.restore();
   }
 }
@@ -423,6 +429,7 @@ export async function boot(canvas) {
   makeGrain();
   initAct3();
   await document.fonts.load('300 46px "Inter Tight"', 'Müşteriler sizden kaçmıyor… ğüşıöçİ');
+  for (const fnt of ['italic 500 52px "Playfair Display"', 'italic 400 42px "Playfair Display"', '500 66px "Playfair Display"', '600 36px "Manrope"', '500 26px "Manrope"', '400 27px "Manrope"']) await document.fonts.load(fnt, 'Müşteriler sizden kaçmıyor… ğüşıöçİ Dijitalde görünür @fentra.digital WEB SEO GEO');
   await document.fonts.load('400 30px "Inter Tight"', 'Yeni müşteri talebi');
   await document.fonts.load('500 30px "Inter Tight"', 'Web • SEO • GEO');
   const logo = new Image(); logo.src = '../assets/fentra-logo.png'; await logo.decode();
