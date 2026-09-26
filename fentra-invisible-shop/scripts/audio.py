@@ -249,8 +249,8 @@ def build():
     city = lp(brown, 220) * 2.4 + bp(white, 300, 2600) * 0.01
     city *= (0.85 + 0.15 * np.sin(2 * np.pi * 0.06 * t + 1.3))[:, None]
     wind = bp(white, 150, 900) * (0.55 + 0.45 * lp(np.abs(rng.standard_normal((N, 2))), 0.35) * 6)
-    city_lvl = env([(0, 0.0), (0.25, 1), (10.3, 1), (11.6, 0.55), (13.0, 0.5), (14.9, 0.8), (19.0, 0.85), (24.8, 1.0), (26.0, 0.25), (DUR, 0.15)])
-    wind_lvl = env([(0, 0.25), (10.3, 0.25), (11.4, 1.0), (13.4, 1.0), (15.0, 0.3), (DUR, 0.2)])
+    city_lvl = env([(0, 0.0), (0.25, 1), (10.45, 1), (11.7, 0.55), (13.0, 0.5), (14.9, 0.8), (19.0, 0.85), (T["brand0"], 1.0), (T["brand0"] + 1.2, 0.25), (DUR, 0.15)])
+    wind_lvl = env([(0, 0.25), (10.45, 0.25), (11.5, 1.0), (13.4, 1.0), (15.0, 0.3), (DUR, 0.2)])
     fx += city * city_lvl[:, None] * 0.085 + wind * wind_lvl[:, None] * 0.018
     # distant passes and street life under the whole bed
     for s0, L, d in ((0.6, 4.0, -1), (9.0, 5.0, 1), (19.5, 4.5, -1)):
@@ -281,9 +281,10 @@ def build():
     for x, which in CUES["doors"]:
         if which == "cafe":
             place(fx, x, pan(door_click(seed=int(x * 10)), -0.8), 0.035)
-    place(fx, 22.02, pan(door_click(seed=4), 0.0), 0.05)
-    place(fx, 22.06, pan(shop_bell(), 0.0), 0.05); place(fx_send, 22.06, pan(shop_bell()), 0.08)
-    place(fx, 23.95, pan(door_click(seed=5), 0.0), 0.035)
+    hero = [x for x, w in CUES["doors"] if w == "hero"][0]; hero_close = [x for x, w in CUES["doors"] if w == "hero_close"][0]
+    place(fx, hero + 0.02, pan(door_click(seed=4), 0.0), 0.05)
+    place(fx, hero + 0.06, pan(shop_bell(), 0.0), 0.05); place(fx_send, hero + 0.06, pan(shop_bell()), 0.08)
+    place(fx, hero_close, pan(door_click(seed=5), 0.0), 0.035)
 
     # --- the Fentra signal: a small sonic lift, a descending glide, a drawn shimmer as it traces the shop
     sig = T["sigOn"]; desc = T["desc0"]; touch = T["touch"]
@@ -314,13 +315,13 @@ def build():
         s = piano(midi(n), 1.6, 0.035, bright=0.9)
         place(mus, x, pan(s, 0.15)); place(mus_send, x, pan(s), 0.5)
     # "…sizi seçemez." — the music holds its breath (one low note); then the lift begins with the crane
-    s = pad(midi(29), 1.9, 0.05, attack=0.2, release=1.0, bright=500); place(mus, 8.7, pan(s, 0)); place(mus_send, 8.7, pan(s), 0.3)
-    for x, notes, dur in ((10.3, (34, 46, 53, 57, 62, 65), 2.0), (12.3, (36, 48, 53, 55, 60, 65), 2.6)):
+    s = pad(midi(29), 1.9, 0.05, attack=0.2, release=1.0, bright=500); place(mus, 9.0, pan(s, 0)); place(mus_send, 9.0, pan(s), 0.3)
+    for x, notes, dur in ((10.45, (34, 46, 53, 57, 62, 65), 2.0), (12.35, (36, 48, 53, 55, 60, 65), 2.6)):
         for j, n in enumerate(notes):
             s = pad(midi(n), dur, 0.034, attack=1.1, release=1.6, bright=1900)
             place(mus, x, pan(s, (j - 2.5) * 0.12)); place(mus_send, x, pan(s), 0.6)
     for k, n in enumerate((65, 69, 72, 74, 77)):  # rising arpeggio as the camera climbs
-        s = piano(midi(n), 1.8, 0.03, bright=1.0); place(mus, 10.4 + k * 0.34, pan(s, 0.2)); place(mus_send, 10.4 + k * 0.34, pan(s), 0.6)
+        s = piano(midi(n), 1.8, 0.03, bright=1.0); place(mus, 10.55 + k * 0.34, pan(s, 0.2)); place(mus_send, 10.55 + k * 0.34, pan(s), 0.6)
 
     # Part 2 — warm and uplifting (96 bpm), from the touch: F · C/E · Dm7 · B♭maj7 · F/A · Am7 · B♭maj9 · C6 · Fadd9
     beat = 60 / 96
@@ -344,9 +345,10 @@ def build():
                 s = pluck(midi(n), 0.022 * g, decay=5.5)
                 place(mus, x + e * beat / 2, pan(s, 0.25 if e % 2 else -0.25)); place(mus_send, x + e * beat / 2, pan(s), 0.45)
     # the sign resolves letter by letter (7 soft notes, from the centre out)
-    for k, n in enumerate((72, 74, 76, 79, 81, 84, 86)):
-        x = T["sign0"] + 0.1 + k * (T["sign1"] - T["sign0"] - 0.2) / 7
-        s = pluck(midi(n + 12), 0.012, decay=7, dur=1.0); place(mus, x, pan(s, (k - 3) * 0.12)); place(mus_send, x, pan(s), 0.8)
+    letters = (72, 74, 76, 79, 81, 84, 86, 88, 91, 93)  # İŞLETMENİZ: one soft note per letter, centre outward
+    for k, n in enumerate(letters):
+        x = T["sign0"] + 0.1 + k * (T["sign1"] - T["sign0"] - 0.2) / len(letters)
+        s = pluck(midi(n + 12), 0.011, decay=7, dur=1.0); place(mus, x, pan(s, (k - 4.5) * 0.09)); place(mus_send, x, pan(s), 0.8)
     # lights on: a warm swell
     for n in (41, 48, 57, 60, 64, 69):
         s = pad(midi(n), 3.2, 0.028, attack=0.6, release=2.0, bright=2600)
@@ -360,7 +362,7 @@ def build():
 
     # --- crowd murmur: rises with the queue, recedes into the brand frame
     mm = murmur(T["brand0"] - 18.6 + 3.0, voices=9, seed=3)
-    mlev = np.interp(np.arange(len(mm)) / SR + 18.6, [18.6, 20.0, 22.5, 24.8, 26.5, 28.0], [0.0, 0.25, 0.8, 1.0, 0.25, 0.0])
+    mlev = np.interp(np.arange(len(mm)) / SR + 18.6, [18.6, 20.0, 22.5, T["brand0"], T["brand0"] + 1.7, T["brand0"] + 3.2], [0.0, 0.25, 0.8, 1.0, 0.25, 0.0])
     place(fx, 18.6, mm * mlev[:, None], 0.028); place(fx_send, 18.6, mm * mlev[:, None], 0.01)
 
     # Brand — resolution (F add9) and the full Fentra motif as the logo appears
@@ -374,7 +376,7 @@ def build():
 
     # ================================================================== voice-over (optional recordings)
     vo = np.zeros((N, 2)); have_vo = False
-    vo_times = [5.6, 8.7, 20.6, T["slogan"]]
+    vo_times = [5.6, 9.0, 20.8, T["slogan"]]
     spans = []
     for i, v0 in enumerate(vo_times):
         f = ROOT / "assets" / "vo" / f"line{i + 1}.wav"

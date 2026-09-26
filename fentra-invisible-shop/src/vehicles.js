@@ -1,5 +1,5 @@
 // Vehicles seen in profile on the road: a small hatchback and a classic moped with its rider.
-import { TAU, clamp, lerp, tintS, PAL, poly, smooth, ink, line, ell, rrectPath } from './core.js';
+import { TAU, clamp, lerp, noise1, tintS, PAL, poly, smooth, ink, line, ell, rrectPath } from './core.js';
 import { LW } from './street.js';
 
 // Car body outline in metres (x from rear 0 → front 3.9, y up), facing +x.
@@ -30,6 +30,11 @@ export function drawCar(ctx, cam, car, t) {
   cam.plane(ctx, Zs);
   ctx.transform(dir, 0, 0, 1, dir > 0 ? 0 : 2 * car.x, 0); // mirror for leftward travel
   const bx = car.x;
+  // suspension: the body rides a few millimetres over small road irregularities, pitching slightly; wheels stay on the road
+  const dist = car.x * dir;
+  const bump = 0.009 * noise1(dist * 1.6, 3) + 0.004 * Math.sin(dist * 6.3), pitch = 0.006 * noise1(dist * 1.1, 9);
+  ctx.save();
+  ctx.translate(bx + 1.95, 0.4 + bump); ctx.rotate(pitch); ctx.translate(-(bx + 1.95), -0.4);
   const B = BODY.map(([x, y]) => [bx + x, y]);
   smooth(ctx, B); ink(ctx, car.color, lw * u);
   // lower sill shading + highlight line
@@ -53,8 +58,12 @@ export function drawCar(ctx, cam, car, t) {
   ctx.beginPath(); ctx.moveTo(bx + 2.98, 1.0); ctx.lineTo(bx + 3.12, 1.08); ctx.lineTo(bx + 3.14, 0.98); ctx.closePath(); ink(ctx, tintS(car.color, -0.1), lw * 0.7 * u);
   rrectPath(ctx, bx + 3.7, 0.62, 0.2, 0.12, 0.04); ink(ctx, '#F4EEDC', lw * 0.6 * u);
   rrectPath(ctx, bx - 0.02, 0.62, 0.14, 0.14, 0.04); ink(ctx, '#B8574A', lw * 0.6 * u);
-  // wheels
-  const rot = (car.x * dir) / 0.31; // rolling angle
+  // driver silhouette
+  ctx.save(); poly(ctx, GLASS.map(([x, y]) => [bx + x, y])); ctx.clip();
+  ell(ctx, bx + 1.3, 1.2, 0.1, 0.12, 'rgba(40,40,50,0.55)', 0); ctx.restore();
+  ctx.restore();
+  // wheels (rolling without slip: angle = distance / radius)
+  const rot = (car.x * dir) / 0.31;
   for (const wx of [0.72, 3.12]) {
     const cx = bx + wx, cyw = 0.31;
     ctx.beginPath(); ctx.arc(cx, cyw + 0.02, 0.4, 0, Math.PI); ctx.fillStyle = tintS(car.color, -0.45); ctx.fill(); // arch shadow
@@ -66,9 +75,6 @@ export function drawCar(ctx, cam, car, t) {
     ctx.restore();
     ell(ctx, cx, cyw, 0.035, 0.035, '#6F747A', 0);
   }
-  // driver silhouette
-  ctx.save(); poly(ctx, GLASS.map(([x, y]) => [bx + x, y])); ctx.clip();
-  ell(ctx, bx + 1.3, 1.2, 0.1, 0.12, 'rgba(40,40,50,0.55)', 0); ctx.restore();
   ctx.restore();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
@@ -84,12 +90,14 @@ export function drawMoped(ctx, cam, m, t) {
   const x = m.x, rot = (m.x * m.dir) / 0.22;
   const R = m.rider;
   const S = u * lw;
+  const mbump = 0.012 * noise1(m.x * 2.1, 5) + 0.005 * Math.sin(m.x * 8.0);
   // wheels
   for (const wx of [-0.62, 0.66]) {
     ell(ctx, x + wx, 0.22, 0.22, 0.22, '#2E3036', S);
     ell(ctx, x + wx, 0.22, 0.12, 0.12, '#C9CCD0', S * 0.7);
     ctx.save(); ctx.translate(x + wx, 0.22); ctx.rotate(-rot); ctx.strokeStyle = '#8E9399'; ctx.lineWidth = S * 0.6; for (let i = 0; i < 3; i++) { const a = i * TAU / 3; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * 0.11, Math.sin(a) * 0.11); ctx.stroke(); } ctx.restore();
   }
+  ctx.save(); ctx.translate(0, mbump);
   // rider legs (behind the leg shield) — seated
   const hipX = x - 0.28, hipY = 0.86;
   ctx.beginPath(); ctx.moveTo(hipX, hipY + 0.06); ctx.lineTo(hipX + 0.46, hipY + 0.02); ctx.lineTo(hipX + 0.5, 0.4); ctx.lineTo(hipX + 0.38, 0.38); ctx.lineTo(hipX + 0.36, hipY - 0.08); ctx.lineTo(hipX - 0.04, hipY - 0.1); ctx.closePath(); ink(ctx, R.trousers, S);
@@ -105,8 +113,11 @@ export function drawMoped(ctx, cam, m, t) {
   ctx.beginPath(); ctx.moveTo(hipX - 0.1, hipY); ctx.lineTo(hipX + 0.1, hipY - 0.02); ctx.lineTo(hipX + 0.2, 1.42); ctx.lineTo(hipX + 0.02, 1.47); ctx.quadraticCurveTo(hipX - 0.14, 1.2, hipX - 0.1, hipY); ctx.closePath(); ink(ctx, R.jacket, S);
   ctx.beginPath(); ctx.moveTo(hipX + 0.12, 1.4); ctx.lineTo(x + 0.3, 1.14); ctx.lineTo(x + 0.46, 1.2); ink(ctx, null, S * 5.5, R.jacket); ctx.beginPath(); ctx.moveTo(hipX + 0.12, 1.4); ctx.lineTo(x + 0.3, 1.14); ctx.lineTo(x + 0.46, 1.2); ink(ctx, null, 0);
   ell(ctx, x + 0.46, 1.2, 0.045, 0.045, R.skin, S * 0.7);
+  // the rider's head lags the body's bob a little
+  ctx.translate(0, -mbump * 0.35);
   ell(ctx, hipX + 0.16, 1.58, 0.1, 0.11, R.skin, S);
   ctx.beginPath(); ctx.ellipse(hipX + 0.14, 1.62, 0.14, 0.13, 0, Math.PI * 0.95, Math.PI * 2.1); ctx.closePath(); ink(ctx, R.helmet, S);
+  ctx.restore();
   ctx.restore();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
 }

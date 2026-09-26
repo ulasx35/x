@@ -352,36 +352,49 @@ function interior(ctx, cam, t, kind, x0, x1, lit = 1, seed = 1) {
 }
 
 function heroInterior(ctx, k, u, lw, x0, x1, lit, r) {
-  // shelves of bread (back wall), a pastry counter, three globe pendants
-  const wood = rgb(mix(hex('#6E6258'), hex('#9C7657'), lit));
-  for (let s = 0; s < 3; s++) {
-    const y = 1.45 + s * 0.62;
-    rect(ctx, x0 - 1.2, y - 0.05, x1 - x0 + 2.4, 0.06, wood, lw * 0.5 * u);
-    let x = x0 - 1.1; const rr = mulberry32(90 + s);
-    while (x < x1 + 1.0) {
-      const w = 0.26 + rr() * 0.14, h = 0.16 + rr() * 0.08;
-      ctx.beginPath(); ctx.ellipse(x + w / 2, y + h / 2 + 0.01, w / 2, h / 2, 0, 0, TAU);
-      ink(ctx, rgb(mix(hex('#8C8278'), hex(['#C98D4E', '#D9A560', '#B87840'][(rr() * 3) | 0]), lit)), lw * 0.45 * u);
-      ctx.strokeStyle = `rgba(255,240,210,${0.5 * lit})`; ctx.lineWidth = lw * 0.35 * u; ctx.beginPath(); ctx.moveTo(x + w * 0.3, y + h * 0.7); ctx.lineTo(x + w * 0.45, y + h * 0.35); ctx.moveTo(x + w * 0.55, y + h * 0.75); ctx.lineTo(x + w * 0.7, y + h * 0.4); ctx.stroke();
-      x += w + 0.05;
+  // a calm, premium store that could be any business: shelves of well-made things, a display table, a counter, one artwork
+  const C = (c) => rgb(mix(hex('#8E8A85'), hex(c), lit));
+  const cx = (x0 + x1) / 2;
+  // slatted feature wall behind the table
+  rect(ctx, cx - 1.25, 0.35, 2.5, 3.2, C('#E6D6BD'), lw * 0.5 * u);
+  ctx.strokeStyle = rgb(mix(hex('#7D7A76'), hex('#CDB897'), lit)); ctx.lineWidth = lw * 0.35 * u; ctx.beginPath();
+  for (let x = cx - 1.15; x < cx + 1.2; x += 0.14) { ctx.moveTo(x, 0.4); ctx.lineTo(x, 3.5); } ctx.stroke();
+  // the artwork
+  rect(ctx, cx - 0.62, 2.0, 1.24, 0.95, C('#F4EEE4'), lw * 0.8 * u);
+  ctx.save(); ctx.beginPath(); ctx.rect(cx - 0.54, 2.08, 1.08, 0.79); ctx.clip();
+  ell(ctx, cx - 0.12, 2.45, 0.26, 0.26, C('#C98B6B'), 0);
+  rect(ctx, cx + 0.05, 2.08, 0.5, 0.36, C('#8FA391'), 0);
+  ctx.strokeStyle = C('#2C3C5E'); ctx.lineWidth = lw * 1.2 * u; ctx.beginPath(); ctx.arc(cx + 0.18, 2.3, 0.3, Math.PI * 1.05, Math.PI * 1.75); ctx.stroke();
+  ctx.restore();
+  // shelving on both sides
+  const obj = (x, y, kind, c) => {
+    const col = C(c);
+    if (kind === 0) { ctx.beginPath(); ctx.moveTo(x - 0.03, y + 0.28); ctx.quadraticCurveTo(x - 0.12, y + 0.16, x - 0.07, y); ctx.lineTo(x + 0.07, y); ctx.quadraticCurveTo(x + 0.12, y + 0.16, x + 0.03, y + 0.28); ctx.closePath(); ink(ctx, col, lw * 0.45 * u); }
+    else if (kind === 1) { rect(ctx, x - 0.13, y, 0.26, 0.17, col, lw * 0.45 * u); rect(ctx, x - 0.1, y + 0.17, 0.2, 0.12, C('#EFE7DA'), lw * 0.45 * u); }
+    else if (kind === 2) { for (let i = 0; i < 4; i++) rect(ctx, x - 0.12 + i * 0.055, y, 0.045, 0.24 + (i % 2) * 0.03, [col, C('#EFE7DA'), C('#2C3C5E'), C('#B9A184')][i], lw * 0.35 * u); }
+    else if (kind === 3) { rect(ctx, x - 0.07, y, 0.14, 0.12, C('#C9B79C'), lw * 0.45 * u); ctx.fillStyle = C('#6F8B6A'); for (const [dx, dy] of [[-0.06, 0.2], [0.05, 0.22], [0, 0.3]]) { ctx.beginPath(); ctx.ellipse(x + dx, y + dy, 0.07, 0.1, dx * 3, 0, TAU); ctx.fill(); } }
+    else { ell(ctx, x, y + 0.1, 0.1, 0.1, col, lw * 0.45 * u); rect(ctx, x - 0.03, y + 0.18, 0.06, 0.06, col, lw * 0.35 * u); }
+  };
+  const palette = ['#C98B6B', '#E9E1D3', '#8FA391', '#2C3C5E', '#B9A184', '#D8C8B0'];
+  for (const [sx0, sx1, seed] of [[x0 - 1.1, cx - 1.4, 3], [cx + 1.4, x1 + 1.1, 9]]) {
+    const rr = mulberry32(seed);
+    for (let sh = 0; sh < 3; sh++) {
+      const y = 1.15 + sh * 0.62;
+      rect(ctx, sx0, y - 0.05, sx1 - sx0, 0.05, C('#8C6F58'), lw * 0.5 * u);
+      for (let x = sx0 + 0.2; x < sx1 - 0.12; x += 0.34 + rr() * 0.12) if (rr() < 0.85) obj(x, y, (rr() * 5) | 0, palette[(rr() * palette.length) | 0]);
     }
   }
-  // counter with glass case
-  const cx0 = x0 - 0.8, cx1 = x1 + 0.8;
-  rect(ctx, cx0, 0, cx1 - cx0, 0.95, rgb(mix(hex('#5F6570'), hex('#2B3A58'), lit)), lw * u);
-  ctx.strokeStyle = `rgba(255,255,255,${0.1 + 0.1 * lit})`; ctx.lineWidth = lw * 0.5 * u; ctx.beginPath();
-  for (let x = cx0 + 0.6; x < cx1; x += 0.6) { ctx.moveTo(x, 0.12); ctx.lineTo(x, 0.83); } ctx.stroke();
-  rect(ctx, cx0, 0.95, cx1 - cx0, 0.5, `rgba(220,235,240,${0.35 + 0.1 * lit})`, lw * 0.6 * u);
-  const rr = mulberry32(77);
-  for (let x = cx0 + 0.25; x < cx1 - 0.2; x += 0.42) {
-    const kind = (rr() * 3) | 0;
-    const c = ['#E8C9C2', '#F1E6D2', '#8A5A44'][kind];
-    rect(ctx, x - 0.02, 1.0, 0.34, 0.03, '#E8E4DC', 0);
-    rrectPath(ctx, x, 1.03, 0.3, 0.15 + kind * 0.03, 0.05); ink(ctx, rgb(mix(hex('#9A948C'), hex(c), lit)), lw * 0.4 * u);
-    ell(ctx, x + 0.15, 1.2 + kind * 0.03, 0.03, 0.03, rgb(mix(hex('#8A8680'), hex('#C0504D'), lit)), 0);
-  }
+  // display table
+  rect(ctx, cx - 0.95, 0.7, 1.9, 0.07, C('#9C7A5E'), lw * 0.7 * u);
+  for (const lx of [cx - 0.85, cx + 0.85]) line(ctx, [[lx, 0], [lx, 0.7]], lw * 1.1 * u, C('#6B5343'));
+  obj(cx - 0.55, 0.77, 1, '#2C3C5E'); obj(cx - 0.12, 0.77, 0, '#C98B6B'); obj(cx + 0.28, 0.77, 3, '#8FA391'); obj(cx + 0.62, 0.77, 2, '#D8C8B0');
+  // counter on the right with a tablet till
+  rect(ctx, x1 - 1.4, 0, 1.8, 1.0, C('#2B3A58'), lw * u);
+  rect(ctx, x1 - 1.45, 1.0, 1.9, 0.06, C('#D8C8B0'), lw * 0.7 * u);
+  ctx.beginPath(); ctx.moveTo(x1 - 0.9, 1.06); ctx.lineTo(x1 - 0.75, 1.3); ctx.lineTo(x1 - 0.45, 1.3); ctx.lineTo(x1 - 0.55, 1.06); ctx.closePath(); ink(ctx, C('#3A3B40'), lw * 0.5 * u);
+  obj(x1 - 1.15, 1.06, 3, '#8FA391');
   // pendants
-  for (const x of [x0 + 0.9, (x0 + x1) / 2, x1 - 0.9]) {
+  for (const x of [x0 + 0.9, cx, x1 - 0.9]) {
     line(ctx, [[x, GH], [x, 3.25]], lw * 0.5 * u);
     if (lit > 0.02) {
       const g = ctx.createRadialGradient(x, 3.1, 0, x, 3.1, 2.2);
@@ -416,9 +429,19 @@ export function drawAwning(ctx, cam, a, fill, stripe, valance = 0.24, alpha = 1)
     ctx.restore();
   }
   poly(ctx, [p0, p1, p2, p3]); ink(ctx, null, lw * 0.9);
-  // valance on the front plane
-  const k = cam.plane(ctx, a.Z), u = 1 / k;
+  // valance: hangs from the front bar; swings about it when the awning stops (a.swing, radians)
   const vh = valance * Math.min(1, a.Z / 0.6);
+  if (a.swing) {
+    const th = a.swing, yb = a.y1 - vh * Math.cos(th), zb = a.Z + vh * Math.sin(th);
+    const Q = (xa, xb) => [cam.P(xa, a.y1, a.Z), cam.P(xb, a.y1, a.Z), cam.P(xb, yb, zb), cam.P(xa, yb, zb)];
+    poly(ctx, Q(a.x0, a.x1)); ctx.fillStyle = fill; ctx.fill();
+    if (stripe) { ctx.fillStyle = stripe; const n = Math.round((a.x1 - a.x0) / 0.25); for (let i = 0; i < n; i += 2) { poly(ctx, Q(a.x0 + (a.x1 - a.x0) * i / n, a.x0 + (a.x1 - a.x0) * (i + 1) / n)); ctx.fill(); } }
+    const q = Q(a.x0, a.x1); poly(ctx, q); ink(ctx, null, lw * 0.9);
+    ctx.fillStyle = 'rgba(40,40,60,0.12)'; poly(ctx, [q[3], q[2], cam.P(a.x1, yb + vh * 0.3, zb), cam.P(a.x0, yb + vh * 0.3, zb)]); ctx.fill();
+    ctx.restore(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+    return;
+  }
+  const k = cam.plane(ctx, a.Z), u = 1 / k;
   rect(ctx, a.x0, a.y1 - vh, a.x1 - a.x0, vh, fill, lw * 0.9 * u);
   if (stripe) { ctx.fillStyle = stripe; const n = Math.round((a.x1 - a.x0) / 0.25); for (let i = 0; i < n; i += 2) ctx.fillRect(a.x0 + (a.x1 - a.x0) * i / n, a.y1 - vh, (a.x1 - a.x0) / n, vh); ctx.beginPath(); ctx.rect(a.x0, a.y1 - vh, a.x1 - a.x0, vh); ink(ctx, null, lw * 0.9 * u); }
   ctx.fillStyle = 'rgba(40,40,60,0.12)'; ctx.fillRect(a.x0, a.y1 - vh, a.x1 - a.x0, vh * 0.3);
@@ -637,36 +660,36 @@ function heroGlass(ctx, cam, st) {
   ctx.beginPath(); ctx.rect(d0, 0, d1 - d0, dh); ink(ctx, null, lw * 0.9 * u);
 }
 
+export const HERO_WORD = 'İŞLETMENİZ';
 function heroSign(ctx, cam, st) {
-  const { x0, x1, pil, fy0, fy1 } = HS;
+  const { fy0, fy1 } = HS;
   const k = cam.k(0), u = 1 / k, lw = LW(k);
   const cy = (fy0 + fy1) / 2;
-  // letters resolve from the centre outward
-  const word = 'PASTANE';
-  ctx.save();
-  ctx.font = '500 100px "Fraunces"'; ctx.letterSpacing = '34px';
-  const s = 0.36 / 100; const wpx = ctx.measureText(word).width - 34;
+  // letters resolve from the centre outward (Fraunces, widely tracked, measured in metres)
+  const size = 0.34, track = 0.1, word = [...HERO_WORD];
+  ctx.save(); ctx.font = '500 100px "Fraunces"';
+  const widths = word.map((ch) => ctx.measureText(ch).width * size / 100);
   ctx.restore();
-  const W0 = wpx * 0.36 / 100;
+  const total = widths.reduce((a, b) => a + b, 0) + track * (word.length - 1);
   const n = word.length;
-  let x = -W0 / 2;
+  let x = -total / 2;
   for (let i = 0; i < n; i++) {
-    ctx.save(); ctx.font = '500 100px "Fraunces"'; const cw = ctx.measureText(word[i]).width * 0.36 / 100; ctx.restore();
+    const cw = widths[i];
     const dist = Math.abs(i - (n - 1) / 2) / ((n - 1) / 2);
-    const a = clamp((st.sign * 1.6 - dist * 0.6));
+    const a = clamp(st.sign * 1.6 - dist * 0.6);
     if (a > 0) {
       ctx.save(); ctx.globalAlpha *= easeO(a);
-      planeText(ctx, word[i], x + cw / 2, cy - 0.015 - (1 - easeO(a)) * 0.05, 0.36, '500 {s} "Fraunces"', HERO_TXT);
+      planeText(ctx, word[i], x + cw / 2, cy - 0.025 - (1 - easeO(a)) * 0.05, size, '500 {s} "Fraunces"', HERO_TXT);
       ctx.restore();
     }
-    x += cw + 0.34 * 0.34;
+    x += cw + track;
   }
   // small rules either side
   const ra = clamp(st.sign * 1.4 - 0.4);
   if (ra > 0) {
     ctx.save(); ctx.globalAlpha *= ra;
-    line(ctx, [[-W0 / 2 - 0.25 - 0.45 * ra, cy], [-W0 / 2 - 0.25, cy]], lw * 0.6 * u, HERO_TXT);
-    line(ctx, [[W0 / 2 + 0.25, cy], [W0 / 2 + 0.25 + 0.45 * ra, cy]], lw * 0.6 * u, HERO_TXT);
+    line(ctx, [[-total / 2 - 0.22 - 0.32 * ra, cy], [-total / 2 - 0.22, cy]], lw * 0.6 * u, HERO_TXT);
+    line(ctx, [[total / 2 + 0.22, cy], [total / 2 + 0.22 + 0.32 * ra, cy]], lw * 0.6 * u, HERO_TXT);
     ctx.restore();
   }
 }
@@ -732,15 +755,16 @@ export function drawHeroShop(ctx, cam, t, st) {
 // the awning is drawn after the facade shadows so it can unfold over them
 export function drawHeroAwning(ctx, cam, st) {
   if (st.awning <= 0) return;
-  const d = 1.35 * easeIO(st.awning);
+  // the arms run out on a motor, overshoot a touch against the fabric's tension and settle; the valance swings
+  const d = 1.35 * (st.awnDepth ?? easeIO(st.awning));
   const a = awningGeom(HS.x0 - 0.05, HS.x1 + 0.05, d, 3.42);
+  a.swing = st.valSwing || 0;
   drawAwning(ctx, cam, a, HERO_AWN, '#34466B', 0.26, clamp(st.awning * 3));
-  // cream piping on the valance
+  // cream piping along the valance
   if (d > 0.2) {
-    const k = cam.plane(ctx, d), u = 1 / k;
-    const vh = 0.26 * Math.min(1, d / 0.6);
+    const vh = 0.26 * Math.min(1, d / 0.6), th = a.swing, yb = a.y1 - (vh - 0.06) * Math.cos(th), zb = a.Z + (vh - 0.06) * Math.sin(th);
     ctx.save(); ctx.globalAlpha = clamp(st.awning * 2 - 0.5);
-    line(ctx, [[a.x0 + 0.05, a.y1 - vh + 0.06], [a.x1 - 0.05, a.y1 - vh + 0.06]], LW(k, 0.5) * u, HERO_TXT);
+    line(ctx, [cam.P(a.x0 + 0.05, yb, zb), cam.P(a.x1 - 0.05, yb, zb)], LW(cam.k(d), 0.5), HERO_TXT);
     ctx.restore();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
@@ -750,7 +774,7 @@ export function drawHeroAwning(ctx, cam, st) {
 export function drawHeroShadow(ctx, cam, st) {
   if (!st || st.awning <= 0) return;
   cam.plane(ctx, 0);
-  const e = easeIO(st.awning);
+  const e = clamp(st.awnDepth ?? easeIO(st.awning), 0, 1);
   ctx.save(); ctx.beginPath(); ctx.rect(HS.x0, 0, HS.x1 - HS.x0, GH); ctx.clip(); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = 'rgba(130,128,150,0.2)';
   ctx.beginPath(); ctx.moveTo(HS.x0, 3.42); ctx.lineTo(HS.x1, 3.42); ctx.lineTo(HS.x1 + 0.3 * e, 3.42 - 0.95 * e); ctx.lineTo(HS.x0 + 0.4 * e, 3.42 - 0.95 * e); ctx.closePath(); ctx.fill();
   ctx.restore();

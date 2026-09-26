@@ -2,25 +2,26 @@
 // Every shot is a camera on one continuous world, so people, cars and the street stay consistent across cuts.
 import { W, H, TAU, clamp, lerp, inv, sstep, easeIO, easeO, easeI, sine, quint, win, mulberry32, noise1, hex, rgb, mix, PAL, Cam, scratch, grainTile, line } from './core.js';
 import { drawSky, drawFar, drawFacades, drawGround, streetProps, drawSunAndShade, setDoorOpen, HS, TRACE, LW, GH } from './street.js';
-import { drawPerson, walkPose, standPose, seatedPose, blendPose, resolveLegs, stride } from './people.js';
+import { drawPerson, seatedPose, finishPose } from './people.js';
+import { simulate, locoPose, FIELDS } from './gait.js';
 import { drawCar, drawMoped } from './vehicles.js';
 
-export const DUR = 28.8;
+export const DUR = 29.5;
 const PI = Math.PI;
 
 // ================================================================== timeline (seconds)
 export const T = {
-  cut1: 5.0, cut2: 7.6, cut3: 10.3,
-  crane0: 10.3, crane1: 12.2,
+  cut1: 5.0, cut2: 7.6, cut3: 10.45,
+  crane0: 10.45, crane1: 12.25,
   sigOn: 11.45, desc0: 12.35, touch: 14.95,
   trace1: 16.25, frame0: 15.6, frame1: 16.7, sign0: 16.3, sign1: 17.3, awn0: 16.8, awn1: 17.9,
   glass0: 17.1, glass1: 17.9, lights0: 17.55, lights1: 18.5, props0: 17.9, props1: 18.8,
-  pull0: 19.0, pull1: 24.8, brand0: 24.8, logo: 25.55, slogan: 26.25, services: 26.85, handle: 27.35,
+  pull0: 19.0, pull1: 25.5, brand0: 25.5, logo: 26.25, slogan: 26.95, services: 27.55, handle: 28.05,
 };
 export const CAPTIONS = [
-  { t0: 5.55, t1: 10.25, text: 'Müşteri sizi göremiyorsa…', slot: 0 },
-  { t0: 8.7, t1: 10.25, text: '…sizi seçemez.', slot: 1 },
-  { t0: 20.6, t1: 24.5, text: 'Fentra ile dijital dünyada\ngörünür olun.', slot: 0 },
+  { t0: 5.55, t1: 10.4, text: 'Müşteri sizi göremiyorsa…', slot: 0 },
+  { t0: 9.0, t1: 10.4, text: '…sizi seçemez.', slot: 1 },
+  { t0: 20.8, t1: 25.2, text: 'Fentra ile dijital dünyada\ngörünür olun.', slot: 0 },
 ];
 
 // ================================================================== camera
@@ -91,10 +92,11 @@ const angDiff = (a, b) => { let d = (b - a) % TAU; if (d > PI) d -= TAU; if (d <
 
 class Actor {
   constructor(name, P, spec) {
-    this.name = name; this.P = P; this.spec = spec;
-    this.keys = spec.keys; this.dt = 1 / 240;
+    this.name = name; this.P = { ...P, propSide: spec.propSide || P.propSide }; this.spec = spec;
+    this.keys = spec.keys;
     this.t0 = spec.keys[0].t; this.t1 = spec.keys[spec.keys.length - 1].t;
-    this.pre();
+    this.falls = [];
+    if (!spec.seated) this.sim = simulate(this);
   }
   posAt(t) {
     const k = this.keys;
@@ -108,60 +110,37 @@ class Actor {
     }
     const L = k[k.length - 1]; return [L.p[0], L.p[1], k.length - 1];
   }
+  segAt(t) { return this.posAt(t)[2]; }
   holdYaw(i) {
     // yaw for a hold: the yaw given on the key that starts/ends the hold
     const k = this.keys;
     for (let j = Math.min(i + 1, k.length - 1); j >= 0; j--) if (k[j].yaw != null) return k[j].yaw;
     return null;
   }
-  pre() {
-    const n = Math.ceil((this.t1 - this.t0) / this.dt) + 2;
-    this.n = n; this.tab = new Float64Array(n * 6); // x, z, yaw, phase, walkAmt, scale
-    const S = stride(this.P);
-    let [px, pz] = this.posAt(this.t0);
-    let yaw = this.spec.yaw0 ?? this.keys[0].yaw ?? 0, phase = this.spec.phase0 || 0, walk = this.spec.walk0 ?? 0, sc = 1;
-    this.falls = [];
-    for (let i = 0; i < n; i++) {
-      const t = this.t0 + i * this.dt;
-      const [x, z, seg] = this.posAt(t);
-      const ds = Math.hypot(x - px, z - pz), sp = ds / this.dt;
-      let target = null;
-      if (sp > 0.08) target = Math.atan2(z - pz, x - px);
-      else { const hy = this.holdYaw(seg); if (hy != null) target = hy; }
-      if (target != null) yaw += angDiff(yaw, target) * Math.min(1, this.dt * (sp > 0.08 ? 9 : 5));
-      const wt = sstep(0.06, 0.5, sp);
-      walk += (wt - walk) * Math.min(1, this.dt * 9);
-      sc = clamp(0.5 + 0.5 * sp / 1.3, 0.5, 1.08);
-      const prev = phase;
-      phase += ds / (S * sc);
-      if (walk > 0.35) {
-        if (Math.floor(prev) !== Math.floor(phase)) this.falls.push([t, x, z]);
-        if (Math.floor(prev + 0.5) !== Math.floor(phase + 0.5)) this.falls.push([t, x, z]);
-      }
-      const o = i * 6; this.tab[o] = x; this.tab[o + 1] = z; this.tab[o + 2] = yaw; this.tab[o + 3] = phase; this.tab[o + 4] = walk; this.tab[o + 5] = sc;
-      px = x; pz = z;
-    }
-  }
   sample(t) {
-    const f = clamp((t - this.t0) / this.dt, 0, this.n - 1.001), i = Math.floor(f), u = f - i;
-    const o = i * 6, q = o + 6, r = this.tab;
-    return { x: lerp(r[o], r[q], u), z: lerp(r[o + 1], r[q + 1], u), yaw: lerp(r[o + 2], r[q + 2], u), phase: lerp(r[o + 3], r[q + 3], u), walk: lerp(r[o + 4], r[q + 4], u), sc: lerp(r[o + 5], r[q + 5], u) };
+    const { tab, n, t0, NF } = this.sim;
+    const f = clamp((t - t0) / (1 / 240), 0, n - 1.001), i = Math.floor(f), u = f - i;
+    const o = i * NF, q = o + NF, out = {};
+    for (const [key, j] of Object.entries(FIELDS)) out[key] = lerp(tab[o + j], tab[q + j], u);
+    return out;
   }
   state(t) {
     const sp = this.spec, P = { ...this.P };
     if (sp.props) { let pr = P.prop; for (const [tt, v] of sp.props) if (t >= tt) pr = v; P.prop = pr; }
-    const s = this.sample(t);
     const lookPhone = kv(sp.phone, t);
-    let pose;
-    if (sp.seated) pose = seatedPose(P, t, { sip: kv(sp.sip, t) });
-    else {
-      const stand = standPose(P, t, { lookPhone, pocket: sp.pocket });
-      pose = s.walk > 0.001 && s.walk < 0.999 ? resolveLegs(blendPose(stand, walkPose(P, s.phase, t, { strideScale: s.sc, lookPhone }), s.walk)) : s.walk >= 0.999 ? walkPose(P, s.phase, t, { strideScale: s.sc, lookPhone }) : stand;
+    let pose, x, z, yaw;
+    if (sp.seated) {
+      pose = seatedPose(P, t, { sip: kv(sp.sip, t) });
+      ({ p: [x, z], yaw } = { p: this.keys[0].p, yaw: this.keys[0].yaw });
+    } else {
+      const S = this.sample(t);
+      pose = finishPose(P, locoPose(P, S, t), t, { lookPhone });
+      x = S.x; z = S.z; yaw = S.yaw;
     }
     const rel = kv(sp.head, t);
     const blinkT = (t * 0.33 + P.seed * 0.137) % 1;
     return {
-      P, t, x: s.x, z: s.z, yaw: s.yaw, pose, headYaw: s.yaw + rel, headPitch: kv(sp.pitch, t),
+      P, t, x, z, yaw, pose, headYaw: yaw + rel, headPitch: kv(sp.pitch, t),
       alpha: sp.alpha ? kv(sp.alpha, t) : 1, blink: blinkT < 0.035 && !sp.noBlink?.some(([a, b]) => t > a && t < b),
       expr: { smile: kv(sp.smile, t), brow: kv(sp.brow, t) }, door: sp.door,
     };
@@ -172,44 +151,101 @@ class Actor {
 const CAFE_DOOR = { x0: -4.72, x1: -3.72, h: 2.55 }, HERO_DOOR = { x0: -0.62, x1: 0.62, h: 2.52 };
 const Q = [[0.98, 1.05], [1.74, 1.12], [2.5, 1.0], [3.27, 1.1], [4.02, 1.05], [4.78, 1.12]];
 
+// Physically paced routes: accelerate from rest at ~1.1 m/s², cruise at a normal walking pace, brake at ~1.2 m/s².
+// Appends dense keys to `keys` and returns the arrival time at each waypoint.
+function route(keys, pts, { v = 1.3, rest0 = true, stop = true, yaw = null, acc = 1.1, dec = 1.2 } = {}) {
+  const last = keys[keys.length - 1], T0 = last.t, path = [last.p, ...pts];
+  const cum = [0]; for (let i = 1; i < path.length; i++) cum.push(cum[i - 1] + Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1]));
+  const L = cum[cum.length - 1];
+  let la = rest0 ? v * v / (2 * acc) : 0, ld = stop ? v * v / (2 * dec) : 0;
+  if (la + ld > L) { const k = L / (la + ld); v *= Math.sqrt(k); la *= k; ld *= k; }
+  const ta = rest0 ? v / acc : 0, tc = (L - la - ld) / v, td = stop ? v / dec : 0, dur = ta + tc + td;
+  const sAt = (tau) => tau < ta ? 0.5 * acc * tau * tau : tau < ta + tc ? la + v * (tau - ta) : L - 0.5 * dec * Math.max(0, dur - tau) ** 2;
+  const tAt = (sv) => sv < la ? Math.sqrt(2 * sv / acc) : sv <= L - ld ? ta + (sv - la) / v : dur - Math.sqrt(2 * Math.max(0, L - sv) / dec);
+  const pAt = (sv) => { let i = 1; while (i < cum.length - 1 && sv > cum[i]) i++; const u = (sv - cum[i - 1]) / ((cum[i] - cum[i - 1]) || 1); return [lerp(path[i - 1][0], path[i][0], u), lerp(path[i - 1][1], path[i][1], u)]; };
+  for (let tau = 0.08; tau < dur; tau += 0.08) keys.push({ t: T0 + tau, p: pAt(sAt(tau)) });
+  keys.push({ t: T0 + dur, p: path[path.length - 1], yaw });
+  return cum.slice(1).map((sv) => T0 + tAt(sv));
+}
+const hold = (keys, t, yaw) => { const L = keys[keys.length - 1]; keys.push({ t, p: L.p, yaw: yaw ?? L.yaw }); return t; };
+const r2 = (x) => Math.round(x * 100) / 100;
+
+// the couple, heading into the café
+const herK = [{ t: 0, p: [-12.2, 1.9] }];
+const herT = route(herK, [[-4.72, 1.9], [-4.3, 0.9], [-4.22, -0.45]], { v: 1.25, rest0: false, stop: true });
+const himK = [{ t: 0, p: [-12.85, 2.5] }];
+const himT = route(himK, [[-4.98, 2.5], [-4.36, 0.95], [-4.22, -0.45]], { v: 1.25, rest0: false, stop: true });
+// the woman looking for somewhere: she stops right in front of the invisible shop, chooses the café, and later comes back out
+const seekK = [{ t: 0, p: [8.6, 2.2] }];
+const seekStop = route(seekK, [[1.61, 2.02], [1.0, 1.85]], { v: 1.03, rest0: false, stop: true, yaw: 4.42 })[1];
+const seekGo = hold(seekK, seekStop + 1.75, 4.42);
+const seekIn = route(seekK, [[0.35, 1.87], [-4.05, 1.75], [-4.22, 0.5], [-4.22, -0.45]], { v: 1.3 });
+const seekOut0 = hold(seekK, 20.7);
+const seekOut = route(seekK, [[-4.15, 0.45], [-2.75, 1.2], [-2.05, 1.32]], { v: 1.2, yaw: -PI / 2 + 0.25 });
+// the passer-by who notices first
+const firstK = [{ t: 16.0, p: [-7.0, 2.4] }];
+const firstStop = route(firstK, [[-2.15, 2.35], [-1.2, 2.25]], { v: 1.35, rest0: false, stop: true, yaw: -PI / 2 + 0.3 })[1];
+const firstGo = hold(firstK, firstStop + 0.25);
+const firstQ = route(firstK, [Q[0]], { v: 1.3, yaw: PI })[0];
+// the second one: turns her head, slows, then follows
+const secK = [{ t: 17.6, p: [7.8, 2.95] }];
+const secStop = route(secK, [[4.3, 2.95], [3.25, 2.45]], { v: 1.3, rest0: false, stop: true, yaw: 4.2 })[1];
+const secGo = hold(secK, Math.max(secStop + 0.3, firstGo + 0.9));
+const secQ = route(secK, [Q[1]], { v: 1.15, yaw: PI })[0];
+// the bookshop browser comes over
+const browK = [{ t: 0, p: [5.4, 0.95], yaw: -PI / 2 }];
+const browGo = hold(browK, 20.9, -PI / 2);
+const browQ = route(browK, [Q[2]], { v: 1.2, yaw: PI })[0];
+// people arriving along the street
+const capK = [{ t: 18.8, p: [10.5, 2.25] }];
+const capQ = route(capK, [[4.95, 2.25], Q[3]], { v: 1.35, rest0: false, yaw: PI })[1];
+const camK = [{ t: 18.6, p: [11.3, 2.8] }];
+const camQ = route(camK, [[5.55, 2.8], Q[4]], { v: 1.3, rest0: false, yaw: PI })[1];
+const packK = [{ t: 20.4, p: [12.0, 3.05] }];
+route(packK, [[6.35, 3.05], Q[5]], { v: 1.4, rest0: false, yaw: PI });
+// a customer leaves the new shop with a bag
+const exitK = [{ t: 21.9, p: [0.0, -0.55], yaw: PI / 2 }];
+const exitGo = hold(exitK, 22.15, PI / 2);
+const exitT = route(exitK, [[-0.15, 1.15], [-1.85, 2.35], [-9.9, 2.5]], { v: 1.2, stop: false });
+
+export const STORY = { herT, himT, seekStop, seekGo, seekIn, seekOut, firstStop, firstGo, firstQ, secStop, secQ, browGo, browQ, capQ, camQ, exitGo };
+
 const ACTORS = [
   new Actor('sitter', CAST.sitter, { keys: [{ t: 0, p: [-8.33, 1.2], yaw: PI }, { t: DUR, p: [-8.33, 1.2], yaw: PI }], seated: true, yaw0: PI,
-    sip: [[0, 0], [1.4, 0], [2.0, 1], [3.1, 1], [3.7, 0], [21.5, 0], [22.1, 1], [23.2, 1], [23.8, 0]], head: [[0, 0.1], [4, 0.1], [4.6, 0.5], [7, 0.5], [7.6, 0.1]] }),
+    sip: [[0, 0], [1.4, 0], [2.0, 1], [3.1, 1], [3.7, 0], [22.2, 0], [22.8, 1], [23.9, 1], [24.5, 0]], head: [[0, 0.1], [4, 0.1], [4.6, 0.5], [7, 0.5], [7.6, 0.1]] }),
   new Actor('florist', CAST.florist, { keys: [{ t: 0, p: [-12.0, 1.5], yaw: -PI / 2 + 0.35 }, { t: DUR, p: [-12.0, 1.5], yaw: -PI / 2 + 0.35 }], yaw0: -PI / 2 + 0.35,
     head: [[0, -0.3], [2, 0.25], [3.5, 0.25], [4.5, -0.2]] }),
-  new Actor('coffee', CAST.coffee, { keys: [{ t: 0, p: [4.3, 2.6] }, { t: 18, p: [4.3 - 1.42 * 18, 2.6] }], yaw0: PI, walk0: 1, phase0: 0.3 }),
-  new Actor('her', CAST.her, { keys: [{ t: 0, p: [-12.2, 1.9] }, { t: 6.6, p: [-4.6, 1.9] }, { t: 7.45, p: [-4.25, 0.85], ease: 'o' }, { t: 7.95, p: [-4.22, -0.4] }, { t: DUR, p: [-4.22, -0.4] }],
-    yaw0: 0, walk0: 1, phase0: 0.1, head: [[0, 0.6], [1.2, 0.6], [2.2, 0.0], [3.4, 0.7], [4.4, 0.0]], smile: [[0, 0.6]], alpha: [[0, 1], [7.55, 1], [7.95, 0]], door: CAFE_DOOR }),
-  new Actor('him', CAST.him, { keys: [{ t: 0, p: [-12.85, 2.5] }, { t: 7.0, p: [-4.85, 2.5] }, { t: 7.85, p: [-4.3, 0.95], ease: 'o' }, { t: 8.35, p: [-4.22, -0.4] }, { t: DUR, p: [-4.22, -0.4] }],
-    yaw0: 0, walk0: 1, phase0: 0.6, head: [[0, -0.5], [1.6, -0.5], [2.6, 0], [3.0, -0.6], [4.0, 0]], smile: [[0, 0.5]], alpha: [[0, 1], [8.0, 1], [8.35, 0]], door: CAFE_DOOR }),
+  new Actor('coffee', CAST.coffee, { keys: [{ t: 0, p: [4.3, 2.6] }, { t: 18, p: [4.3 - 1.35 * 18, 2.6] }], yaw0: PI, walk0: 1, phase0: 0.3 }),
+  new Actor('her', CAST.her, { keys: herK, yaw0: 0, walk0: 1, phase0: 0.1, head: [[0, 0.6], [1.2, 0.6], [2.2, 0.0], [3.4, 0.7], [4.4, 0.0]], smile: [[0, 0.6]],
+    alpha: [[0, 1], [herT[1] + 0.25, 1], [herT[1] + 0.7, 0]], door: CAFE_DOOR }),
+  new Actor('him', CAST.him, { keys: himK, yaw0: 0, walk0: 1, phase0: 0.6, head: [[0, -0.5], [1.6, -0.5], [2.6, 0], [3.0, -0.6], [4.0, 0]], smile: [[0, 0.5]],
+    alpha: [[0, 1], [himT[1] + 0.25, 1], [himT[1] + 0.7, 0]], door: CAFE_DOOR }),
   new Actor('seeker', CAST.seeker, {
-    keys: [{ t: 0, p: [9.1, 2.2] }, { t: 5.0, p: [3.95, 2.2] }, { t: 6.9, p: [1.95, 2.12] }, { t: 7.75, p: [1.0, 1.85], ease: 'o', yaw: 4.42 },
-      { t: 9.45, p: [1.0, 1.85], yaw: 4.42 }, { t: 10.05, p: [0.55, 1.88], ease: 'i' }, { t: 13.6, p: [-4.05, 1.75] }, { t: 14.3, p: [-4.22, 0.5] }, { t: 14.8, p: [-4.22, -0.4] },
-      { t: 21.3, p: [-4.22, -0.4] }, { t: 21.95, p: [-4.12, 0.95], ease: 'i' }, { t: 22.55, p: [-3.55, 1.6] }, { t: 23.65, p: [-2.05, 1.32], ease: 'o', yaw: -PI / 2 + 0.25 }, { t: DUR, p: [-2.05, 1.32], yaw: -PI / 2 + 0.25 }],
-    yaw0: PI, walk0: 1, phase0: 0.45,
-    phone: [[0, 1], [7.55, 1], [7.95, 0]],
+    keys: seekK, yaw0: PI, walk0: 1, phase0: 0.45,
+    phone: [[0, 1], [seekStop - 0.25, 1], [seekStop + 0.15, 0]],
     props: [[0, 'phone'], [18, 'coffee']], propSide: 'R',
-    head: [[0, 0], [7.9, 0], [8.1, 1.02], [8.55, 1.02], [8.95, -1.2], [9.5, -1.2], [9.9, 0], [22.2, 0], [22.6, 1.2], [23.3, 0.6], [23.8, 0]],
-    pitch: [[0, 0], [7.9, 0], [8.1, -0.25], [9.4, -0.2], [9.8, 0]],
-    smile: [[0, 0], [8.95, 0], [9.3, 1], [10.5, 0.6], [22.4, 0.3], [22.8, 1]], brow: [[0, 0], [8.9, 0], [9.1, 1], [9.6, 0.3], [22.4, 0], [22.6, 1], [23.4, 0.3]],
-    noBlink: [[8.0, 10.0], [22.3, 23.6]],
-    alpha: [[0, 1], [14.45, 1], [14.8, 0], [21.3, 0], [21.65, 1]], door: CAFE_DOOR }),
-  new Actor('browser', CAST.browser, { keys: [{ t: 0, p: [5.4, 0.95], yaw: -PI / 2 }, { t: 21.15, p: [5.4, 0.95], yaw: -PI / 2 }, { t: 23.35, p: Q[2], ease: 'io', yaw: PI }, { t: DUR, p: Q[2], yaw: PI }],
-    yaw0: -PI / 2, head: [[0, 0.25], [3, -0.2], [6, 0.3], [12, -0.1], [20.5, -0.1], [20.9, -1.35], [21.4, -0.6], [21.8, 0], [24.5, 0], [25, 0.8]], smile: [[20.9, 0], [21.3, 0.8]], brow: [[20.8, 0], [21.0, 1], [21.6, 0]] }),
-  new Actor('first', CAST.first, { keys: [{ t: 17.4, p: [-5.9, 2.4] }, { t: 19.25, p: [-3.35, 2.4] }, { t: 20.1, p: [-2.05, 2.28], ease: 'o', yaw: -PI / 2 + 0.3 }, { t: 20.5, p: [-2.05, 2.28], yaw: -PI / 2 + 0.3 }, { t: 22.15, p: Q[0], ease: 'io', yaw: PI }, { t: DUR, p: Q[0], yaw: PI }],
-    yaw0: 0, walk0: 1, head: [[19.1, 0], [19.4, -1.15], [20.0, -0.3], [20.4, 0], [22.8, 0], [23.3, -0.5], [24.5, -0.5], [25, 0]], brow: [[19.3, 0], [19.5, 1], [20.3, 0.4]], smile: [[19.6, 0], [20.0, 0.9]] }),
-  new Actor('second', CAST.second, { keys: [{ t: 17.6, p: [7.25, 2.95] }, { t: 19.9, p: [4.3, 2.95] }, { t: 20.9, p: [3.25, 2.45], ease: 'o', yaw: 4.2 }, { t: 21.45, p: [3.25, 2.45], yaw: 4.2 }, { t: 22.75, p: Q[1], ease: 'io', yaw: PI }, { t: DUR, p: Q[1], yaw: PI }],
-    yaw0: PI, walk0: 1, phase0: 0.2, head: [[19.6, 0], [19.95, 1.2], [20.8, 0.3], [21.3, 0], [23.4, 0], [23.8, 1.0], [25, 1.0]], smile: [[20.0, 0], [20.4, 0.8]], brow: [[19.9, 0], [20.1, 1], [20.8, 0]] }),
-  new Actor('cap', CAST.cap, { keys: [{ t: 18.8, p: [9.9, 2.25] }, { t: 22.3, p: [4.95, 2.25] }, { t: 23.55, p: Q[3], ease: 'io', yaw: PI }, { t: DUR, p: Q[3], yaw: PI }],
-    yaw0: PI, walk0: 1, phase0: 0.7, phone: [[18.8, 0.8], [21.2, 0.8], [21.6, 0], [24.2, 0], [24.6, 0.9]], head: [[21.3, 0], [21.6, 0.9], [22.4, 0.2]] }),
-  new Actor('camel', CAST.camel, { keys: [{ t: 18.6, p: [11.0, 2.8] }, { t: 22.8, p: [5.55, 2.8] }, { t: 24.1, p: Q[4], ease: 'io', yaw: PI }, { t: DUR, p: Q[4], yaw: PI }],
-    yaw0: PI, walk0: 1, phase0: 0.35, head: [[21.8, 0], [22.1, 1.1], [22.9, 0.3], [24.4, 0], [24.9, -0.9]] }),
-  new Actor('pack', CAST.pack, { keys: [{ t: 20.4, p: [11.8, 3.05] }, { t: 24.2, p: [6.35, 3.05] }, { t: 25.35, p: Q[5], ease: 'io', yaw: PI }, { t: DUR, p: Q[5], yaw: PI }],
-    yaw0: PI, walk0: 1, phase0: 0.15, head: [[23.2, 0], [23.5, 1.0], [24.2, 0.2]] }),
-  new Actor('exit', CAST.exit, { keys: [{ t: 21.9, p: [0.0, -0.55] }, { t: 22.9, p: [-0.15, 1.15], ease: 'i' }, { t: 24.2, p: [-1.85, 2.35] }, { t: 30, p: [-9.9, 2.5] }],
-    yaw0: PI / 2, walk0: 0, alpha: [[21.95, 0], [22.35, 1]], door: HERO_DOOR, smile: [[0, 0.9]], head: [[23.0, 0], [23.3, 0.6], [24.0, 0.6], [24.4, 0]] }),
+    head: [[0, 0], [seekStop + 0.1, 0], [seekStop + 0.3, 1.02], [seekStop + 0.75, 1.02], [seekStop + 1.15, -1.2], [seekGo, -1.2], [seekGo + 0.4, 0],
+      [seekOut[0], 0], [seekOut[0] + 0.3, -0.8], [seekOut[2] - 0.3, -0.4], [seekOut[2], 0]],
+    pitch: [[0, 0], [seekStop + 0.1, 0], [seekStop + 0.3, -0.25], [seekGo - 0.1, -0.2], [seekGo + 0.3, 0]],
+    smile: [[0, 0], [seekStop + 1.15, 0], [seekStop + 1.5, 1], [seekGo + 0.9, 0.6], [seekOut[0] + 0.2, 0.3], [seekOut[0] + 0.6, 1]],
+    brow: [[0, 0], [seekStop + 1.1, 0], [seekStop + 1.3, 1], [seekStop + 1.8, 0.3], [seekOut[0] + 0.2, 0], [seekOut[0] + 0.4, 1], [seekOut[1] + 0.4, 0.3]],
+    noBlink: [[seekStop + 0.1, seekGo + 0.5], [seekOut[0], seekOut[2]]],
+    alpha: [[0, 1], [seekIn[2] + 0.2, 1], [seekIn[2] + 0.65, 0], [seekOut0, 0], [seekOut0 + 0.4, 1]], door: CAFE_DOOR }),
+  new Actor('browser', CAST.browser, { keys: browK, yaw0: -PI / 2,
+    head: [[0, 0.25], [3, -0.2], [6, 0.3], [12, -0.1], [browGo - 0.5, -0.1], [browGo - 0.15, -1.35], [browGo + 0.35, -0.6], [browGo + 0.8, 0], [browQ + 0.2, 0], [browQ + 0.7, 0.8]],
+    smile: [[browGo - 0.2, 0], [browGo + 0.2, 0.8]], brow: [[browGo - 0.3, 0], [browGo - 0.1, 1], [browGo + 0.6, 0]] }),
+  new Actor('first', CAST.first, { keys: firstK, yaw0: 0, walk0: 1,
+    head: [[18.6, 0], [18.95, -1.15], [firstStop - 0.2, -0.3], [firstStop + 0.2, 0], [firstQ + 0.3, 0], [firstQ + 0.8, -0.5]],
+    brow: [[18.8, 0], [19.0, 1], [firstStop, 0.4]], smile: [[19.1, 0], [19.5, 0.9]] }),
+  new Actor('second', CAST.second, { keys: secK, yaw0: PI, walk0: 1, phase0: 0.2,
+    head: [[19.4, 0], [19.75, 1.2], [secStop - 0.2, 0.3], [secStop + 0.2, 0], [secQ + 0.3, 0], [secQ + 0.7, 1.0]],
+    smile: [[19.8, 0], [20.2, 0.8]], brow: [[19.7, 0], [19.9, 1], [20.6, 0]] }),
+  new Actor('cap', CAST.cap, { keys: capK, yaw0: PI, walk0: 1, phase0: 0.7, phone: [[18.8, 0.8], [21.2, 0.8], [21.6, 0], [capQ + 0.4, 0], [capQ + 0.9, 0.9]], head: [[21.3, 0], [21.6, 0.9], [22.4, 0.2]] }),
+  new Actor('camel', CAST.camel, { keys: camK, yaw0: PI, walk0: 1, phase0: 0.35, head: [[21.8, 0], [22.1, 1.1], [22.9, 0.3], [camQ, 0], [camQ + 0.5, -0.9]] }),
+  new Actor('pack', CAST.pack, { keys: packK, yaw0: PI, walk0: 1, phase0: 0.15, head: [[23.2, 0], [23.5, 1.0], [24.2, 0.2]] }),
+  new Actor('exit', CAST.exit, { keys: exitK, yaw0: PI / 2, walk0: 0, alpha: [[exitGo - 0.2, 0], [exitGo + 0.25, 1]], door: HERO_DOOR, smile: [[0, 0.9]],
+    head: [[exitT[0], 0], [exitT[0] + 0.3, 0.6], [exitT[1] - 0.2, 0.6], [exitT[1] + 0.2, 0]] }),
 ];
-
 // ================================================================== vehicles
 const VEH = [
   { kind: 'car', z: 9.35, dir: 1, color: '#E7DFCC', x: (t) => -26 + 8.0 * t, t0: 0, t1: 6 },
@@ -217,17 +253,30 @@ const VEH = [
 ];
 
 // ================================================================== the Fentra signal and the reveal
+// a door on a closer: swings open quickly, bumps its stop, and is pulled shut by the damper with a small latch bounce
+export function doorSwing(t, tOpen, tClose) {
+  if (t <= tOpen) return 0;
+  const a = t - tOpen;
+  let v = a < 0.55 ? easeO(a / 0.45) : 1;
+  if (a >= 0.45 && a < 0.9) v = 1 - 0.05 * Math.exp(-(a - 0.45) * 9) * Math.sin((a - 0.45) * 22);
+  if (t > tClose) { const c = t - tClose; v *= 1 - easeIO(c / 0.6); if (c > 0.6) v = Math.max(0, 0.02 * Math.exp(-(c - 0.6) * 12) * Math.sin((c - 0.6) * 30)); }
+  return clamp(v, 0, 1.05);
+}
+
 export function heroState(t) {
+  const ta = t - T.awn0, run = T.awn1 - T.awn0;
+  const depth = ta <= 0 ? 0 : ta < run ? easeIO(ta / run) : 1 + 0.035 * Math.exp(-(ta - run) * 5) * Math.sin((ta - run) * 13);
+  const valSwing = ta <= run * 0.6 ? 0 : 0.28 * Math.exp(-(ta - run * 0.6) * 2.8) * Math.sin((ta - run * 0.6) * 8.5);
   return {
     ghost: 1 - sstep(T.touch, T.touch + 1.1, t),
     frame: sstep(T.frame0, T.frame1, t),
     sign: inv(T.sign0, T.sign1, t),
-    awning: inv(T.awn0, T.awn1, t),
+    awning: inv(T.awn0, T.awn1, t), awnDepth: depth, valSwing,
     glass: sstep(T.glass0, T.glass1, t),
     sweep: inv(T.glass0, T.glass1 + 0.2, t),
     lights: sstep(T.lights0, T.lights1, t) * (0.85 + 0.15 * sstep(T.lights1, T.lights1 + 1.0, t)),
     props: sstep(T.props0, T.props1, t),
-    door: win(t, 22.0, 22.55, 23.4, 24.0),
+    door: doorSwing(t, STORY.exitGo - 0.2, STORY.exitGo + 1.25),
   };
 }
 
@@ -319,9 +368,8 @@ function planters(t) {
   if (st.props <= 0) return [];
   return [-1.05, 1.05].map((x) => ({ z: 0.35, draw: (ctx, cam) => {
     const k = cam.plane(ctx, 0.35), u = 1 / k, lw = LW(k);
-    const a = st.props, s = 0.9 + 0.1 * easeO(a);
+    const a = st.props;
     ctx.save(); ctx.globalAlpha = a;
-    ctx.translate(x, 0); ctx.scale(s, s); ctx.translate(-x, 0);
     ctx.beginPath(); ctx.moveTo(x - 0.24, 0.55); ctx.lineTo(x + 0.24, 0.55); ctx.lineTo(x + 0.2, 0); ctx.lineTo(x - 0.2, 0); ctx.closePath(); ctx.fillStyle = '#26344F'; ctx.fill(); ctx.strokeStyle = PAL.ink; ctx.lineWidth = lw * u; ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(x - 0.22, 0.47, 0.44, 0.04);
     line(ctx, [[x, 0.55], [x, 0.85]], lw * 1.2 * u, '#6B5A4A');
@@ -487,7 +535,7 @@ function motionPx(ta, tb) {
     m = Math.max(m, Math.hypot(p[0] - q[0], p[1] - q[1]));
   }
   for (const a of ACTORS) {
-    if (ta < a.t0) continue;
+    if (ta < a.t0 || !a.sim) continue;
     const sa = a.sample(ta), sb = a.sample(tb);
     const p = A.P(sa.x, 1, sa.z), q = B.P(sb.x, 1, sb.z);
     if (p[0] < -200 || p[0] > W + 200 || A.z - sa.z < 1) continue;
@@ -534,13 +582,13 @@ export function renderAt(t) {
 export function cues() {
   const steps = [];
   for (const a of ACTORS) {
-    for (const [t, x, z] of a.falls) {
+    for (const [t, x, z, strength] of a.falls) {
       if (t < 0 || t > DUR) continue;
       const cam = camAt(t);
       if (t > T.crane0 + 0.8 && t < T.touch + 3.5) continue;
       const p = cam.P(x, 0.8, z), d = cam.z - z;
       const inFrame = p[0] > -150 && p[0] < W + 150;
-      const g = clamp(3.2 / d, 0, 1) * (inFrame ? 1 : 0.35) * (t > T.brand0 ? 1 - inv(T.brand0, T.brand0 + 1.2, t) : 1);
+      const g = clamp(3.2 / d, 0, 1) * (inFrame ? 1 : 0.35) * (strength ?? 1) * (t > T.brand0 ? 1 - inv(T.brand0, T.brand0 + 1.2, t) : 1);
       if (g < 0.03) continue;
       steps.push([+t.toFixed(3), +clamp((p[0] - W / 2) / (W * 0.7), -1, 1).toFixed(2), +g.toFixed(3), a.name]);
     }
@@ -555,14 +603,15 @@ export function cues() {
   return {
     duration: DUR, fps: 30, cuts: [T.cut1, T.cut2, T.cut3], T, steps, vehicles,
     captions: CAPTIONS,
-    doors: [[7.3, 'cafe'], [8.75, 'cafe'], [21.05, 'cafe'], [22.35, 'cafe'], [22.0, 'hero'], [23.95, 'hero_close']],
+    doors: [[STORY.herT[1] - 0.35, 'cafe'], [STORY.himT[2] + 0.8, 'cafe'], [STORY.seekOut[0] - 0.95, 'cafe'], [STORY.seekOut[0] + 0.7, 'cafe'], [STORY.exitGo - 0.2, 'hero'], [STORY.exitGo + 1.85, 'hero_close']],
   };
 }
 
 export async function boot(canvas) {
   ctxMain = canvas.getContext('2d');
   // the café door opens for the couple, for her on the way in, and again when she comes out
-  setDoorOpen((kind, t) => (kind === 'cafe' ? Math.max(win(t, 7.25, 7.6, 8.35, 8.8), win(t, 14.05, 14.35, 14.8, 15.2), win(t, 21.0, 21.35, 21.95, 22.4)) : 0));
+  const S_ = STORY;
+  setDoorOpen((kind, t) => (kind === 'cafe' ? Math.max(doorSwing(t, S_.herT[1] - 0.35, S_.himT[2] + 0.2), doorSwing(t, S_.seekIn[2] - 0.35, S_.seekIn[3] + 0.25), doorSwing(t, S_.seekOut[0] - 0.95, S_.seekOut[0] + 0.1)) : 0));
   GRAIN = grainTile(256, 21, 1.0);
   VIGNETTE = document.createElement('canvas'); VIGNETTE.width = W; VIGNETTE.height = H;
   const v = VIGNETTE.getContext('2d');
@@ -571,6 +620,6 @@ export async function boot(canvas) {
   v.fillStyle = g; v.fillRect(0, 0, W, H);
   LOGO = new Image(); LOGO.src = '../assets/fentra-logo-original.png'; await LOGO.decode();
   window.FILM = { duration: DUR, cues, T };
-  window.renderAt = renderAt; window.ACTORS = ACTORS; window.motionPx = motionPx;
+  window.renderAt = renderAt; window.ACTORS = ACTORS; window.motionPx = motionPx; window.STORY = STORY;
   renderAt(0);
 }

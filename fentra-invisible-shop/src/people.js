@@ -1,37 +1,12 @@
 // People: a 2.5D puppet. Joints live in 3D body space (x forward, y up, z to the body's left), are placed in
 // the street with a yaw, projected by the street camera and drawn as clean outlined shapes.
-// Feet are solved from planted footfall positions, so they never slide.
+// Walking comes from the footstep simulation in gait.js; this file finishes the pose (arms, props) and draws it.
 import { W, H, TAU, clamp, lerp, sstep, easeIO, noise1, hex, rgb, mix, tintS, PAL, poly, smooth, ink, line, ell, rrectPath } from './core.js';
 import { LW } from './street.js';
+import { dims, armSwing } from './gait.js';
 
 const frac = (x) => x - Math.floor(x);
-
-// ------------------------------------------------------------------ gait
-export const GAIT = { duty: 0.6, R0: 0.34, R1: 0.5 }; // reach ahead / behind the pelvis (for 1.75 m)
-export const stride = (P) => (GAIT.R0 + GAIT.R1) / GAIT.duty * (P.h / 1.75);
-
-function ik2(hip, target, l1, l2) {
-  // sagittal two-bone IK (x forward, y up), knee bends forward
-  let dx = target[0] - hip[0], dy = target[1] - hip[1];
-  let d = Math.hypot(dx, dy); const maxd = (l1 + l2) * 0.999;
-  if (d > maxd) { dx *= maxd / d; dy *= maxd / d; d = maxd; }
-  const a = Math.atan2(dy, dx);
-  const c = clamp((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d), -1, 1);
-  const b = Math.acos(c);
-  const ka = a + b; // knee forward (for a leg pointing down, +b rotates toward +x)
-  const knee = [hip[0] + Math.cos(ka) * l1, hip[1] + Math.sin(ka) * l1];
-  return { knee, ankle: [hip[0] + dx, hip[1] + dy] };
-}
-
-// A pose is a dictionary of body-space points [x, y, z] plus a few angles.
-function basePose(P) {
-  const s = P.h / 1.75;
-  return {
-    s, hipH: 0.905 * s, hw: 0.095 * s * P.build, sw: 0.158 * s * P.build * (P.fem ? 0.92 : 1),
-    shY: 1.43 * s, neckY: 1.5 * s, headY: 1.635 * s, thigh: 0.44 * s, shin: 0.43 * s, ankleH: 0.085 * s,
-    upper: 0.3 * s, fore: 0.27 * s,
-  };
-}
+const P_REF = 0.905; // reference pelvis height (× s) the upper-body heights are defined against
 
 function armFrom(pose, side, ang, flex, spread = 0.06, twist = 0) {
   // arm hanging from the shoulder: ang = swing forward (rad), flex = elbow bend
@@ -43,146 +18,106 @@ function armFrom(pose, side, ang, flex, spread = 0.06, twist = 0) {
   pose[`el${side}`] = el; pose[`wr${side}`] = wr;
 }
 
-function placeTorso(pose, lean, pelvisY, pelvisX = 0, sway = 0) {
-  const { s } = pose;
-  pose.lean = lean;
-  const L = (y) => pelvisX + (y - pelvisY) * Math.sin(lean);
-  pose.pelvis = [pelvisX, pelvisY, sway];
-  pose.shL = [L(pose.shY) - 0.01 * s, pose.shY, pose.sw + sway];
-  pose.shR = [L(pose.shY) - 0.01 * s, pose.shY, -pose.sw + sway];
-  pose.neck = [L(pose.neckY), pose.neckY, sway];
-  pose.head = [L(pose.headY) + 0.01 * s, pose.headY, sway];
-  pose.hipL = [pelvisX, pelvisY, pose.hw + sway];
-  pose.hipR = [pelvisX, pelvisY, -pose.hw + sway];
-}
-
 // arms for held props / gestures; returns true if the arm was set
-function propArms(pose, P, which, t, walkAng = 0) {
-  const s = pose.s;
+function propArms(pose, P, which, walkAng = 0) {
   if (P.prop === 'coffee' && which === P.propSide) { armFrom(pose, which, 0.22 + walkAng * 0.15, 1.45, 0.05); return true; }
   if (P.prop === 'phone' && pose.lookPhone > 0.01) {
     const f = pose.lookPhone;
     if (which === 'R') { armFrom(pose, 'R', lerp(walkAng, 0.3, f), lerp(0.3, 1.55, f), lerp(0.06, 0.02, f), lerp(0, 0.08, f)); return true; }
-    if (which === 'L' && f > 0.5 && P.twoHands) { armFrom(pose, 'L', 0.25, 1.5, 0.02, -0.1); return true; }
   }
   if (P.prop === 'phone' && which === 'R') { armFrom(pose, 'R', walkAng * 0.6, 0.3, 0.07); return true; }
   if (P.prop === 'bagHand' && which === P.propSide) { armFrom(pose, which, walkAng * 0.35, 0.12, 0.1); return true; }
-  if (pose.pocket && which === pose.pocket) { armFrom(pose, which, -0.05, 0.55, 0.13); return true; }
   return false;
 }
 
-export function walkPose(P, phase, t, opts = {}) {
-  const pose = basePose(P), s = pose.s;
-  const scale = opts.strideScale ?? 1;
-  const R0 = GAIT.R0 * s * scale, R1 = GAIT.R1 * s * scale, D = GAIT.duty;
-  const bob = 0.022 * s * scale;
-  const pelvisY = pose.hipH - bob * (1 - Math.cos(TAU * 2 * (phase - 0.3))) / 2 - 0.01 * s;
-  placeTorso(pose, 0.045 * scale + (opts.lean || 0), pelvisY, 0, 0);
-  for (const [side, off] of [['R', 0], ['L', 0.5]]) {
-    const u = frac(phase + off);
-    let fx, fy, pitch;
-    if (u < D) {
-      const w = u / D;
-      fx = R0 - w * (R0 + R1);
-      const rise = sstep(0.62, 1, w);
-      fy = pose.ankleH + rise * 0.1 * s * scale;
-      pitch = u < 0.08 ? lerp(0.22, 0, u / 0.08) : -rise * 0.55;
-    } else {
-      const w = (u - D) / (1 - D);
-      const e = 0.5 - 0.5 * Math.cos(Math.PI * w);
-      fx = -R1 + e * (R0 + R1);
-      fy = pose.ankleH + (0.1 * s * scale) * (1 - w) * (1 - w) * (w < 0.3 ? 1 : 1) + Math.sin(Math.PI * Math.min(1, w * 1.15)) * 0.07 * s * scale;
-      pitch = w < 0.5 ? lerp(-0.6, 0, w / 0.5) : lerp(0, 0.24, (w - 0.5) / 0.5);
-    }
-    const hip = pose[`hip${side}`];
-    const { knee, ankle } = ik2([hip[0], hip[1]], [fx, fy], pose.thigh, pose.shin);
-    const z = hip[2] * 0.92;
-    pose[`kn${side}`] = [knee[0], knee[1], z]; pose[`an${side}`] = [ankle[0], ankle[1], z]; pose[`fp${side}`] = pitch;
-  }
-  // arms swing against the legs
-  const A = 0.34 * scale;
-  for (const side of ['R', 'L']) {
-    const u = frac(phase + (side === 'R' ? 0 : 0.5));
-    const ang = -A * Math.cos(TAU * u);
-    pose.lookPhone = opts.lookPhone || 0;
-    if (!propArms(pose, P, side, t, ang)) armFrom(pose, side, ang, 0.22 + 0.25 * Math.max(0, ang / A), 0.06);
-  }
+// upper-body heights follow the pelvis, so the whole body rises and falls with each step
+function upperBody(pose) {
+  const dy = pose.pelvis[1] - P_REF * pose.s;
+  pose.dy = dy; pose.waistY = 1.08 * pose.s + dy; pose.hemY = 0.62 * pose.s + dy;
   return pose;
 }
 
-export function standPose(P, t, opts = {}) {
-  const pose = basePose(P), s = pose.s;
-  const sway = Math.sin(t * 0.7 + P.seed) * 0.008 * s;
-  const breath = Math.sin(t * 1.7 + P.seed * 2) * 0.004 * s;
-  const pelvisY = pose.hipH - 0.012 * s;
-  placeTorso(pose, 0.01 + (opts.lean || 0), pelvisY, sway * 0.5, sway);
-  pose.shL[1] += breath; pose.shR[1] += breath;
-  const stance = opts.stance ?? 0.05;
-  for (const [side, dx] of [['R', stance], ['L', -stance * 0.6]]) {
-    const hip = pose[`hip${side}`];
-    const target = [dx * s, pose.ankleH];
-    const { knee, ankle } = ik2([hip[0], hip[1]], target, pose.thigh, pose.shin);
-    const z = hip[2] * 1.05 - sway * 0.5;
-    pose[`kn${side}`] = [knee[0], knee[1], z]; pose[`an${side}`] = [ankle[0], ankle[1], z]; pose[`fp${side}`] = 0;
+// finish a simulated pose: arms (swinging with the gait, with a little follow-through) and props
+export function finishPose(P, pose, t, opts = {}) {
+  upperBody(pose);
+  pose.lookPhone = opts.lookPhone || 0;
+  const walk = pose.walk || 0, sc = pose.sc || 1;
+  for (const side of ['R', 'L']) {
+    const u = frac((pose.phase || 0) + (side === 'R' ? 0 : 0.5));
+    const ang = armSwing(walk, sc, u) + (1 - walk) * (0.035 + 0.012 * Math.sin(t * 0.8 + P.seed + (side === 'R' ? 0 : 1.3)));
+    const A = (0.2 + 0.14 * sc) * walk || 1;
+    const flex = 0.14 + 0.1 * walk + 0.22 * Math.max(0, ang) / A * walk + 0.06 * walk * Math.sin(TAU * (u - 0.3));
+    if (!propArms(pose, P, side, ang)) armFrom(pose, side, ang, flex, 0.06 + 0.01 * (1 - walk));
   }
-  pose.lookPhone = opts.lookPhone || 0; pose.pocket = opts.pocket || null;
-  for (const side of ['R', 'L']) if (!propArms(pose, P, side, t, 0)) armFrom(pose, side, 0.04, 0.16, 0.07);
   return pose;
 }
 
 export function seatedPose(P, t, opts = {}) {
-  const pose = basePose(P), s = pose.s;
-  const seatY = 0.47;
-  const pelvisY = seatY + 0.07 * s;
-  placeTorso(pose, -0.04, pelvisY, 0, 0);
+  const d = dims(P), s = d.s;
+  const pose = { s, thigh: d.thigh, shin: d.shin, upper: d.upper, fore: d.fore, sw: 0.158 * s * P.build * (P.fem ? 0.92 : 1), shY: 1.43 * s, neckY: 1.5 * s, headY: 1.635 * s };
+  const seatY = 0.47, pelvisY = seatY + 0.07 * s;
+  // seated heights: torso keeps its length above the seat
+  const dy = pelvisY - P_REF * s;
+  pose.shY += dy; pose.neckY += dy; pose.headY += dy;
+  const lean = -0.04 + 0.01 * Math.sin(t * 0.6);
+  const L = (y) => (y - pelvisY) * Math.sin(lean);
+  pose.lean = lean; pose.pelvis = [0, pelvisY, 0];
+  const breath = Math.sin(t * 1.7 + P.seed * 2) * 0.004 * s;
+  pose.shL = [L(pose.shY) - 0.01 * s, pose.shY + breath, pose.sw]; pose.shR = [L(pose.shY) - 0.01 * s, pose.shY + breath, -pose.sw];
+  pose.neck = [L(pose.neckY), pose.neckY, 0]; pose.head = [L(pose.headY) + 0.01 * s, pose.headY, 0];
+  pose.hipL = [0, pelvisY, 0.092 * s]; pose.hipR = [0, pelvisY, -0.092 * s];
   for (const [side, dz] of [['R', 0], ['L', 0.02]]) {
     const hip = pose[`hip${side}`];
-    const knee = [hip[0] + pose.thigh * 0.98, pelvisY + 0.02 * s];
-    const ankle = [knee[0] + 0.06 * s, pose.ankleH];
-    const z = hip[2] + dz;
-    pose[`kn${side}`] = [knee[0], knee[1], z]; pose[`an${side}`] = [ankle[0], ankle[1], z]; pose[`fp${side}`] = 0;
+    const knee = [hip[0] + d.thigh * 0.98, pelvisY + 0.02 * s, hip[2] + dz];
+    const ankle = [knee[0] + 0.06 * s, d.ankleH, hip[2] + dz];
+    pose[`kn${side}`] = knee; pose[`an${side}`] = ankle; pose[`fp${side}`] = 0; pose[`fy${side}`] = 0;
   }
-  pose.lookPhone = 0;
-  // one hand on the table, the other lifting a cup now and then
   const sip = opts.sip || 0;
   armFrom(pose, 'L', 0.9, 0.6, 0.06);
   armFrom(pose, 'R', lerp(0.75, 0.35, sip), lerp(0.6, 2.0, sip), 0.04);
+  pose.lookPhone = 0; pose.walk = 0; pose.speed = 0;
+  pose.dy = dy; pose.waistY = 1.08 * s + dy; pose.hemY = 0.62 * s + dy;
   return pose;
-}
-
-// after blending two poses, re-solve the knees so the legs keep their true length
-export function resolveLegs(pose) {
-  for (const side of ['L', 'R']) {
-    const hip = pose[`hip${side}`], an = pose[`an${side}`];
-    const { knee, ankle } = ik2([hip[0], hip[1]], [an[0], an[1]], pose.thigh, pose.shin);
-    pose[`kn${side}`] = [knee[0], knee[1], pose[`kn${side}`][2]];
-    pose[`an${side}`] = [ankle[0], ankle[1], an[2]];
-  }
-  return pose;
-}
-
-export function blendPose(a, b, w) {
-  if (w <= 0) return a; if (w >= 1) return b;
-  const out = { ...a };
-  for (const k of Object.keys(a)) {
-    const va = a[k], vb = b[k];
-    if (Array.isArray(va) && Array.isArray(vb)) out[k] = [lerp(va[0], vb[0], w), lerp(va[1], vb[1], w), lerp(va[2], vb[2], w)];
-    else if (typeof va === 'number' && typeof vb === 'number') out[k] = lerp(va, vb, w);
-  }
-  return out;
 }
 
 // ------------------------------------------------------------------ drawing
 function capsule(ctx, a, b, ra, rb) {
   const dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1e-6;
   const nx = -dy / d, ny = dx / d, ang = Math.atan2(dy, dx);
-  const sa = Math.asin(clamp((ra - rb) / d, -1, 1));
   ctx.moveTo(a[0] + nx * ra, a[1] + ny * ra);
   ctx.lineTo(b[0] + nx * rb, b[1] + ny * rb);
-  ctx.arc(b[0], b[1], rb, ang + Math.PI / 2 - sa * 0, ang - Math.PI / 2 + sa * 0, true);
+  ctx.arc(b[0], b[1], rb, ang + Math.PI / 2, ang - Math.PI / 2, true);
   ctx.lineTo(a[0] - nx * ra, a[1] - ny * ra);
   ctx.arc(a[0], a[1], ra, ang - Math.PI / 2, ang + Math.PI / 2, true);
   ctx.closePath();
+}
+
+// An anatomical limb along a two-segment chain (hip→knee→ankle, shoulder→elbow→wrist) with a width profile
+// [t, front, back] (t: 0 start, 0.5 joint, 1 end). `fwd` is the body's forward direction on screen (x sign × strength).
+function limb(ctx, a, j, b, prof, k, fwd) {
+  const N = 16, pts = [];
+  for (let i = 0; i <= N; i++) {
+    const u = i / N;
+    const p = u <= 0.5 ? [lerp(a[0], j[0], u * 2), lerp(a[1], j[1], u * 2)] : [lerp(j[0], b[0], u * 2 - 1), lerp(j[1], b[1], u * 2 - 1)];
+    let q = 0; while (q < prof.length - 2 && u > prof[q + 1][0]) q++;
+    const w = clamp((u - prof[q][0]) / (prof[q + 1][0] - prof[q][0])), e = w * w * (3 - 2 * w);
+    pts.push({ p, rf: lerp(prof[q][1], prof[q + 1][1], e) * k, rb: lerp(prof[q][2], prof[q + 1][2], e) * k });
+  }
+  const L = [], R = [];
+  for (let i = 0; i <= N; i++) {
+    const p0 = pts[Math.max(0, i - 1)].p, p1 = pts[Math.min(N, i + 1)].p;
+    let tx = p1[0] - p0[0], ty = p1[1] - p0[1]; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
+    const nx = -ty, ny = tx; // left normal (screen)
+    const frontIsLeft = nx * fwd >= 0, strength = clamp(Math.abs(fwd) * 1.6);
+    const { rf, rb } = pts[i], avg = (rf + rb) / 2;
+    const rl = lerp(avg, frontIsLeft ? rf : rb, strength), rr = lerp(avg, frontIsLeft ? rb : rf, strength);
+    L.push([pts[i].p[0] + nx * rl, pts[i].p[1] + ny * rl]); R.push([pts[i].p[0] - nx * rr, pts[i].p[1] - ny * rr]);
+    if (i === 0 || i === N) pts[i].t = [tx, ty];
+  }
+  const e0 = pts[N], s0 = pts[0];
+  const endR = (e0.rf + e0.rb) / 2, startR = (s0.rf + s0.rb) / 2;
+  const outline = [...L, [e0.p[0] + e0.t[0] * endR * 0.9, e0.p[1] + e0.t[1] * endR * 0.9], ...R.reverse(), [s0.p[0] - s0.t[0] * startR * 0.9, s0.p[1] - s0.t[1] * startR * 0.9]];
+  smooth(ctx, outline);
 }
 
 // outline-then-fill for a group of subpaths → one merged silhouette with an outside ink line
@@ -191,6 +126,11 @@ function group(ctx, build, fill, lw, stroke = PAL.ink) {
   ctx.strokeStyle = stroke; ctx.lineWidth = lw * 2; ctx.lineJoin = 'round'; ctx.stroke();
   ctx.fillStyle = fill; ctx.fill();
 }
+
+// width profiles, metres for a 1.75 m person
+const LEG_TROUSER = [[0, 0.074, 0.08], [0.18, 0.068, 0.072], [0.4, 0.055, 0.057], [0.5, 0.05, 0.051], [0.62, 0.047, 0.058], [0.76, 0.044, 0.05], [0.92, 0.041, 0.043], [1, 0.04, 0.041]];
+const LEG_BARE = [[0, 0.066, 0.072], [0.2, 0.059, 0.065], [0.42, 0.046, 0.047], [0.5, 0.041, 0.042], [0.62, 0.039, 0.051], [0.78, 0.033, 0.04], [0.93, 0.027, 0.028], [1, 0.026, 0.027]];
+const SLEEVE = [[0, 0.05, 0.05], [0.25, 0.047, 0.047], [0.5, 0.041, 0.041], [0.75, 0.039, 0.038], [1, 0.035, 0.034]];
 
 export function drawPerson(ctx, cam, P, st) {
   // st: { x, z, yaw, pose, headYaw (world), headPitch, alpha, expr }
@@ -201,14 +141,22 @@ export function drawPerson(ctx, cam, P, st) {
   if (cam.z - st.z < 0.5) return;
   const R = (m) => m * k;
   const dark = (c, a = 0.1) => tintS(c, -a);
+  const fwdScreen = cy; // the body's forward direction along screen x
   ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
   if (st.alpha != null && st.alpha < 1) ctx.globalAlpha = st.alpha;
 
-  // contact shadow
+  // contact shadows under each foot (they stay put while the foot is planted)
   {
+    ctx.save(); ctx.fillStyle = 'rgba(60,62,80,0.2)'; ctx.filter = `blur(${Math.max(1, k * 0.025).toFixed(1)}px)`;
     const a = cam.P(st.x, 0, st.z);
-    ctx.save(); ctx.fillStyle = 'rgba(60,62,80,0.22)'; ctx.filter = `blur(${Math.max(1, k * 0.03).toFixed(1)}px)`;
-    ctx.beginPath(); ctx.ellipse(a[0] + k * 0.05, a[1] - k * 0.01, k * 0.34, k * 0.07, 0, 0, TAU); ctx.fill(); ctx.restore();
+    ctx.beginPath(); ctx.ellipse(a[0] + k * 0.04, a[1] - k * 0.005, k * 0.26, k * 0.05, 0, 0, TAU); ctx.fill();
+    for (const side of ['L', 'R']) {
+      const an = Wp(pose[`an${side}`]), g = cam.P(an[0], 0, an[2]);
+      const lift = clamp(1 - (pose[`an${side}`][1] - 0.085 * s) / (0.2 * s));
+      ctx.globalAlpha = (st.alpha ?? 1) * lift * 0.9;
+      ctx.beginPath(); ctx.ellipse(g[0] + k * 0.05 * Math.sign(fwdScreen || 1), g[1], k * 0.13, k * 0.035, 0, 0, TAU); ctx.fill();
+    }
+    ctx.restore();
   }
   const pel = Wp(pose.pelvis);
   const zOf = (p) => Wp(p)[2] - pel[2];
@@ -221,16 +169,14 @@ export function drawPerson(ctx, cam, P, st) {
     const hip = S(pose[`hip${side}`]), kn = S(pose[`kn${side}`]), an = S(pose[`an${side}`]);
     const pc = far ? dark(P.bottom.color, 0.12) : P.bottom.color;
     const legCol = skirt ? (far ? dark(P.legs || P.skin, 0.12) : (P.legs || P.skin)) : pc;
-    // shoe
-    const fp = pose[`fp${side}`], an3 = pose[`an${side}`];
-    const heel = S([an3[0] - 0.035 * s, an3[1] - 0.05 * s, an3[2]]);
-    const toe = S([an3[0] + Math.cos(fp) * 0.16 * s, an3[1] - 0.055 * s + Math.sin(fp) * 0.16 * s, an3[2]]);
+    // shoe, following the foot's pitch and its own yaw
+    const fp = pose[`fp${side}`], fy = pose[`fy${side}`] || 0, an3 = pose[`an${side}`];
+    const Lf = 0.16 * s, hb = 0.035 * s;
+    const heel = S([an3[0] - Math.cos(fy) * hb, an3[1] - 0.05 * s, an3[2] - Math.sin(fy) * hb]);
+    const toe = S([an3[0] + Math.cos(fy) * Math.cos(fp) * Lf, an3[1] - 0.055 * s + Math.sin(fp) * Lf, an3[2] + Math.sin(fy) * Math.cos(fp) * Lf]);
     group(ctx, (c) => { capsule(c, heel, toe, R(0.036 * s), R(0.03 * s)); }, far ? dark(P.shoes, 0.1) : P.shoes, lw);
-    group(ctx, (c) => {
-      capsule(c, hip, kn, R(0.075 * s * P.build), R(0.056 * s));
-      capsule(c, kn, an, R(0.055 * s), R(0.042 * s));
-    }, legCol, lw);
-    if (!skirt && P.bottom.cuff) { ctx.fillStyle = dark(pc, 0.15); ctx.beginPath(); capsule(ctx, [lerp(kn[0], an[0], 0.88), lerp(kn[1], an[1], 0.88)], an, R(0.045 * s), R(0.044 * s)); ctx.fill(); }
+    group(ctx, (c) => limb(c, hip, kn, an, skirt ? LEG_BARE : LEG_TROUSER, R(s * P.build ** 0.5), fwdScreen), legCol, lw);
+    if (!skirt && P.bottom.cuff) { ctx.fillStyle = dark(pc, 0.15); ctx.beginPath(); capsule(ctx, [lerp(kn[0], an[0], 0.88), lerp(kn[1], an[1], 0.88)], an, R(0.043 * s), R(0.042 * s)); ctx.fill(); }
   };
 
   const torsoRings = () => {
@@ -239,12 +185,17 @@ export function drawPerson(ctx, cam, P, st) {
       [0.0, pose.neckY - 0.03 * s, 0.065, 0.065],
       [-0.005, pose.shY + 0.01 * s, f ? 0.17 : 0.19, 0.1],
       [0.015, pose.shY - 0.13 * s, f ? 0.16 : 0.18, 0.12],
-      [0.0, 1.08 * s, f ? 0.13 : 0.155, 0.1],
-      [-0.005, pose.pelvis[1] - 0.0, f ? 0.175 : 0.165, 0.11],
+      [0.0, pose.waistY, f ? 0.13 : 0.155, 0.1],
+      [-0.005, pose.pelvis[1], f ? 0.175 : 0.165, 0.11],
     ];
-    if (coat) rings.push([0.01, 0.62 * s, 0.22, 0.19]);
-    else if (skirt) rings.push([0.02, 0.5 * s, 0.23, 0.2]);
-    else rings.push([-0.005, pose.pelvis[1] - 0.06 * s, f ? 0.17 : 0.16, 0.105]);
+    if (coat || skirt) {
+      // the hem is pushed by the knees and trails a little behind the body's motion
+      const kx = ((pose.knL ? pose.knL[0] : 0) + (pose.knR ? pose.knR[0] : 0)) / 2;
+      const spread = pose.knL && pose.knR ? Math.abs(pose.knL[0] - pose.knR[0]) / 2 : 0;
+      const trail = -0.018 * (pose.speed || 0);
+      const base = coat ? [0.22, 0.19] : [0.23, 0.2];
+      rings.push([(kx * 0.45) / s + trail, coat ? pose.hemY : pose.hemY - 0.12 * s, base[0], Math.max(base[1], 0.12 + spread / s * 0.55)]);
+    } else rings.push([-0.005, pose.pelvis[1] - 0.06 * s, P.fem ? 0.17 : 0.16, 0.105]);
     return rings;
   };
   const drawTorso = () => {
@@ -255,45 +206,38 @@ export function drawPerson(ctx, cam, P, st) {
       const bx = px + (y - py) * Math.sin(lean) + ox * s;
       const c = S([bx, y, sz]);
       const e = k * Math.sqrt((b * s * cy) ** 2 + (a * s * P.build * sy) ** 2);
-      // forward offset makes the chest/back asymmetric in profile
       left.push([c[0] - e, c[1]]); right.push([c[0] + e, c[1]]);
     }
     const pts = [...left, ...right.reverse()];
     // neck
     const nk = S(pose.neck), hd = S([pose.head[0], pose.head[1] - 0.06 * s, pose.head[2]]);
     group(ctx, (c) => capsule(c, nk, hd, R(0.05 * s), R(0.048 * s)), dark(P.skin, 0.06), lw);
-    // skirt/coat lower body as a separate softer piece
     ctx.beginPath(); smooth(ctx, pts); ctx.strokeStyle = PAL.ink; ctx.lineWidth = lw * 2; ctx.lineJoin = 'round'; ctx.stroke();
     ctx.fillStyle = P.top.color; ctx.fill();
     if (skirt) {
       const hip = rings[4], hem = rings[5];
-      const i4 = 4; const pts2 = [left[i4], left[5], right[right.length - 1 - 5] || right[0], right[right.length - 1 - 4]];
       const R4 = S([px + hip[0] * s, hip[1], sz]), R5 = S([px + hem[0] * s, hem[1], sz]);
       const e4 = k * Math.sqrt((hip[3] * s * cy) ** 2 + (hip[2] * s * sy) ** 2), e5 = k * Math.sqrt((hem[3] * s * cy) ** 2 + (hem[2] * s * sy) ** 2);
       ctx.beginPath(); ctx.moveTo(R4[0] - e4, R4[1]); ctx.lineTo(R5[0] - e5, R5[1]); ctx.quadraticCurveTo(R5[0], R5[1] + k * 0.03, R5[0] + e5, R5[1]); ctx.lineTo(R4[0] + e4, R4[1]); ctx.closePath();
       ink(ctx, P.bottom.color, lw);
     }
-    // front details: placket / coat opening visible when facing the camera or in profile
-    const facing = sy; // +1 = toward camera
-    if (facing > -0.2) {
-      const cxf = px + 0.12 * s * cy * 0 ;
-      const topP = S([px + (pose.shY - 0.06 * s - py) * Math.sin(lean) + 0.1 * s * Math.max(0, Math.abs(cy)) * 0, pose.shY - 0.06 * s, sz]);
-      const frontShift = k * 0.1 * s * cy; // in profile the front edge sits on the silhouette
-      const bot = S([px, coat ? 0.64 * s : py - 0.02 * s, sz]);
-      ctx.save(); ctx.globalAlpha *= clamp(0.35 + facing * 0.65) * 0.8;
+    // front edge (placket / coat opening)
+    if (sy > -0.2) {
+      const topP = S([px + (pose.shY - 0.06 * s - py) * Math.sin(lean), pose.shY - 0.06 * s, sz]);
+      const frontShift = k * 0.1 * s * cy;
+      const bot = S([px, coat ? pose.hemY + 0.02 * s : py - 0.02 * s, sz]);
+      ctx.save(); ctx.globalAlpha *= clamp(0.35 + sy * 0.65) * 0.8;
       line(ctx, [[topP[0] + frontShift * 0.85, topP[1]], [bot[0] + frontShift * 0.9, bot[1]]], lw * 0.8, dark(P.top.color, 0.3));
       ctx.restore();
     }
-    // collar / scarf
     if (P.scarf) {
       const a = S([pose.neck[0], pose.neckY - 0.07 * s, sz]);
       group(ctx, (c) => { c.ellipse(a[0], a[1], k * Math.sqrt((0.09 * s * cy) ** 2 + (0.12 * s * sy) ** 2), k * 0.055 * s, 0, 0, TAU); }, P.scarf, lw);
-      if (sy > -0.3) { const b = S([pose.neck[0] + 0.07 * s, pose.neckY - 0.28 * s, sz + 0.04 * s]); group(ctx, (c) => capsule(c, [a[0] + k * 0.03 * s * cy, a[1]], b, R(0.035 * s), R(0.04 * s)), dark(P.scarf, 0.08), lw); }
+      if (sy > -0.3) { const sw = -(pose.bag || 0) * 0.5; const b = S([pose.neck[0] + 0.07 * s + sw * 0.1, pose.neckY - 0.28 * s, sz + 0.04 * s]); group(ctx, (c) => capsule(c, [a[0] + k * 0.03 * s * cy, a[1]], b, R(0.035 * s), R(0.04 * s)), dark(P.scarf, 0.08), lw); }
     } else if (P.top.collar) {
       const a = S([pose.neck[0], pose.neckY - 0.05 * s, sz]);
       ctx.beginPath(); ctx.ellipse(a[0], a[1], k * Math.sqrt((0.08 * s * cy) ** 2 + (0.1 * s * sy) ** 2), k * 0.035 * s, 0, 0, TAU); ink(ctx, P.top.collar, lw * 0.8);
     }
-    // belt line
     if (!coat && !skirt) { const b = S([px, py + 0.05 * s, sz]); const e = k * Math.sqrt((0.105 * s * cy) ** 2 + (0.165 * s * P.build * sy) ** 2); ctx.save(); ctx.globalAlpha *= 0.4; line(ctx, [[b[0] - e * 0.95, b[1]], [b[0] + e * 0.95, b[1]]], lw * 0.7, dark(P.top.color, 0.3)); ctx.restore(); }
   };
 
@@ -304,8 +248,7 @@ export function drawPerson(ctx, cam, P, st) {
     const dx = w0[0] - e0[0], dy = w0[1] - e0[1], dl = Math.hypot(dx, dy) || 1;
     const hand = S([w0[0] + dx / dl * 0.06 * s, w0[1] + dy / dl * 0.06 * s, w0[2]]);
     group(ctx, (cc) => { cc.ellipse(hand[0], hand[1], R(0.042 * s), R(0.05 * s), Math.atan2(hand[1] - wr[1], hand[0] - wr[0]) + Math.PI / 2, 0, TAU); }, far ? dark(P.skin, 0.1) : P.skin, lw * 0.9);
-    group(ctx, (cc) => { capsule(cc, sh, el, R(0.05 * s * P.build), R(0.043 * s)); capsule(cc, el, wr, R(0.042 * s), R(0.036 * s)); }, c, lw);
-    // held props
+    group(ctx, (cc) => limb(cc, sh, el, wr, SLEEVE, R(s * P.build ** 0.5), fwdScreen), c, lw);
     if (P.prop === 'coffee' && side === P.propSide) {
       const hx = hand[0], hy = hand[1] - R(0.03 * s);
       ctx.beginPath(); ctx.moveTo(hx - R(0.04), hy - R(0.07)); ctx.lineTo(hx + R(0.04), hy - R(0.07)); ctx.lineTo(hx + R(0.032), hy + R(0.07)); ctx.lineTo(hx - R(0.032), hy + R(0.07)); ctx.closePath(); ink(ctx, '#F1ECE2', lw * 0.8);
@@ -321,35 +264,39 @@ export function drawPerson(ctx, cam, P, st) {
       ctx.restore();
     }
     if (P.prop === 'bagHand' && side === P.propSide) {
-      const hx = hand[0], hy = hand[1];
-      ctx.beginPath(); ctx.moveTo(hx - R(0.05), hy + R(0.02)); ctx.lineTo(hx, hy - R(0.03)); ctx.lineTo(hx + R(0.05), hy + R(0.02)); ctx.strokeStyle = PAL.ink; ctx.lineWidth = lw; ctx.stroke();
+      // the bag hangs from the hand and swings as a pendulum
+      ctx.save(); ctx.translate(hand[0], hand[1]); ctx.rotate(-(pose.hbag || 0) * Math.sign(cy || 1) * Math.min(1, Math.abs(cy) * 1.5));
+      ctx.beginPath(); ctx.moveTo(-R(0.05), R(0.02)); ctx.lineTo(0, -R(0.03)); ctx.lineTo(R(0.05), R(0.02)); ctx.strokeStyle = PAL.ink; ctx.lineWidth = lw; ctx.stroke();
       const bw = R(0.13 * (0.6 + 0.4 * Math.abs(sy))) + R(0.06), bh = R(0.26);
-      ctx.beginPath(); ctx.rect(hx - bw, hy + R(0.02), bw * 2, bh); ink(ctx, P.bagColor || '#C7AA83', lw * 0.9);
-      ctx.fillStyle = 'rgba(0,0,0,0.08)'; ctx.fillRect(hx - bw, hy + R(0.02), bw * 2, R(0.03));
-      if (P.bagMark) { ctx.fillStyle = P.bagMark; ctx.fillRect(hx - bw * 0.35, hy + bh * 0.5, bw * 0.7, R(0.02)); }
+      ctx.beginPath(); ctx.rect(-bw, R(0.02), bw * 2, bh); ink(ctx, P.bagColor || '#C7AA83', lw * 0.9);
+      ctx.fillStyle = 'rgba(0,0,0,0.08)'; ctx.fillRect(-bw, R(0.02), bw * 2, R(0.03));
+      if (P.bagMark) { ctx.fillStyle = P.bagMark; ctx.fillRect(-bw * 0.35, bh * 0.5, bw * 0.7, R(0.02)); }
+      ctx.restore();
     }
   };
 
   const drawBag = () => {
     if (!P.bag) return;
     const side = P.bag.side || 'L';
-    const sh = S(pose[`sh${side}`]);
+    const sh3 = pose[`sh${side}`], sh = S(sh3);
+    const th = pose.bag || 0; // pendulum angle, + forward
     if (P.bag.type === 'tote') {
-      const hp = S([pose.pelvis[0] - 0.02 * s, pose.pelvis[1] + 0.05 * s, pose[`sh${side}`][2] * 1.2]);
+      const hp = S([sh3[0] + Math.sin(th) * 0.5 * s - 0.02 * s, sh3[1] - Math.cos(th) * 0.5 * s, sh3[2] * 1.2]);
       const bw = k * 0.17 * s * (0.55 + 0.45 * Math.abs(cy)), bh = k * 0.32 * s;
       line(ctx, [sh, [hp[0] - bw * 0.5, hp[1] - bh * 0.5]], lw * 0.9, dark(P.bag.color, 0.25));
       line(ctx, [sh, [hp[0] + bw * 0.5, hp[1] - bh * 0.5]], lw * 0.9, dark(P.bag.color, 0.25));
       ctx.beginPath(); ctx.moveTo(hp[0] - bw, hp[1] - bh * 0.45); ctx.lineTo(hp[0] + bw, hp[1] - bh * 0.45); ctx.lineTo(hp[0] + bw * 0.92, hp[1] + bh * 0.55); ctx.lineTo(hp[0] - bw * 0.92, hp[1] + bh * 0.55); ctx.closePath();
       ink(ctx, P.bag.color, lw);
     } else if (P.bag.type === 'backpack') {
-      const c = S([pose.pelvis[0] - 0.17 * s, 1.18 * s, pose.pelvis[2]]);
+      const c = S([pose.pelvis[0] - 0.17 * s, 1.18 * s + (pose.dy || 0), pose.pelvis[2]]);
       const e = k * Math.sqrt((0.08 * s * cy) ** 2 + (0.15 * s * sy) ** 2) + k * 0.02;
       rrectPath(ctx, c[0] - e, c[1] - k * 0.22 * s, e * 2, k * 0.42 * s, k * 0.06 * s); ink(ctx, P.bag.color, lw);
     } else if (P.bag.type === 'cross') {
-      const hp = S([pose.pelvis[0] + 0.02 * s, pose.pelvis[1] + 0.1 * s, pose.hipL[2] * 1.3]);
+      const hp = S([pose.pelvis[0] + 0.02 * s + Math.sin(th) * 0.12 * s, pose.pelvis[1] + 0.1 * s, pose.hipL[2] * 1.3]);
       const other = S(pose[side === 'L' ? 'shR' : 'shL']);
       line(ctx, [other, hp], lw * 0.9, dark(P.bag.color, 0.2));
-      rrectPath(ctx, hp[0] - k * 0.1 * s, hp[1] - k * 0.07 * s, k * 0.2 * s, k * 0.15 * s, k * 0.03 * s); ink(ctx, P.bag.color, lw);
+      ctx.save(); ctx.translate(hp[0], hp[1]); ctx.rotate(-th * 0.5 * Math.sign(cy || 1));
+      rrectPath(ctx, -k * 0.1 * s, -k * 0.07 * s, k * 0.2 * s, k * 0.15 * s, k * 0.03 * s); ink(ctx, P.bag.color, lw); ctx.restore();
     }
   };
 
@@ -363,7 +310,7 @@ export function drawPerson(ctx, cam, P, st) {
     const knot = (front) => {
       if (hs === 'bun' && (backZ > 0.15) === front) { const bx = cxh + Rh * 0.78 * Math.cos(hy + Math.PI); ell(ctx, bx, cyh - Rh * 0.72, Rh * 0.4, Rh * 0.38, hcCol, lw); }
       if (hs === 'pony' && (backZ > 0.15) === front) {
-        const bx = cxh + Rh * 0.9 * Math.cos(hy + Math.PI), sw = Math.sin((st.t || 0) * 5 + P.seed) * 0.12;
+        const bx = cxh + Rh * 0.9 * Math.cos(hy + Math.PI), sw = -(pose.pony || 0) * Math.sign(fx || 1) * 1.1 - fx * 0.04 * (pose.speed || 0);
         ctx.beginPath(); ctx.moveTo(bx - Rh * 0.16, cyh - Rh * 0.45); ctx.quadraticCurveTo(bx - fx * Rh * 0.45 + sw * Rh, cyh + Rh * 0.6, bx - fx * Rh * 0.2 + sw * Rh * 1.5, cyh + Rh * 1.35);
         ctx.quadraticCurveTo(bx + fx * Rh * 0.1 + Rh * 0.12, cyh + Rh * 0.5, bx + Rh * 0.16, cyh - Rh * 0.45); ctx.closePath(); ink(ctx, hcCol, lw);
         ell(ctx, bx, cyh - Rh * 0.42, Rh * 0.12, Rh * 0.1, dark(hcCol, 0.2), 0);
@@ -372,7 +319,7 @@ export function drawPerson(ctx, cam, P, st) {
     // long hair falls behind the head and shoulders
     if (hs === 'long' || hs === 'bob') {
       const L = hs === 'long' ? 1.75 : 1.0;
-      const bx = cxh - fx * Rh * 0.28 * (1 - Math.max(0, fz));
+      const bx = cxh - fx * Rh * 0.28 * (1 - Math.max(0, fz)) - Math.sign(fx || 1) * (pose.pony || 0) * Rh * 0.25;
       const wv = Rh * (1.05 + 0.1 * Math.abs(fz));
       ctx.beginPath(); rrectPath(ctx, bx - wv, cyh - Rh * 0.55, wv * 2, Rh * (0.55 + L), Rh * 0.6); ink(ctx, dark(hcCol, 0.06), lw);
     }
@@ -440,14 +387,13 @@ export function drawPerson(ctx, cam, P, st) {
   // ---- paint in depth order
   const farArm = arms.filter((a) => a.dz < -0.02 * s).map((a) => a.side);
   const nearArm = arms.filter((a) => a.dz >= -0.02 * s).map((a) => a.side);
-  if (P.bag && P.bag.type === 'backpack' && cy * 1 !== 0 && Math.sin(st.yaw) > 0.2) drawBag();
+  if (P.bag && P.bag.type === 'backpack' && sy > 0.2) drawBag();
   for (const a of farArm) drawArm(a, true);
   if (P.bag && P.bag.type === 'tote' && zOf(pose[`sh${P.bag.side || 'L'}`]) < 0) drawBag();
-  if (coat) { for (const l of legs) drawLeg(l.side, l.dz < -0.01); drawTorso(); }
-  else { for (const l of legs) drawLeg(l.side, l.dz < -0.01); drawTorso(); }
-  if (P.bag && (P.bag.type === 'backpack' ? Math.sin(st.yaw) <= 0.2 : P.bag.type === 'cross' || zOf(pose[`sh${P.bag.side || 'L'}`]) >= 0)) drawBag();
+  for (const l of legs) drawLeg(l.side, l.dz < -0.01);
+  drawTorso();
+  if (P.bag && (P.bag.type === 'backpack' ? sy <= 0.2 : P.bag.type === 'cross' || zOf(pose[`sh${P.bag.side || 'L'}`]) >= 0)) drawBag();
   nearArm.sort((a, b) => zOf(pose[`el${a}`]) - zOf(pose[`el${b}`]));
-  // head before the near arm only when an arm is raised in front of the face
   drawHead();
   for (const a of nearArm) drawArm(a, false);
   ctx.restore();
