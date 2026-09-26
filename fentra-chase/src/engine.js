@@ -116,7 +116,9 @@ export function line3(ctx, cam, a, b, stroke, width = 1) {
 
 // Fog: exponential mix toward the night haze colour.
 export const FOG = hex('#1b2230');
-export function fogged(c, d, density = 0.045, fog = FOG) { return mix(c, fog, 1 - Math.exp(-d * density)); }
+let FOG_SCALE = 1;
+export function setFogScale(k) { FOG_SCALE = k; }
+export function fogged(c, d, density = 0.045, fog = FOG) { return mix(c, fog, 1 - Math.exp(-d * density * FOG_SCALE)); }
 
 // ------------------------------------------------------------------ light
 export function glow(ctx, x, y, r, c, a = 1, op = 'lighter') {
@@ -180,6 +182,11 @@ export function figure(ctx, draw, opts = {}) {
     const s = opts.shade, gr = fg.createLinearGradient(s.from[0], s.from[1], s.to[0], s.to[1]);
     gr.addColorStop(0, 'rgba(6,8,12,0)'); gr.addColorStop(1, `rgba(6,8,12,${s.a})`);
     fg.fillStyle = gr; fg.fillRect(0, 0, W, H);
+  }
+  if (opts.band) { // a horizontal slit of light (e.g. a street light falling across the eyes)
+    const b = opts.band, gr = fg.createLinearGradient(0, b.y - b.h, 0, b.y + b.h);
+    gr.addColorStop(0, rgb(b.color, 0)); gr.addColorStop(0.5, rgb(b.color, b.a)); gr.addColorStop(1, rgb(b.color, 0));
+    fg.globalCompositeOperation = 'source-atop'; fg.fillStyle = gr; fg.fillRect(0, b.y - b.h, W, b.h * 2);
   }
   if (opts.spots) for (const s of opts.spots) {
     fg.globalCompositeOperation = 'source-atop';

@@ -16,6 +16,25 @@ export const CUSTOMERS = [
   { id: 'folder', skin: '#a4735a', skinShade: '#7b523e', hair: '#2d221d', style: 'bun', top: '#2e473d', topShade: '#22352e', bottom: '#262626', shoe: '#1a1a1a', h: 1.70, w: 0.97, prop: 'folder', lip: '#84503f' },
 ];
 
+// Living faces: every face blinks on its own schedule and makes small saccades, driven by the film clock.
+let FT = 0;
+export function setFaceTime(t) { FT = t; }
+function hashStr(s) { let h = 7; for (const ch of String(s)) h = (h * 31 + ch.charCodeAt(0)) % 100000; return h; }
+function blinkAt(t, seed) {
+  const r = (k) => { const x = Math.sin((k + seed * 0.37) * 91.7) * 43758.5; return x - Math.floor(x); };
+  let tt = r(0) * 2; let k = 1;
+  while (tt < t - 0.2) { tt += 2.4 + r(k) * 2.2; k++; }
+  const u = t - (tt - (2.4 + r(k - 1) * 2.2)) ; // time since previous blink start
+  const d = t - tt;
+  const f = (x) => (x < 0 || x > 0.17 ? 0 : x < 0.06 ? x / 0.06 : 1 - (x - 0.06) / 0.11);
+  return Math.max(f(d), f(u));
+}
+function saccade(t, seed) {
+  const k = Math.floor(t * 1.3 + seed), u = t * 1.3 + seed - k;
+  const v = (n) => { const x = Math.sin(n * 12.9898 + seed) * 43758.5453; return (x - Math.floor(x)) * 2 - 1; };
+  const e = Math.min(1, u / 0.08);
+  return lerp(v(k - 1), v(k), e);
+}
 export const tr = (T, x, y) => [T.ox + T.dir * T.s * x, T.oy - T.s * y];
 export const P = (T, pts) => pts.map((p) => tr(T, p[0], p[1]));
 // A closed hand (fist / grip): palm block, curled finger line, thumb. p = screen centre, ang = screen angle of the forearm.
@@ -134,21 +153,32 @@ export function faceFront(g, T, c, pal, expr = {}, kind = 'man', lightSide = -1)
   smoothShape(g, [H(fx(-sh * 0.078), 0.06), H(fx(-sh * 0.05), 0.05), H(fx(-sh * 0.042), -0.03), H(fx(-sh * 0.03), -0.11), H(fx(-sh * 0.06), -0.09), H(fx(-sh * 0.077), -0.03)], pal.skinShade + '77');
   // beard
   if (pal.beard) smoothShape(g, [H(fx(-0.07), -0.04), H(fx(-0.045), -0.1), H(0, -0.135), H(fx(0.045), -0.1), H(fx(0.07), -0.04), H(fx(0.03), -0.07), H(0, -0.06), H(fx(-0.03), -0.07)], pal.hair);
-  // eyes
-  const open = [expr.eyeL ?? 1, expr.eyeR ?? 1];
+  // eyes (with natural blinks and saccades unless the shot drives them explicitly)
+  const seed = hashStr(pal.skin + kind);
+  const bl = expr.noBlink ? 0 : blinkAt(FT, seed);
+  const open = [(expr.eyeL ?? 1) * (1 - bl), (expr.eyeR ?? 1) * (1 - bl)];
   const squint = expr.squint || 0;
+  const gx = (expr.gazeX || 0) + (expr.lockGaze ? 0 : saccade(FT, seed) * 0.12), gy = (expr.gazeY || 0) + (expr.lockGaze ? 0 : saccade(FT + 7, seed) * 0.08);
   for (const [i, sd] of [[0, -1], [1, 1]]) {
     const ex = feat(sd * 0.034), ey = 0.012 - squint * 0.002;
     const cc = H(ex, ey);
     const wx = s * 0.0135 * (1 - (sd * yaw > 0 ? 0 : Math.abs(yaw) * 0.35)), hy = s * 0.0068 * Math.max(0.06, open[i] * (1 - squint * 0.55));
     if (open[i] > 0.12) {
-      g.beginPath(); g.ellipse(cc[0], cc[1], wx, hy, 0, 0, TAU); g.fillStyle = '#ddd3c6'; g.fill();
+      g.beginPath(); g.ellipse(cc[0], cc[1], wx, hy, 0, 0, TAU); g.fillStyle = '#d8cdbf'; g.fill();
       g.save(); g.clip();
-      const ir = H(ex + (expr.gazeX || 0) * 0.009, ey + (expr.gazeY || 0) * 0.004);
-      g.beginPath(); g.arc(ir[0], ir[1], s * 0.0072, 0, TAU); g.fillStyle = pal.eye || '#1a1411'; g.fill();
+      const ir = H(ex + gx * 0.009, ey + gy * 0.004);
+      g.beginPath(); g.arc(ir[0], ir[1], s * 0.0074, 0, TAU); g.fillStyle = pal.iris || '#3b2a1f'; g.fill();
+      g.beginPath(); g.arc(ir[0], ir[1], s * 0.0074, 0, TAU); g.strokeStyle = '#140e0b'; g.lineWidth = s * 0.0014; g.stroke();
+      g.beginPath(); g.arc(ir[0], ir[1], s * 0.0034, 0, TAU); g.fillStyle = '#0c0907'; g.fill();
+      // lid shadow across the top of the eyeball
+      g.fillStyle = 'rgba(40,24,16,0.35)'; g.fillRect(cc[0] - wx, cc[1] - hy, wx * 2, hy * 0.55);
+      // catchlight
+      g.beginPath(); g.arc(ir[0] - s * 0.0026 * lightSide, ir[1] - s * 0.0026, s * 0.0017, 0, TAU); g.fillStyle = 'rgba(255,248,236,0.9)'; g.fill();
       g.restore();
-      // upper lid
-      g.beginPath(); g.ellipse(cc[0], cc[1], wx * 1.05, hy, 0, Math.PI, TAU); g.strokeStyle = '#21160f'; g.lineWidth = s * 0.0032; g.stroke();
+      // upper lid, crease, lower lid
+      g.beginPath(); g.ellipse(cc[0], cc[1], wx * 1.06, hy, 0, Math.PI, TAU); g.strokeStyle = '#1e140e'; g.lineWidth = s * 0.0036; g.stroke();
+      g.beginPath(); g.ellipse(cc[0], cc[1] - s * 0.0035, wx * 1.0, hy * 1.25 + s * 0.002, 0, Math.PI * 1.1, Math.PI * 1.9); g.strokeStyle = pal.skinShade; g.lineWidth = s * 0.0018; g.stroke();
+      g.beginPath(); g.ellipse(cc[0], cc[1] + s * 0.0005, wx * 0.9, hy * 0.9, 0, Math.PI * 0.15, Math.PI * 0.85); g.strokeStyle = 'rgba(90,55,40,0.45)'; g.lineWidth = s * 0.0014; g.stroke();
     } else {
       // closed (wink / squeeze): a soft curved lid line
       g.beginPath(); g.moveTo(cc[0] - wx, cc[1]); g.quadraticCurveTo(cc[0], cc[1] + s * 0.005, cc[0] + wx, cc[1] - s * 0.001);
@@ -168,6 +198,10 @@ export function faceFront(g, T, c, pal, expr = {}, kind = 'man', lightSide = -1)
   poly2(g, [n0, n1, n2], pal.skinShade + 'cc');
   const nb = H(feat(0) + yaw * 0.01, -0.05);
   g.beginPath(); g.ellipse(nb[0], nb[1], s * 0.013, s * 0.004, 0, 0, TAU); g.fillStyle = pal.skinShade; g.fill();
+  for (const sd of [-1, 1]) { // nostril wings
+    const w0 = H(feat(sd * 0.011) + yaw * 0.01, -0.046);
+    g.beginPath(); g.arc(w0[0], w0[1], s * 0.006, sd > 0 ? -1.2 : Math.PI + 1.2 - Math.PI * 0.6, sd > 0 ? 0.6 : Math.PI + 1.2); g.strokeStyle = pal.skinShade; g.lineWidth = s * 0.0018; g.stroke();
+  }
   // mouth
   const sm = expr.smile || 0, op = expr.open || 0;
   const ml = H(feat(-0.022 - sm * 0.003), -0.077 + sm * 0.004), mr = H(feat(0.022 + sm * 0.003), -0.077 + sm * 0.006 + (expr.smirk || 0) * 0.004);
@@ -176,11 +210,17 @@ export function faceFront(g, T, c, pal, expr = {}, kind = 'man', lightSide = -1)
     g.beginPath(); g.moveTo(ml[0], ml[1]); g.quadraticCurveTo(mc[0], mc[1] + s * op * 0.02, mr[0], mr[1]); g.quadraticCurveTo(mc[0], mc[1] - s * 0.002, ml[0], ml[1]);
     g.fillStyle = '#3a1e18'; g.fill();
   }
+  // upper lip (with cupid's bow) and a softer, lighter lower lip
+  const up0 = H(feat(-0.007), -0.0725), up1 = H(feat(0.007), -0.0725), upc = H(feat(0), -0.0745);
+  g.beginPath(); g.moveTo(ml[0], ml[1]); g.quadraticCurveTo((ml[0] + up0[0]) / 2, up0[1] - s * 0.0005, up0[0], up0[1]); g.lineTo(upc[0], upc[1]); g.lineTo(up1[0], up1[1]);
+  g.quadraticCurveTo((mr[0] + up1[0]) / 2, up1[1] - s * 0.0005, mr[0], mr[1]); g.quadraticCurveTo(mc[0], mc[1] + s * sm * 0.006, ml[0], ml[1]); g.closePath();
+  g.fillStyle = pal.lip; g.fill();
+  const ll = H(feat(0), -0.086 - sm * 0.002);
+  g.beginPath(); g.moveTo(ml[0] + s * 0.004, ml[1] + s * 0.001); g.quadraticCurveTo(ll[0], ll[1] + s * 0.009, mr[0] - s * 0.004, mr[1] + s * 0.001); g.quadraticCurveTo(mc[0], mc[1] + s * 0.002, ml[0] + s * 0.004, ml[1] + s * 0.001);
+  g.fillStyle = pal.lip + 'aa'; g.fill();
   g.beginPath(); g.moveTo(ml[0], ml[1]); g.quadraticCurveTo(mc[0], mc[1] + s * sm * 0.006, mr[0], mr[1]);
-  g.strokeStyle = pal.lip; g.lineWidth = s * 0.0048; g.lineCap = 'round'; g.stroke();
-  // lower-lip light
-  const ll = H(feat(0), -0.088);
-  g.beginPath(); g.ellipse(ll[0], ll[1], s * 0.012, s * 0.003, 0, 0, TAU); g.fillStyle = pal.skinShade + '88'; g.fill();
+  g.strokeStyle = '#4a2a22'; g.lineWidth = s * 0.0026; g.lineCap = 'round'; g.stroke();
+  g.beginPath(); g.ellipse(ll[0], ll[1] + s * 0.001, s * 0.008, s * 0.0022, 0, 0, TAU); g.fillStyle = 'rgba(255,230,210,0.25)'; g.fill();
   // glasses
   if (pal.glasses) {
     g.strokeStyle = '#1b1b1d'; g.lineWidth = s * 0.004;

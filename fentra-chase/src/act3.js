@@ -1,7 +1,7 @@
 // Act 3 — torch to lamp, the office, the wink, the brand.
-import { W, H, clamp, lerp, inv, sstep, easeIO, easeOut, easeIn, win, lerp3, TAU, mulberry32, hex, rgb, mix, Cam, figure, glow, softDisc, beam, scratch, fillPoly, projectPoly, pathPoly } from './engine.js';
+import { W, H, clamp, lerp, inv, sstep, easeIO, easeOut, easeIn, win, lerp3, TAU, mulberry32, hex, rgb, mix, Cam, figure, glow, softDisc, beam, scratch, fillPoly, projectPoly, pathPoly, setFogScale } from './engine.js';
 import { MAN, CUSTOMERS, WALK, gait, manFront, manSeated, personFront, personSide, faceFront, hatFront, hatProfile, tr } from './characters.js';
-import { renderWorld } from './world.js';
+import { renderWorld, setWindowWave } from './world.js';
 import { actorT } from './common.js';
 import { MAN_STOP, LINE } from './act2.js';
 
@@ -32,10 +32,14 @@ function S19(ctx, t) {
   ctx.fillStyle = '#07080b'; ctx.fillRect(0, 0, W, H);
   const cx = W / 2, cy = H * 0.47;
   const r = lerp(70, 1300, easeIn(u));
-  // hand and torch body (silhouette), receding as the light blooms
-  ctx.save(); ctx.globalAlpha = 1 - sstep(0.2, 0.6, u);
-  ctx.fillStyle = '#121316'; ctx.beginPath(); ctx.arc(cx, cy, r * 1.35, 0, TAU); ctx.fill();
-  ctx.fillStyle = '#0c0d0f'; ctx.beginPath(); ctx.roundRect(cx - 190, cy + r * 1.1, 380, 520, 120); ctx.fill();
+  // the torch head: knurled bezel around the lens, a hand in silhouette with a rim of light
+  ctx.save(); ctx.globalAlpha = 1 - sstep(0.25, 0.6, u);
+  ctx.fillStyle = '#050506'; ctx.beginPath(); ctx.ellipse(cx + r * 0.2, cy + r * 2.2, r * 1.7, r * 1.25, -0.3, 0, TAU); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,200,140,0.35)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(cx + r * 0.2, cy + r * 2.2, r * 1.7, r * 1.25, -0.3, Math.PI * 1.05, Math.PI * 1.6); ctx.stroke();
+  ctx.fillStyle = '#0e0f11'; ctx.beginPath(); ctx.arc(cx, cy, r * 1.32, 0, TAU); ctx.fill();
+  ctx.strokeStyle = '#2a2b2f'; ctx.lineWidth = Math.max(1, r * 0.05);
+  for (let k = 0; k < 36; k++) { const an = k / 36 * TAU; ctx.beginPath(); ctx.moveTo(cx + Math.cos(an) * r * 1.12, cy + Math.sin(an) * r * 1.12); ctx.lineTo(cx + Math.cos(an) * r * 1.3, cy + Math.sin(an) * r * 1.3); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(255,230,200,0.5)'; ctx.lineWidth = Math.max(1, r * 0.04); ctx.beginPath(); ctx.arc(cx, cy, r * 1.1, Math.PI * 1.1, Math.PI * 1.7); ctx.stroke();
   ctx.restore();
   // reflector rings
   for (let k = 3; k >= 1; k--) glow(ctx, cx, cy, r * (1 + k * 0.28), TORCH, 0.18 + 0.1 * (3 - k));
@@ -96,6 +100,18 @@ function drawOffice(ctx, cam, t, opts = {}) {
   // window onto the neighbourhood
   f(Q(-2.3, -0.15, 0.8, 2.75, -3.99), O.charcoal);
   mapImage(ctx, cam, CITY, Q(-2.22, -0.23, 0.88, 2.67, -3.985));
+  { // rain on the glass: beads catching the room light, a few running down
+    const r = mulberry32(55), gs = cam.scaleAt([-1.2, 1.8, -3.98]);
+    for (let k = 0; k < 90; k++) {
+      const u = r(), v = r(), run = r() < 0.15;
+      const vv = run ? (v + t * (0.08 + r() * 0.12)) % 1 : v;
+      const P = cam.project([lerp(-2.2, -0.25, u), lerp(2.65, 0.9, vv), -3.975]);
+      if (P[2] <= 0) continue;
+      const rad = Math.max(1, gs * (0.004 + r() * 0.007));
+      ctx.fillStyle = 'rgba(255,225,190,0.28)'; ctx.beginPath(); ctx.ellipse(P[0], P[1], rad, rad * 1.2, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,245,230,0.55)'; ctx.beginPath(); ctx.arc(P[0] - rad * 0.3, P[1] - rad * 0.35, rad * 0.3, 0, TAU); ctx.fill();
+    }
+  }
   for (const x of [-1.22]) f(Q(x - 0.03, x + 0.03, 0.88, 2.67, -3.98), O.charcoal);
   f(Q(-2.22, -0.23, 1.9, 1.95, -3.98), O.charcoal);
   // glass partition to the corridor (right) — the corridor is lit warmly behind it
@@ -289,22 +305,121 @@ function S23(ctx, t) {
   cam.set(lerp3([-0.12, 1.36, -1.05], [-0.1, 1.37, -1.2], easeIO(lt / 4.8)), [0.05, 1.33, -2.6], 26);
   const turn = easeIO(inv(0.15, 1.0, lt));
   const wink = win(lt, 3.3, 3.42, 3.62, 3.78);
-  const expr = { yaw: lerp(-0.22, 0.0, turn), gazeX: lerp(-0.7, 0, turn), brow: 0.3 - wink * 0.2, browR: -wink * 0.5, smile: 0.55 + wink * 0.15, smirk: wink * 0.6, eyeL: 0.9, eyeR: 0.9 * (1 - wink) };
+  const expr = { yaw: lerp(-0.22, 0.0, turn), gazeX: lerp(-0.7, 0, turn), brow: 0.3 - wink * 0.2, browR: -wink * 0.5, smile: 0.55 + wink * 0.15, smirk: wink * 0.6, eyeL: 0.9, eyeR: 0.9 * (1 - wink), noBlink: lt > 2.4, lockGaze: turn > 0.85 };
   drawOffice(ctx, cam, t, seated(cam, { lean: 1, expr, lightSide: 1 }));
-  // end transition begins: the room settles into darkness around the lamp
-  const d = sstep(4.2, 4.8, lt);
-  if (d > 0) { ctx.fillStyle = `rgba(14,14,16,${d})`; ctx.fillRect(0, 0, W, H); }
 }
 
-// ---------------------------------------------------------------- S24: brand
-function S24(ctx, t) {
-  const lt = t - 85.0;
-  const bg = ctx.createRadialGradient(W / 2, H * 0.44, 0, W / 2, H * 0.46, H * 0.75);
-  bg.addColorStop(0, '#1c1c1f'); bg.addColorStop(0.55, '#141416'); bg.addColorStop(1, '#0b0b0c');
-  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
-  // the lamp's warm circle lingers, then dissolves (graphic echo of the torch/globe)
-  const ring = 1 - sstep(0.0, 1.1, lt);
-  if (ring > 0) glow(ctx, W / 2, H * 0.4, 520, WARM, 0.25 * ring);
+// ---------------------------------------------------------------- S25: outside — his window glows; the city lights up; the brand
+// His office: second floor of the east facade of Street A (window faces the street, i.e. -x).
+const OW = { x: 3.5, z: -21.83, y0: 8.1, y1: 10.05, hw: 1.0 };
+let INTERIOR = null;
+function paintInterior(t) {
+  if (!INTERIOR) { INTERIOR = document.createElement('canvas'); INTERIOR.width = 420; INTERIOR.height = 410; }
+  const g = INTERIOR.getContext('2d');
+  const bg = g.createLinearGradient(0, 0, 0, 410); bg.addColorStop(0, '#6b5540'); bg.addColorStop(0.55, '#8a6c4e'); bg.addColorStop(1, '#3c2c20');
+  g.fillStyle = bg; g.fillRect(0, 0, 420, 410);
+  g.fillStyle = '#3a2a1f'; for (const y of [110, 170]) g.fillRect(250, y, 170, 6);
+  const rb = mulberry32(8); for (let x = 256; x < 410; x += 9 + rb() * 6) g.fillRect(x, 170 - (40 + rb() * 22), 6, 40 + rb() * 22);
+  g.fillStyle = 'rgba(28,115,253,0.8)'; g.fillRect(332, 124, 7, 42);
+  // him at the desk, the monitor's glow on his face, the globe lamp
+  const T = { ox: 210, oy: 470, s: 300, dir: 1 };
+  manSeated(g, T, { expr: { yaw: -0.25, gazeX: -0.6, smile: 0.35 }, lightSide: 1 });
+  manSeated(g, T, { part: 'arms', handsY: 0.8, expr: {} });
+  g.fillStyle = '#2a1e16'; g.fillRect(0, 300, 420, 110);
+  g.fillStyle = '#17181b'; g.fillRect(40, 205, 110, 80);
+  const flick = 0.85 + 0.15 * Math.sin(t * 3.1);
+  const sg = g.createRadialGradient(120, 240, 0, 120, 240, 140); sg.addColorStop(0, `rgba(190,215,255,${0.35 * flick})`); sg.addColorStop(1, 'rgba(190,215,255,0)');
+  g.fillStyle = sg; g.fillRect(0, 100, 300, 280);
+  const lg = g.createRadialGradient(345, 250, 0, 345, 250, 120); lg.addColorStop(0, 'rgba(255,225,170,0.95)'); lg.addColorStop(0.15, 'rgba(255,205,140,0.55)'); lg.addColorStop(1, 'rgba(255,190,120,0)');
+  g.fillStyle = lg; g.fillRect(200, 120, 220, 260);
+  return INTERIOR;
+}
+function officeWindow(ctx, cam, t) {
+  const c = (y, dz) => [OW.x - 0.01, y, OW.z + dz];
+  const q = [c(OW.y0, -OW.hw), c(OW.y0, OW.hw), c(OW.y1, OW.hw), c(OW.y1, -OW.hw)];
+  const fr = [c(OW.y0 - 0.12, -OW.hw - 0.12), c(OW.y0 - 0.12, OW.hw + 0.12), c(OW.y1 + 0.12, OW.hw + 0.12), c(OW.y1 + 0.12, -OW.hw - 0.12)];
+  fillPoly(ctx, cam, fr, '#1c1612');
+  const img = paintInterior(t);
+  const p0 = cam.project(q[3]), p1 = cam.project(q[2]), p3 = cam.project(q[0]);
+  if (p0[2] <= 0) return;
+  ctx.save(); const sp = projectPoly(cam, q); pathPoly(ctx, sp); ctx.clip();
+  ctx.setTransform((p1[0] - p0[0]) / img.width, (p1[1] - p0[1]) / img.width, (p3[0] - p0[0]) / img.height, (p3[1] - p0[1]) / img.height, p0[0], p0[1]);
+  ctx.drawImage(img, 0, 0); ctx.setTransform(1, 0, 0, 1, 0, 0);
+  // glass: faint reflection of the street, and raindrops running down
+  const s = cam.scaleAt(q[0]);
+  const rg = ctx.createLinearGradient(p0[0], p0[1], p1[0], p3[1]); rg.addColorStop(0, 'rgba(120,140,170,0.16)'); rg.addColorStop(0.5, 'rgba(120,140,170,0)'); rg.addColorStop(1, 'rgba(120,140,170,0.08)');
+  ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H);
+  const r = mulberry32(21);
+  for (let k = 0; k < 70; k++) {
+    const u = r(), v = r(), run = r() < 0.18;
+    const vv = run ? (v + t * (0.15 + r() * 0.2)) % 1 : v;
+    const P = cam.project(c(lerp(OW.y1, OW.y0, vv), lerp(-OW.hw, OW.hw, u)));
+    const rad = Math.max(1.2, s * (0.006 + r() * 0.01));
+    ctx.fillStyle = 'rgba(255,236,210,0.35)'; ctx.beginPath(); ctx.ellipse(P[0], P[1], rad, rad * 1.25, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = 'rgba(255,250,240,0.7)'; ctx.beginPath(); ctx.arc(P[0] - rad * 0.3, P[1] - rad * 0.4, rad * 0.3, 0, TAU); ctx.fill();
+  }
+  ctx.restore();
+  // cross mullion + sill
+  const m = (a, b, wdt) => { const A = cam.project(a), B = cam.project(b); ctx.strokeStyle = '#1c1612'; ctx.lineWidth = Math.max(1, s * wdt); ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.stroke(); };
+  m(c(OW.y0, 0), c(OW.y1, 0), 0.05); m(c(OW.y0 + 1.35, -OW.hw), c(OW.y0 + 1.35, OW.hw), 0.04);
+  // his light spilling onto the wet facade and the rain in front of it
+  const cc = cam.project(c((OW.y0 + OW.y1) / 2, 0));
+  glow(ctx, cc[0], cc[1], s * 2.4, [255, 190, 120], 0.22);
+}
+const FINALE_WALKERS = [
+  { i: 0, z0: -31, dir: 1, t0: 1.0, umb: true },
+  { i: 3, z0: -12.5, dir: -1, t0: 1.6, umb: true },
+  { i: 2, z0: -33.5, dir: 1, t0: 2.4, umb: false },
+];
+function S25(ctx, t) {
+  const lt = t - 84.5;
+  const u1 = easeIO(inv(0.2, 3.4, lt)), u2 = easeIO(inv(2.6, 6.2, lt));
+  const pos = lerp3(lerp3([0.2, 9.1, -21.4], [-2.9, 13.2, -14.2], u1), [-2.5, 17.0, -8.5], u2);
+  const tgt = lerp3(lerp3([3.5, 9.05, -21.83], [2.5, 1.8, -23.0], u1), [0.4, 7.5, -64], u2);
+  cam.set(pos, tgt, lerp(44, 54, u1));
+  setFogScale(lerp(0.8, 0.5, u2));
+  setWindowWave({ x: OW.x, z: OW.z, t0: 84.5 + 2.9, speed: 16, skip: (w, i, fi) => w.seed === 5 && i === 7 && fi === 1 });
+  const actors = [];
+  for (const wk of FINALE_WALKERS) {
+    const wt = lt - wk.t0; if (wt < 0) continue;
+    const walked = Math.min(WALK.v * wt, Math.abs(OW.z - wk.z0) - 0.6);
+    const p = [2.55, 0, wk.z0 + wk.dir * walked];
+    const moving = walked < Math.abs(OW.z - wk.z0) - 0.61;
+    actors.push({ pos: p, draw: (c) => {
+      const T0 = actorT(cam, p, 1); if (T0.d < 0.5) return;
+      const pose = gait(moving ? wt : (Math.abs(OW.z - wk.z0) - 0.6) / WALK.v, WALK);
+      const sx = cam.project([p[0], 0, p[2] + wk.dir])[0] - T0.ox;
+      const dir = sx >= 0 ? 1 : -1;
+      const T = { ...T0, dir, ox: T0.ox - dir * pose.hip[0] * T0.s };
+      c.save(); c.translate(T0.ox, T0.oy); c.scale(1, 0.86); c.translate(-T0.ox, -T0.oy);
+      figure(c, (g) => {
+        personSide(g, T, pose, CUSTOMERS[wk.i], { props: true, walk: true });
+        if (wk.umb) { // black umbrella, rain beading on it
+          const hp = tr(T, pose.hip[0] + 0.05, 2.02), s0 = T.s;
+          g.strokeStyle = '#111'; g.lineWidth = Math.max(1, s0 * 0.012); g.beginPath(); g.moveTo(...tr(T, pose.hip[0] + 0.1, 1.2)); g.lineTo(hp[0], hp[1]); g.stroke();
+          g.fillStyle = '#121316'; g.beginPath(); g.ellipse(hp[0], hp[1], s0 * 0.5, s0 * 0.2, 0, Math.PI, TAU); g.fill();
+          g.beginPath(); g.moveTo(hp[0] - s0 * 0.5, hp[1]); for (let k = 0; k <= 6; k++) g.quadraticCurveTo(hp[0] - s0 * 0.5 + (k + 0.5) * s0 / 6, hp[1] + s0 * 0.04, hp[0] - s0 * 0.5 + (k + 1) * s0 / 6, hp[1]); g.fill();
+        }
+      }, { dark: 0.35, rims: [{ dir: [0, -1], color: WARM, a: 0.55, w: 3 }] });
+      c.restore();
+    } });
+  }
+  // brand: the city softens into bokeh behind the logo
+  const soft = sstep(5.6, 6.9, lt);
+  if (soft > 0.001) {
+    const [bc, bg] = scratch(8);
+    renderWorld(bg, cam, { actors, after: (c) => officeWindow(c, cam, t) });
+    ctx.save(); ctx.filter = `blur(${(soft * 24).toFixed(1)}px) brightness(${(1 - soft * 0.32).toFixed(3)}) saturate(${(1 - soft * 0.2).toFixed(3)})`; ctx.drawImage(bc, 0, 0); ctx.restore();
+    const v = ctx.createRadialGradient(W / 2, H * 0.5, H * 0.08, W / 2, H * 0.5, H * 0.7); v.addColorStop(0, `rgba(10,10,12,${(0.5 * soft).toFixed(3)})`); v.addColorStop(0.55, `rgba(10,10,12,${(0.3 * soft).toFixed(3)})`); v.addColorStop(1, `rgba(6,6,8,${(0.6 * soft).toFixed(3)})`);
+    ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  } else {
+    renderWorld(ctx, cam, { actors, after: (c) => officeWindow(c, cam, t) });
+  }
+  if (lt > 6.2) brand(ctx, lt - 6.2);
+}
+
+// ---------------------------------------------------------------- brand overlay
+function brand(ctx, lt) {
   const logo = window.FENTRA_LOGO;
   const la = sstep(0.8, 1.6, lt);
   if (logo && la > 0) {
@@ -339,16 +454,16 @@ function S24(ctx, t) {
   }
   txt('Birlikte başlayalım.', 1150, 'italic 400 42px "Playfair Display"', '#b3aca1', 3.2);
   txt('Birlikte büyüyelim.', 1208, 'italic 400 42px "Playfair Display"', '#b3aca1', 3.5);
-  txt('@fentra.digital', 1420, '500 26px "Manrope"', '#8d877f', 4.1, 5);
+  txt('@fentra.digital', 1420, '500 28px "Manrope"', '#c2bbb1', 4.1, 5);
 }
 
 export const ACT3 = [
   { t0: 60.6, t1: 63.4, f: S19 },
   { t0: 63.4, t1: 68.2, f: S20 },
-  { t0: 68.2, t1: 74.6, f: S21 },
+  { t0: 68.2, t1: 74.6, f: S21, mb: 2, bloom: 0.3 },
   { t0: 74.6, t1: 80.2, f: S22 },
-  { t0: 80.2, t1: 85.0, f: S23 },
-  { t0: 85.0, t1: 93.0, f: S24, noPost: false },
+  { t0: 80.2, t1: 84.5, f: S23 },
+  { t0: 84.5, t1: 98.5, f: S25, mb: 3, bloom: 0.8 },
 ];
 export function initAct3() { CITY = paintCity(); }
-Object.assign(window.EXTRA_CUES || (window.EXTRA_CUES = {}), { notify: [68.2 + 0.6, 68.2 + 2.7, 68.2 + 5.3], wink: 80.2 + 3.35, flash: 60.6 + 1.3, office: 63.4, brand: 85.0 });
+Object.assign(window.EXTRA_CUES || (window.EXTRA_CUES = {}), { notify: [68.2 + 0.6, 68.2 + 2.7, 68.2 + 5.3], wink: 80.2 + 3.35, flash: 60.6 + 1.3, office: 63.4, outside: 84.5, wave: 84.5 + 2.9, brand: 84.5 + 6.2, logo: 84.5 + 7.0 });

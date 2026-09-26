@@ -148,6 +148,35 @@ def torch_click(seed=0):
     return out / np.max(np.abs(out))
 
 
+def flutter(dur=0.7, seed=0):
+    r = np.random.default_rng(seed)
+    n = int(dur * SR); tt = np.arange(n) / SR
+    am = 0.5 + 0.5 * np.sign(np.sin(2 * np.pi * (9 + r.random() * 2) * tt)) * np.abs(np.sin(2 * np.pi * (9 + r.random() * 2) * tt)) ** 0.3
+    s = bp(r.standard_normal(n), 700, 4200) * am * np.exp(-tt * 2.2) * (1 - np.exp(-tt * 60))
+    return s / (np.max(np.abs(s)) + 1e-9)
+
+
+def drip(freq=1900, amp=1.0):
+    n = int(0.25 * SR); tt = np.arange(n) / SR
+    f = freq * (1 + 0.6 * np.exp(-tt * 60))
+    s = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-tt * 28)
+    return s * amp
+
+
+MOTIF = (79, 84, 88)  # the Fentra sonic logo: G5 – C6 – E6, rising (sits as Fmaj9 colour over F)
+
+
+def motif(amp=1.0, octave=0, gap=0.17, dur=3.2):
+    n = int((gap * 2 + dur) * SR); out = np.zeros(n)
+    for i, m in enumerate(MOTIF):
+        f = midi(m + 12 * octave)
+        tt = np.arange(n - int(i * gap * SR)) / SR
+        tone = (np.sin(2 * np.pi * f * tt) * np.exp(-tt * 1.6) + 0.32 * np.sin(2 * np.pi * f * 2.0 * tt) * np.exp(-tt * 3.5)
+                + 0.12 * np.sin(2 * np.pi * f * 3.01 * tt) * np.exp(-tt * 6) + 0.2 * np.sin(2 * np.pi * f * 4 * tt) * np.exp(-tt * 9))
+        out[int(i * gap * SR):] += tone * (1 - np.exp(-tt * 900)) * (1.0 if i < 2 else 1.15)
+    return out * amp
+
+
 def gasp():
     n = int(0.42 * SR); tt = np.arange(n) / SR; u = tt / tt[-1]
     s = bp(rng.standard_normal(n), 900, 4200) * (np.clip(u * 5, 0, 1) * np.exp(-u * 3.2))
@@ -246,10 +275,31 @@ def build():
         body = bp(rng.standard_normal(n), 150, 1100) * np.sin(np.pi * u) ** 2.5
         a = (d * (u * 1.6 - 0.8) + 1) * np.pi / 4
         place(city, s0, np.stack([body * np.cos(a), body * np.sin(a)], axis=1) * 0.08)
-    city_lvl = env([(0, 0), (0.6, 1), (22, 1), (22.4, 0.7), (60.6, 0.7), (62.6, 0.2), (63.4, 0.0), (93, 0)])
+    OUT_T = CUES.get("outside", 84.5)
+    city_lvl = env([(0, 0.6), (0.2, 1), (22, 1), (22.4, 0.7), (60.6, 0.7), (62.6, 0.2), (63.4, 0.0), (OUT_T - 0.05, 0.0), (OUT_T, 0.9), (DUR, 0.7)])
     fx += city * city_lvl[:, None] * 0.09
     room = lp(rng.standard_normal((N, 2)), 400) * 0.02 + lp(brown, 120) * 0.25
-    fx += room * env([(0, 0), (63.4, 0), (64.2, 1), (84.6, 1), (86, 0), (93, 0)])[:, None] * 0.08
+    fx += room * env([(0, 0), (63.4, 0), (64.2, 1), (OUT_T - 0.05, 1), (OUT_T, 0), (DUR, 0)])[:, None] * 0.08
+    # rain: fine patter + a softer wash; muffled behind the office glass
+    wn = rng.standard_normal((N, 2))
+    patter = hp(wn, 3500) * (0.6 + 0.4 * np.abs(lp(rng.standard_normal((N, 2)), 30)))
+    wash = bp(wn, 600, 2600) * 0.5
+    rain_bed = patter * 0.022 + wash * 0.012
+    rain_lvl = env([(0, 1), (22.2, 1), (22.4, 0.85), (60.6, 0.85), (62.4, 0.2), (63.4, 0.0), (OUT_T - 0.05, 0.0), (OUT_T, 1.0), (DUR, 0.85)])
+    fx += rain_bed * rain_lvl[:, None]
+    fx += lp(rain_bed, 1300) * env([(0, 0), (63.4, 0), (64.0, 0.55), (OUT_T - 0.05, 0.55), (OUT_T, 0), (DUR, 0)])[:, None]
+    for k in range(260):  # individual drips from eaves and awnings
+        x = rng.uniform(0.2, DUR - 0.5)
+        if 63.4 < x < OUT_T: continue
+        place(fx, x, pan(drip(rng.uniform(1300, 2600), 1), rng.uniform(-0.8, 0.8)), 0.012 * rng.uniform(0.4, 1))
+    # cold open: an intimate breath, a drop falling from the brim
+    for x, g in ((0.05, 0.16), (0.72, 0.18)):
+        place(fx, x, pan(breath("out", 0.6, seed=int(x * 100)), 0.05), g); place(fx_send, x, pan(breath("out", 0.6, seed=int(x * 100))), g * 0.3)
+    place(fx, 0.92, pan(drip(2100, 1), -0.2), 0.12); place(fx_send, 0.92, pan(drip(2100, 1), -0.2), 0.2)
+    # pigeons bursting into the air
+    for k, x in enumerate(CUES.get("pigeons", [])):
+        fl = flutter(0.75, seed=40 + k)
+        place(fx, x, pan(fl, rng.uniform(-0.7, 0.7)), 0.06); place(fx_send, x, pan(fl), 0.05)
 
     # --- his footsteps (level follows the shot: distance / close-up)
     g_run = shot_gain([(0, 0.55), (2.6, 0.4), (4.4, 0.22), (7.0, 1.0), (8.6, 0.72), (11.6, 0.6), (17.2, 0.28), (18.75, 0.7), (19.95, 0.0)])
@@ -314,7 +364,7 @@ def build():
 
     # --- office: notification chime, wink accent
     for k, nt in enumerate(CUES["notify"]):
-        place(fx, nt, pan(chime(midi(88), midi(93), 0.12), 0.1)); place(fx_send, nt, pan(chime(midi(88), midi(93), 0.12)), 0.5)
+        place(fx, nt, pan(chime(midi(MOTIF[0] + 12), midi(MOTIF[1] + 12), 0.12), 0.1)); place(fx_send, nt, pan(chime(midi(MOTIF[0] + 12), midi(MOTIF[1] + 12), 0.12)), 0.5)
 
     # ================================================================== music
     beat = 60 / 132 / 2  # eighth notes
@@ -335,6 +385,9 @@ def build():
     for f in (midi(69), midi(70)):  # high tremolo cluster rising from the shadows shot
         s = bowed(f, 8.6, 0.018, attack=4.0, release=0.4, bright=5000, vib=0.012) * (1 + 0.5 * np.sin(2 * np.pi * 13 * np.arange(int((8.6 + 0.4) * SR)) / SR))
         place(mus, 13.2, pan(s, 0.3)); place(mus_send, 13.2, pan(s), 0.6)
+    for ct in CUES.get("cuts", []):  # a restrained low accent on each chase cut
+        if 1.2 < ct < 22.3:
+            place(mus, ct, pan(boom(0.045), 0)); place(mus_send, ct, pan(boom(0.045)), 0.2)
     for bt in (17.2, 22.2):
         place(mus, bt, pan(boom(0.16), 0)); place(mus_send, bt, pan(boom(0.16)), 0.3)
     # the silhouettes: soft low pulses as each one appears
@@ -381,12 +434,20 @@ def build():
     # wink: one tiny glockenspiel note
     w = celesta(midi(96), 0.045, dur=1.6)
     place(mus, CUES["wink"], pan(w, 0.25)); place(mus_send, CUES["wink"], pan(w, 0.25), 1.2)
-    # brand: clean, confident resolution (F add9), a bell on the logo
+    # outside: the camera rises, warm swell; the lights spread with the motif, high and soft
+    for n in (41, 48, 52, 57):
+        s = pad(midi(n), 5.4, 0.04, attack=2.2, release=1.5, bright=1600)
+        place(mus, OUT_T + 0.2, pan(s, 0)); place(mus_send, OUT_T + 0.2, pan(s), 0.5)
+    m = motif(0.035, octave=1, gap=0.28, dur=4.0)
+    place(mus, CUES.get("wave", OUT_T + 2.9), pan(m, 0.2)); place(mus_send, CUES.get("wave", OUT_T + 2.9), pan(m, 0.2), 1.4)
+    # brand: clean, confident resolution (F add9) and the full sonic logo as the logo appears
+    BT = CUES.get("brand", OUT_T + 6.2)
     for n in (29, 41, 48, 55, 57, 60, 67):
-        s = pad(midi(n), 6.3, 0.05 if n > 40 else 0.07, attack=0.8, release=1.6, bright=2200)
-        place(mus, 85.2, pan(s, 0)); place(mus_send, 85.2, pan(s), 0.5)
-    for x, n in ((85.9, 77), (86.05, 84)):
-        place(mus, x, pan(celesta(midi(n), 0.06, dur=4.5), 0)); place(mus_send, x, pan(celesta(midi(n), 0.06, dur=4.5)), 1.0)
+        s = pad(midi(n), DUR - BT - 0.4, 0.05 if n > 40 else 0.07, attack=1.0, release=1.8, bright=2200)
+        place(mus, BT - 0.3, pan(s, 0)); place(mus_send, BT - 0.3, pan(s), 0.5)
+    LT = CUES.get("logo", BT + 0.8)
+    m = motif(0.075, octave=0, gap=0.17, dur=4.5)
+    place(mus, LT, pan(m, 0)); place(mus_send, LT, pan(m, 0), 1.1)
 
     # ================================================================== voice-over (optional recordings)
     vo = np.zeros((N, 2)); have_vo = False
@@ -404,7 +465,7 @@ def build():
         duck = np.minimum(duck, 1 - 0.45 * win(t, v["t0"] - 0.3, v["t0"], v["t1"], v["t1"] + 0.5))
 
     # ================================================================== mix
-    office = env([(0, 0), (63.3, 0), (63.6, 1), (93, 1)])
+    office = env([(0, 0), (63.3, 0), (63.6, 1), (OUT_T - 0.05, 1), (OUT_T, 0), (DUR, 0)])
     fxw = verb(fx_send * (1 - office)[:, None], street_ir, 0.5) + verb(fx_send * office[:, None], office_ir, 0.3)
     musw = verb(mus_send, street_ir, 0.55)
     music = (mus + musw) * duck[:, None] * env([(0, 1), (stop - 0.1, 1), (stop + 0.15, 0.0), (27.0, 0.0), (27.8, 1), (93, 1)])[:, None]

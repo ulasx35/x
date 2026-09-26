@@ -1,7 +1,7 @@
 // Fentra — "Görünür" (animated brand film). Deterministic: every frame is a pure function of time t.
-import { W, H, clamp, lerp, inv, sstep, easeIO, easeOut, easeIn, sine, win, lerp3, TAU, mulberry32, noise1, hex, rgb, mix, Cam, figure, castShadow, glow, softDisc, beam, scratch, peek, fogged } from './engine.js';
-import { MAN, CUSTOMERS, gait, RUN, WALK, footfalls, manSide, manFront, manBack, personSide, personFront, personBack, faceFront, hatFront, manSeated, headProfile, tr } from './characters.js';
-import { renderWorld, groundPool, reflection, LAMPS, lampPos } from './world.js';
+import { W, H, clamp, lerp, inv, sstep, easeIO, easeOut, easeIn, sine, win, lerp3, TAU, mulberry32, noise1, hex, rgb, mix, Cam, figure, castShadow, glow, softDisc, beam, scratch, peek, fogged, setFogScale } from './engine.js';
+import { MAN, CUSTOMERS, gait, RUN, WALK, footfalls, manSide, manFront, manBack, personSide, personFront, personBack, faceFront, hatFront, manSeated, headProfile, tr, setFaceTime } from './characters.js';
+import { renderWorld, groundPool, reflection, LAMPS, lampPos, setWorldTime, setWindowWave } from './world.js';
 import { ACT2 } from './act2.js';
 import { ACT3, initAct3 } from './act3.js';
 
@@ -21,7 +21,7 @@ const V = RUN.v;
 // Story positions (metres along ROUTE) at the start of each chase shot. Editing compresses time between
 // shots, but order, direction and the gap between him and the group always stay consistent.
 const STORY = {
-  S1: { t0: 0.0, man: 4.6 - MAN_T0 * V, grp: -40 },
+  S1: { t0: 0.0, man: 3.93, grp: -40 },
   S2: { t0: 4.4, man: 22.5, grp: 8.2 },
   S3: { t0: 7.0, man: 30 },
   S4: { t0: 8.6, man: 29.5 },
@@ -86,6 +86,72 @@ function personBackRun(ctx, cam, g, pos, t) {
   }, { dark: 0.78, rims: [{ dir: [0, -1], color: WARM, a: 0.6, w: Math.max(1.5, T.s * 0.02) }, { dir: [-1, 0], color: COOL_RIM, a: 0.22, w: Math.max(1, T.s * 0.012) }] });
 }
 
+// ---- S0: cold open — one eye under the brim, a slit of street light, breath in the cold, watching behind him
+function S0(ctx, t) {
+  const lt = t;
+  // defocused night behind him: lantern bokeh and lit rain
+  ctx.fillStyle = '#06070a'; ctx.fillRect(0, 0, W, H);
+  for (const [x, y, r, a] of [[180, 520, 260, 0.35], [880, 380, 190, 0.22], [760, 1500, 320, 0.18], [120, 1420, 150, 0.2]]) {
+    glow(ctx, x + Math.sin(lt * 0.8) * 6, y, r, WARM, a);
+  }
+  const rr = mulberry32(5);
+  ctx.save(); ctx.strokeStyle = 'rgba(255,215,170,0.22)'; ctx.lineWidth = 2; ctx.beginPath();
+  for (let k = 0; k < 40; k++) { const x = rr() * W, v = 1500 + rr() * 900, y = (rr() * H + lt * v) % (H + 200) - 100; ctx.moveTo(x, y); ctx.lineTo(x + 6, y - 60); }
+  ctx.stroke(); ctx.restore();
+  // the face, extreme close-up (his right eye near frame centre)
+  const s = 15000 * (1 + easeIO(lt / 1.3) * 0.06); // slow creep in
+  const T = { ox: W * 0.47 + s * 0.0284, oy: H * 0.5 + s * 0.012, s, dir: 1 };
+  const look = win(lt, 0.22, 0.34, 0.5, 0.58) * -1 + win(lt, 0.62, 0.72, 1.3, 1.4) * 1.0;
+  const alarm = sstep(0.9, 1.05, lt);
+  figure(ctx, (g) => {
+    faceFront(g, T, [0, 0], MAN, { yaw: 0.1, gazeX: look, gazeY: 0.05, brow: 0.6 + alarm * 0.7, knit: 0.5, eyeL: 1 + alarm * 0.15, eyeR: 1 + alarm * 0.15, lockGaze: true }, 'man', 1);
+    hatFront(g, T, [0, 0], MAN, 0.1);
+  }, { dark: 0.62, band: { y: T.oy - T.s * 0.012, h: T.s * 0.016, color: [255, 196, 130], a: 0.6 }, rims: [{ dir: [1, -0.4], color: WARM, a: 0.45, w: 14 }] });
+  // skin texture at this magnification
+  ctx.save(); ctx.globalAlpha = 0.07; ctx.globalCompositeOperation = 'overlay'; ctx.drawImage(grainTiles[1], 0, 0, 512, 512, 0, 0, W * 1.2, W * 1.2); ctx.drawImage(grainTiles[2], 0, 0, 512, 512, 0, W * 1.2, W * 1.2, W * 1.2); ctx.restore();
+  // a raindrop gathers on the brim and falls
+  const drip = inv(0.35, 0.95, lt), bx = W * 0.2, by = T.oy - T.s * 0.064;
+  if (drip > 0 && drip < 1) {
+    const y = by + (drip < 0.55 ? 0 : Math.pow((drip - 0.55) / 0.45, 2) * 700);
+    glow(ctx, bx, y, 22, [255, 220, 180], 0.7);
+    ctx.fillStyle = 'rgba(255,236,210,0.9)'; ctx.beginPath(); ctx.ellipse(bx, y, 5, 7, 0, 0, TAU); ctx.fill();
+  }
+  // breath in the cold air, rising from below the frame
+  for (const [t0, x] of [[0.05, 470], [0.75, 520]]) {
+    const u = inv(t0, t0 + 0.9, lt); if (u <= 0 || u >= 1) continue;
+    const y = H * 0.98 - u * 520, r = 120 + u * 260;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(210,212,220,${(0.16 * Math.sin(Math.PI * u)).toFixed(3)})`); g.addColorStop(1, 'rgba(210,212,220,0)');
+    ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+}
+
+// Pigeons on the pavement near the corner — they burst into the air as he runs through.
+const PIGEONS = Array.from({ length: 9 }, (_, i) => {
+  const r = mulberry32(300 + i);
+  return { p0: [-1.9 + r() * 3.6, 0, -3.0 - r() * 5.5], t0: 1.55 + i * 0.05 + r() * 0.25, vx: (r() - 0.5) * 3, vz: 1.5 + r() * 2.5, up: 2.6 + r() * 1.6, ph: r(), tone: r() };
+});
+function pigeon(ctx, cam, pg, t) {
+  const dt = t - pg.t0;
+  const air = dt > 0;
+  const pos = air ? [pg.p0[0] + pg.vx * dt, 0.12 + pg.up * dt + 1.4 * dt * dt, pg.p0[2] + pg.vz * dt] : [pg.p0[0], 0.1, pg.p0[2]];
+  const p = cam.project(pos); if (p[2] <= 0.3) return;
+  const s = cam.scaleAt(pos), dir = pg.vx >= 0 ? 1 : -1;
+  const col = rgb(mix(hex('#3e424a'), hex('#6a6d74'), pg.tone)), dark = rgb(mix(hex('#23252a'), hex('#3a3c42'), pg.tone));
+  ctx.save(); ctx.translate(p[0], p[1]); ctx.scale(dir, 1);
+  const peck = air ? 0 : Math.max(0, Math.sin((t + pg.ph) * 7)) * 0.03;
+  ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, -s * 0.07, s * 0.13, s * 0.065, air ? -0.25 : 0.1, 0, TAU); ctx.fill();
+  ctx.beginPath(); ctx.arc(s * 0.12, -s * (0.12 - peck * 3), s * 0.036, 0, TAU); ctx.fill();
+  ctx.fillStyle = dark; ctx.beginPath(); ctx.moveTo(-s * 0.11, -s * 0.08); ctx.lineTo(-s * 0.22, -s * 0.05); ctx.lineTo(-s * 0.1, -s * 0.05); ctx.fill();
+  if (air) { // wings, flapping ~9 Hz
+    const f = Math.sin((dt + pg.ph) * TAU * 9);
+    for (const k of [1, 0.75]) {
+      ctx.fillStyle = k === 1 ? col : dark; ctx.beginPath(); ctx.moveTo(-s * 0.02, -s * 0.09);
+      ctx.quadraticCurveTo(-s * 0.05, -s * (0.09 + 0.2 * f * k), -s * 0.2, -s * (0.1 + 0.28 * f * k)); ctx.lineTo(s * 0.06, -s * 0.08); ctx.closePath(); ctx.fill();
+    }
+  } else { ctx.strokeStyle = '#8a4a3a'; ctx.lineWidth = Math.max(1, s * 0.01); ctx.beginPath(); ctx.moveTo(0, -s * 0.02); ctx.lineTo(0, 0); ctx.stroke(); }
+  ctx.restore();
+}
+
 // ---- S1: quiet street → he bursts around the corner and runs away from us
 function S1(ctx, t) {
   CUR = STORY.S1;
@@ -93,7 +159,7 @@ function S1(ctx, t) {
   const cp = lerp3([1.5, 1.22, 8.5], [0.9, 1.3, 5.0], easeIO(lt / 4.4));
   cam.set(cp, [0.2, 1.75, -30], 46);
   const actors = [];
-  if (t >= MAN_T0) {
+  if (manS(t) > 6.4) {
     const w = manWorld(t);
     const heading = Math.atan2(w.dir[0], -w.dir[1]); // 0 = north, +90° = east
     actors.push({
@@ -110,6 +176,7 @@ function S1(ctx, t) {
       },
     });
   }
+  for (const pg of PIGEONS) actors.push({ pos: [pg.p0[0], 0, pg.p0[2] + Math.max(0, t - pg.t0) * pg.vz], draw: (c) => pigeon(c, cam, pg, t) });
   renderWorld(ctx, cam, { actors });
 }
 
@@ -177,8 +244,8 @@ function S4(ctx, t) {
   CUR = STORY.S4;
   const lt = t - 8.6;
   const w = manWorld(t);
-  const d = 4.1;
-  cam.set([w.p[0] + d, 1.2, w.p[2] + 0.35 - lt * 0.12], [w.p[0] - 3, 1.45, w.p[2] + 0.35 - lt * 0.12], 44);
+  const d = 2.85; // camera on the east pavement (inside the street), wide lens
+  cam.set([w.p[0] + d, 1.15, w.p[2] + 0.3 - lt * 0.1], [w.p[0] - 3, 1.4, w.p[2] + 0.3 - lt * 0.1], 58);
   const actors = [{
     pos: w.p, draw: (c) => {
       const T0 = actorT(cam, w.p, 1);
@@ -340,16 +407,17 @@ function S9(ctx, t) {
 
 // ------------------------------------------------------------------ timeline
 export const SHOTS = [
-  { t0: 0.0, t1: 4.4, f: S1 },
-  { t0: 4.4, t1: 7.0, f: S2 },
-  { t0: 7.0, t1: 8.6, f: S3 },
-  { t0: 8.6, t1: 11.6, f: S4 },
-  { t0: 11.6, t1: 13.2, f: S5 },
-  { t0: 13.2, t1: 15.4, f: S6 },
-  { t0: 15.4, t1: 17.2, f: S7 },
-  { t0: 17.2, t1: 18.75, f: S8 },
-  { t0: 18.75, t1: 19.95, f: S9 },
-  { t0: 19.95, t1: 22.2, f: S8 },
+  { t0: 0.0, t1: 1.3, f: S0, mb: 3, shake: 0.4 },
+  { t0: 1.3, t1: 4.4, f: S1, mb: 4, shake: 0.5 },
+  { t0: 4.4, t1: 7.0, f: S2, mb: 4, shake: 0.7 },
+  { t0: 7.0, t1: 8.6, f: S3, mb: 5, shake: 0.6 },
+  { t0: 8.6, t1: 11.6, f: S4, mb: 4, shake: 0.6 },
+  { t0: 11.6, t1: 13.2, f: S5, mb: 4, shake: 1.0 },
+  { t0: 13.2, t1: 15.4, f: S6, mb: 4, shake: 0.4 },
+  { t0: 15.4, t1: 17.2, f: S7, mb: 4, shake: 0.3 },
+  { t0: 17.2, t1: 18.75, f: S8, mb: 4, shake: 0.2 },
+  { t0: 18.75, t1: 19.95, f: S9, mb: 5, shake: 0.8 },
+  { t0: 19.95, t1: 22.2, f: S8, mb: 4, shake: 0.2 },
   ...ACT2, ...ACT3,
 ];
 export const DURATION = SHOTS[SHOTS.length - 1].t1;
@@ -409,7 +477,7 @@ function captions(ctx, t) {
 function cues() {
   // his footfalls, shot by shot (each chase shot has its own story offset)
   const run = [];
-  const runShots = [['S1', MAN_T0, 4.4], ['S2', 4.4, 7.0], ['S3', 7.0, 8.6], ['S4', 8.6, 11.6], ['S5', 11.6, 13.2], ['S8', 17.2, 19.95]];
+  const runShots = [['S1', 1.3, 4.4], ['S2', 4.4, 7.0], ['S3', 7.0, 8.6], ['S4', 8.6, 11.6], ['S5', 11.6, 13.2], ['S8', 17.2, 19.95]];
   for (const [k, a, b] of runShots) {
     const st = STORY[k];
     for (const tf of footfalls(RUN, -5, 60)) { const tt = st.t0 + tf - st.man / V; if (tt >= a && tt < b) run.push(tt); }
@@ -421,7 +489,7 @@ function cues() {
     const st = STORY[k];
     for (const g of GROUP) for (const tf of footfalls({ ...RUN, phase: g.phase }, -5, 60)) { const tt = st.t0 + tf - (st.grp - g.lag) / V; if (tt >= a && tt < b) group.push(tt); }
   }
-  return { run: run.sort((a, b) => a - b), group: group.sort((a, b) => a - b), ...(window.EXTRA_CUES || {}), vo: VO, duration: DURATION };
+  return { run: run.sort((a, b) => a - b), group: group.sort((a, b) => a - b), pigeons: PIGEONS.map((p) => p.t0), cuts: SHOTS.map((s) => s.t0), ...(window.EXTRA_CUES || {}), vo: VO, duration: DURATION };
 }
 
 export async function boot(canvas) {
@@ -435,15 +503,48 @@ export async function boot(canvas) {
   const logo = new Image(); logo.src = '../assets/fentra-logo.png'; await logo.decode();
   window.FENTRA_LOGO = logo;
   window.FILM = { duration: DURATION, cues };
+  const [acc, accG] = [document.createElement('canvas'), null];
+  acc.width = W; acc.height = H;
+  const sub = document.createElement('canvas'); sub.width = W; sub.height = H;
+  const subG = sub.getContext('2d'), accCtx = acc.getContext('2d');
+  const shotAt = (t) => SHOTS.find((s) => t >= s.t0 && t < s.t1) || SHOTS[SHOTS.length - 1];
   window.renderAt = (t) => {
+    const sh = shotAt(t);
+    // --- motion blur: average sub-frames across a 180° shutter (1/48 s), never across a cut
+    const n = sh.mb ?? 3, shutter = 1 / 48;
+    accCtx.setTransform(1, 0, 0, 1, 0, 0); accCtx.globalAlpha = 1; accCtx.globalCompositeOperation = 'source-over'; accCtx.filter = 'none';
+    for (let k = 0; k < n; k++) {
+      const ts = n === 1 ? t : clamp(t + (k / (n - 1) - 0.5) * shutter, sh.t0, sh.t1 - 1e-4);
+      subG.setTransform(1, 0, 0, 1, 0, 0); subG.globalAlpha = 1; subG.globalCompositeOperation = 'source-over'; subG.filter = 'none';
+      subG.fillStyle = '#000'; subG.fillRect(0, 0, W, H);
+      setWorldTime(ts); setFaceTime(ts); setWindowWave(null); setFogScale(1);
+      sh.f(subG, ts, sh);
+      accCtx.globalAlpha = 1 / (k + 1);
+      accCtx.drawImage(sub, 0, 0);
+    }
+    accCtx.globalAlpha = 1;
+    // --- camera body: subtle handheld sway (chase shots), with a touch of overscan
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.filter = 'none';
-    const sh = SHOTS.find((s) => t >= s.t0 && t < s.t1) || SHOTS[SHOTS.length - 1];
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
-    sh.f(ctx, t, sh);
+    const hh = sh.shake || 0;
+    if (hh > 0) {
+      const dx = (noise1(t * 1.7, 11) * 0.7 + noise1(t * 4.3, 12) * 0.3) * 9 * hh, dy = (noise1(t * 1.5, 13) * 0.7 + noise1(t * 3.9, 14) * 0.3) * 9 * hh;
+      const rot = noise1(t * 1.1, 15) * 0.0035 * hh, sc = 1 + 0.022 * hh;
+      ctx.translate(W / 2 + dx, H / 2 + dy); ctx.rotate(rot); ctx.scale(sc, sc); ctx.translate(-W / 2, -H / 2);
+    }
+    ctx.filter = sh.grade === false ? 'none' : 'contrast(1.06) saturate(0.94)';
+    ctx.drawImage(acc, 0, 0);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.filter = 'none';
+    // --- bloom / halation: isolate highlights, blur, screen back
+    if (sh.bloom !== 0) {
+      const [bc, bg] = scratch(7, W / 4, H / 4);
+      bg.filter = 'brightness(0.62) contrast(3.4) blur(3px)'; bg.drawImage(ctx.canvas, 0, 0, W / 4, H / 4);
+      ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = 0.5 * (sh.bloom ?? 1); ctx.filter = 'blur(10px)';
+      ctx.drawImage(bc, 0, 0, W, H); ctx.globalAlpha = 0.25 * (sh.bloom ?? 1); ctx.filter = 'blur(38px) sepia(0.6)'; ctx.drawImage(bc, 0, 0, W, H); ctx.restore();
+    }
     if (!sh.noPost) post(ctx, t);
     captions(ctx, t);
-    // global fades (open from black)
-    const fin = 1 - sstep(0, 0.8, t);
+    const fin = 1 - sstep(0, 0.25, t);
     if (fin > 0) { ctx.fillStyle = `rgba(0,0,0,${fin})`; ctx.fillRect(0, 0, W, H); }
     return true;
   };

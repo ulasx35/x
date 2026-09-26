@@ -1,6 +1,6 @@
 // Bodies: anatomical limb outlines, real hands, keyframed gait, and every view the film needs.
 // Figure space: metres, y up, origin on the ground under the pelvis (at gait time 0). T = {ox, oy, s, dir}.
-import { clamp, lerp, sstep, easeIO, TAU, smoothShape, poly2, ik, mix, hex, rgb } from './engine.js';
+import { clamp, lerp, sstep, easeIO, TAU, smoothShape, poly2, ik, mix, hex, rgb, noise1 } from './engine.js';
 import { MAN, CUSTOMERS, tr, P, headProfile, hatProfile, hairProfile, faceFront, hatFront, flashlight, propFront, propSide } from './faces.js';
 
 // ------------------------------------------------------------------ shading helpers
@@ -165,7 +165,29 @@ export function gait(t, o) {
   });
   const neck = [chest[0] + up[0] * 0.08, chest[1] + up[1] * 0.08];
   const head = [neck[0] + 0.03, neck[1] + 0.135];
-  return { hip, legs, arms, chest, sh: chest, neck, head, lean, u0, px };
+  return { hip, legs, arms, chest, sh: chest, neck, head, lean, u0, px, t, o };
+}
+
+// Coat hem as a damped spring-mass driven by the pelvis's vertical acceleration (footfall impacts)
+// plus turbulent air drag. Simulated from rest over the preceding 1.2 s, so any frame is reproducible.
+const hemCache = new Map();
+export function coatHem(t, o) {
+  const key = `${o.v}|${o.T}|${o.phase || 0}|${t.toFixed(4)}`;
+  if (hemCache.has(key)) return hemCache.get(key);
+  const phase = o.phase || 0;
+  const hipY = (tt) => o.hipH - o.bob * Math.cos(TAU * 2 * (tt / o.T + phase - o.stance / 2));
+  const dt = 1 / 240;
+  let y = 0, vy = 0, x = 0, vx = 0;
+  for (let tt = t - 1.2; tt < t; tt += dt) {
+    const acc = (hipY(tt + dt) - 2 * hipY(tt) + hipY(tt - dt)) / (dt * dt);
+    vy += (-acc - 95 * y - 6.5 * vy) * dt; y += vy * dt;
+    const gust = noise1(tt * 5.3, 3) * 4.2 + noise1(tt * 11.7, 4) * 2.0;
+    vx += (gust * (o.v / 4.6) - 70 * x - 7 * vx) * dt; x += vx * dt;
+  }
+  const out = { dy: y, dx: x };
+  if (hemCache.size > 4000) hemCache.clear();
+  hemCache.set(key, out);
+  return out;
 }
 export function footfalls(o, t0, t1) {
   const out = [];
@@ -208,9 +230,10 @@ export function manSide(g, T, pose, opts = {}) {
   const kf = legs[0].knee[0] > legs[1].knee[0] ? legs[0].knee : legs[1].knee;
   const kb = legs[0].knee[0] > legs[1].knee[0] ? legs[1].knee : legs[0].knee;
   const fl = opts.flare ?? 1;
-  const wave = Math.sin(TAU * (pose.u0 * 2 + 0.15));
-  const hemY = 0.44 + fl * (0.07 + 0.035 * wave);
-  const backX = hip[0] - 0.16 - fl * (0.12 + 0.05 * Math.sin(TAU * (pose.u0 * 2 + 0.4)));
+  const sim = pose.t !== undefined ? coatHem(pose.t, pose.o) : { dx: 0, dy: 0 };
+  const speedK = pose.o ? pose.o.v / 4.6 : 1;
+  const hemY = 0.44 + fl * (0.06 * speedK + sim.dy * 1.6);
+  const backX = hip[0] - 0.16 - fl * (0.12 * speedK - sim.dx * 1.4 - sim.dy * 0.6);
   const skirt = [TF(-0.125, 0.1), TF(-0.15, -0.04), [backX + 0.03, lerp(hip[1] - 0.04, hemY, 0.5)], [backX, hemY + 0.03 * fl], [lerp(backX, kb[0], 0.55), hemY - 0.02], [kb[0] + 0.04, hemY - 0.03], [kf[0] + 0.02, Math.min(kf[1] - 0.12, hemY + 0.08)], [kf[0] + 0.085, kf[1] + 0.02], [TF(0.12, 0.02)[0] + 0.02, TF(0.12, 0.02)[1]], TF(0.115, 0.1)];
   smoothShape(g, P(T, skirt), pal.coat);
   // folds
@@ -282,7 +305,8 @@ export function manBack(g, T, pose = {}) {
   const legs = backLegs(gp, amp);
   const hy = lerp(0.93, gp.hip[1], amp);
   const br = pose.breath || 0;
-  const shY = hy + 0.54 + (pose.hunch || 0) * 0.03 + br * 0.012;
+  const lf = pose.leanF || 0; // forward pitch of the upper body (momentum after a hard stop)
+  const shY = hy + 0.54 + (pose.hunch || 0) * 0.03 + br * 0.012 - lf * 0.05;
   const sway = amp * 0.018 * Math.sin(TAU * gp.u0);
   const X = (x, y) => tr(T, x + sway, y);
   // legs: the forward (farther) leg first
@@ -301,8 +325,9 @@ export function manBack(g, T, pose = {}) {
   };
   for (const A of armPts) if (A.fwd > 0.15) drawArm(A, pal.coatDeep);
   // coat: hem swings with the legs
-  const hem = 0.44 + amp * 0.07;
-  const hl = legs[0].knee[1] - 0.5, hr = legs[1].knee[1] - 0.5;
+  const hs = running ? coatHem(gp.t, gp.o) : { dy: 0, dx: 0 };
+  const hem = 0.44 + amp * (0.06 + hs.dy * 1.4);
+  const hl = legs[0].knee[1] - 0.5 + hs.dx * amp, hr = legs[1].knee[1] - 0.5 - hs.dx * amp;
   smoothShape(g, [X(-0.205, hy + 0.13), X(-0.27 - amp * 0.02, hem + 0.03 + hl * 0.5), X(-0.1, hem - 0.01 + hl * 0.3), X(0.1, hem - 0.01 + hr * 0.3), X(0.27 + amp * 0.02, hem + 0.03 + hr * 0.5), X(0.205, hy + 0.13)], pal.coat);
   poly2(g, [X(-0.006, hy + 0.1), X(0.006, hy + 0.1), X(0.01, hem + 0.02), X(-0.01, hem + 0.02)], pal.coatDeep);
   smoothShape(g, [X(-0.205, hy + 0.13), X(-0.27, hem + 0.03 + hl * 0.5), X(-0.16, hem + 0.02), X(-0.11, hy + 0.1)], pal.coatShade);
@@ -312,7 +337,7 @@ export function manBack(g, T, pose = {}) {
   smoothShape(g, [X(-0.2, shY - 0.02), X(-0.18, shY - 0.17), X(0.18, shY - 0.17), X(0.2, shY - 0.02)], pal.coatShade + '99'); // storm flap
   poly2(g, [X(-0.198, hy + 0.1), X(0.198, hy + 0.1), X(0.2, hy + 0.15), X(-0.2, hy + 0.15)], pal.belt);
   // head from behind
-  const hc = [0, shY + 0.2 + (pose.hunch || 0) * 0.0];
+  const hc = [0, shY + 0.2 - lf * 0.03];
   smoothShape(g, [X(-0.048, shY - 0.02), X(0.048, shY - 0.02), X(0.052, hc[1] - 0.06), X(-0.052, hc[1] - 0.06)], pal.skinShade);
   smoothShape(g, [X(-0.076, hc[1] + 0.06), X(-0.079, hc[1] - 0.06), X(-0.04, hc[1] - 0.105), X(0.04, hc[1] - 0.105), X(0.079, hc[1] - 0.06), X(0.076, hc[1] + 0.06)], pal.hair);
   for (const sd of [-1, 1]) { const e = X(sd * 0.08, hc[1] - 0.01); g.fillStyle = pal.skinShade; g.beginPath(); g.ellipse(e[0], e[1], T.s * 0.012, T.s * 0.026, 0, 0, TAU); g.fill(); }

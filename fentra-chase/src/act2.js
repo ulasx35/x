@@ -54,7 +54,8 @@ function S10(ctx, t) {
       if (T.d < 0.25) return;
       contactShadow(c, cam, at.p, 0.35, 0.55);
       const near = clamp(1.6 - T.d);
-      figure(c, (g) => manBack(g, T, amp > 0.02 ? { phase: st.s / (V * RUN.T), amp, hunch: 0.2 } : { breath: breath(t), hunch: 0.35 }), {
+      const ds = t - STOP_T, leanF = ds > -0.6 ? (ds < 0 ? (ds + 0.6) / 0.6 * 0.6 : 0.6 * Math.exp(-ds * 2.6) * Math.cos(ds * 7.5)) : 0;
+      figure(c, (g) => manBack(g, T, amp > 0.02 ? { phase: st.s / (V * RUN.T), amp, hunch: 0.2, leanF } : { breath: breath(t), hunch: 0.35, leanF }), {
         rims: [{ dir: [0.6, -1], color: WARM, a: 0.5, w: Math.max(2, T.s * 0.02) }], shade: { from: [0, T.oy - T.s * 1.8], to: [0, T.oy], a: 0.35 }, blur: near > 0 ? near * 14 : 0,
       });
     },
@@ -109,7 +110,7 @@ function S12(ctx, t) {
   for (let i = 0; i < 5; i++) {
     const cp = custPos(i, t);
     if (!cp.visible) continue;
-    actors.push({ pos: cp.p, draw: (c) => drawCustomer(c, cam, i, t, { pose: { light: 'down', lightOn: 0, propUp: 0 }, look: { dark: 0.86, rims: [{ dir: [0, -1], color: WARM, a: 0.75, w: 3 }, { dir: [1, 0], color: WARM, a: 0.35, w: 2 }] } }) });
+    actors.push({ pos: cp.p, draw: (c) => drawCustomer(c, cam, i, t, { pose: { light: 'down', lightOn: 0, propUp: 0 }, look: { dark: 0.94, rims: [{ dir: [0, -1], color: WARM, a: 0.75, w: 3 }, { dir: [1, 0], color: WARM, a: 0.35, w: 2 }] } }) });
   }
   actors.push({ pos: MAN_STOP, bias: 0, draw: (c) => {
     const T = actorT(cam, MAN_STOP);
@@ -127,7 +128,7 @@ function S13(ctx, t) {
   const actors = [];
   for (let i = 0; i < 5; i++) {
     actors.push({ pos: custPos(i, t).p, draw: (c) => {
-      const r = drawCustomer(c, cam, i, t, { pose: { light: 'up', aim: sstep(35.2 + i * 0.1, 35.55 + i * 0.1, t), lightOn: torchOn(i, t), propUp: 0 }, look: { dark: 0.86, rims: [{ dir: [0, -1], color: WARM, a: 0.7, w: 3 }] } });
+      const r = drawCustomer(c, cam, i, t, { pose: { light: 'up', aim: sstep(35.2 + i * 0.1, 35.55 + i * 0.1, t), lightOn: torchOn(i, t), propUp: 0 }, look: { dark: 0.94, rims: [{ dir: [0, -1], color: WARM, a: 0.7, w: 3 }] } });
       if (r && r.fl) lenses.push({ ...r.fl, on: torchOn(i, t), i });
     } });
   }
@@ -307,11 +308,11 @@ function S18(ctx, t) {
 }
 
 export const ACT2 = [
-  { t0: 22.2, t1: 27.0, f: S10 },
+  { t0: 22.2, t1: 27.0, f: S10, shake: 0.35 },
   { t0: 27.0, t1: 30.4, f: S11 },
   { t0: 30.4, t1: 35.2, f: S12 },
-  { t0: 35.2, t1: 38.2, f: S13 },
-  { t0: 38.2, t1: 41.6, f: S14 },
+  { t0: 35.2, t1: 38.2, f: S13, bloom: 1.4 },
+  { t0: 38.2, t1: 41.6, f: S14, bloom: 1.3, shake: 0.25 },
   { t0: 41.6, t1: 43.8, f: S15 },
   { t0: 43.8, t1: 51.0, f: S16 },
   { t0: 51.0, t1: 56.0, f: S17 },

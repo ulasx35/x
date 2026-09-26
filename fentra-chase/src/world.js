@@ -1,7 +1,8 @@
 // The neighbourhood: one consistent set of streets, facades, lanterns and wet stone, rendered from any camera.
 // Top view (metres): Street A runs north (-z) at x∈[-3.5,3.5]; a side street enters from the west at z∈[-2.5,1.5];
 // Alley B branches east at z∈[-49,-46]; Alley C branches north from Alley B at x∈[18,20.5] and dead-ends at z=-62.
-import { W, H, lerp, clamp, mulberry32, hex, rgb, mix, mul, add, fogged, FOG, projectPoly, pathPoly, fillPoly, line3, glow, softDisc, beam } from './engine.js';
+import { W, H, lerp, clamp, TAU, mulberry32, hex, rgb, mix, mul, add, fogged, FOG, projectPoly, pathPoly, fillPoly, line3, glow, softDisc, beam } from './engine.js';
+import { propItems, skyline, CABLES, moths, rain, ripples, overhead } from './detail.js';
 
 const STONE = [hex('#3b3a39'), hex('#353330'), hex('#403c36'), hex('#34373b'), hex('#3a3632')];
 const WARM = hex('#ffb866');
@@ -100,68 +101,184 @@ function drawChunk(ctx, cam, ch, extra) {
   const { w, s0, s1, i } = ch;
   const r = mulberry32(w.seed * 1000 + i);
   const mid = P3(w, (s0 + s1) / 2, 2);
-  // backface cull
   const toCam = [cam.pos[0] - mid[0], cam.pos[2] - mid[2]];
-  if (toCam[0] * w.n[0] + toCam[1] * w.n[2] < 0) return;
+  if (toCam[0] * w.n[0] + toCam[1] * w.n[2] < 0) return; // backface
   const d = cam.depth(mid);
   const base = w.style === 'brick' ? BRICK : STONE[(w.seed + i) % STONE.length];
   const hTop = w.h + (w.style === 'brick' ? 0 : ((w.seed * 7 + i * 3) % 4 < 1 ? 0.8 : 0));
+  const near = d < 42, close = d < 20;
+  const sc = cam.scaleAt(mid);
+  const lw = (k) => clamp(sc * k, 0.5, 3);
+  const col = (c, p) => rgb(shade(c, p || P3(w, (s0 + s1) / 2, 1.8), cam));
+  const quadF = (a0, a1, y0, y1, dd, c, dd2) => fillPoly(ctx, cam, [P3(w, a0, y0, dd), P3(w, a1, y0, dd), P3(w, a1, y1, dd2 ?? dd), P3(w, a0, y1, dd2 ?? dd)], c);
+  // --- mansard roof, dormers and chimneys (seen when looking up)
+  if (w.style !== 'brick') {
+    quadF(s0, s1, hTop, hTop + 2.3, 0.05, rgb(fogged(mix(hex('#23262d'), hex('#2e333c'), r()), d)), -1.7);
+    if (near) for (let y = hTop + 0.3; y < hTop + 2.2; y += 0.28) { const k = (y - hTop) / 2.3; line3(ctx, cam, P3(w, s0, y, 0.05 - 1.75 * k), P3(w, s1, y, 0.05 - 1.75 * k), 'rgba(0,0,0,0.25)', lw(0.008)); }
+    if (r() < 0.6) { const cx = lerp(s0, s1, 0.5), k = 0.45;
+      quadF(cx - 0.45, cx + 0.45, hTop + 0.55, hTop + 1.6, 0.05 - 1.75 * 0.24, rgb(fogged(hex('#2b2e35'), d)));
+      quadF(cx - 0.3, cx + 0.3, hTop + 0.7, hTop + 1.4, 0.05 - 1.75 * 0.24 + 0.01, rgb(r() < 0.3 ? mix(WIN_LIT, FOG, 1 - Math.exp(-d * 0.03)) : fogged(GLASS, d))); }
+    if (r() < 0.35) { const cx = lerp(s0, s1, 0.2 + r() * 0.6); quadF(cx - 0.3, cx + 0.3, hTop + 1.5, hTop + 3.3, -1.2, rgb(fogged(mul(base, 0.8), d)));
+      quadF(cx - 0.36, cx + 0.36, hTop + 3.3, hTop + 3.45, -1.15, rgb(fogged(mul(base, 1.1), d))); }
+  }
+  // --- wall
   const quad = [P3(w, s0, 0), P3(w, s1, 0), P3(w, s1, hTop), P3(w, s0, hTop)];
-  const sp = fillPoly(ctx, cam, quad, rgb(shade(base, P3(w, (s0 + s1) / 2, 1.8), cam)));
+  const sp = fillPoly(ctx, cam, quad, col(base));
   if (!sp) return;
-  // light pools from lanterns on this wall (clipped to the chunk)
   ctx.save(); pathPoly(ctx, sp); ctx.clip();
-  // vertical value gradient (darker at the top, like the reference noir plates)
   const top = cam.project(P3(w, (s0 + s1) / 2, hTop)), bot = cam.project(P3(w, (s0 + s1) / 2, 0));
   if (top[2] > 0 && bot[2] > 0) {
     const gr = ctx.createLinearGradient(0, top[1], 0, bot[1]);
     gr.addColorStop(0, 'rgba(8,10,16,0.55)'); gr.addColorStop(0.6, 'rgba(8,10,16,0.0)');
     ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
   }
+  if (near && w.style !== 'brick') { // weathering: soot and rain streaks running down from sills and the cornice
+    for (let k = 0; k < 5; k++) {
+      const x = lerp(s0 + 0.2, s1 - 0.2, r()), y1 = [hTop - 0.4, 7.2, 3.95, 10.5][k % 4], y0 = y1 - (1.2 + r() * 3.0);
+      const a = cam.project(P3(w, x, y1, 0.002)), b = cam.project(P3(w, x, y0, 0.002));
+      if (a[2] <= 0.2 || b[2] <= 0.2) continue;
+      const g = ctx.createLinearGradient(a[0], a[1], b[0], b[1]); g.addColorStop(0, 'rgba(10,10,12,0.22)'); g.addColorStop(1, 'rgba(10,10,12,0)');
+      ctx.strokeStyle = g; ctx.lineWidth = Math.max(1, sc * (0.08 + r() * 0.25)); ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+    }
+  }
   for (const L of LAMPS) wallPool(ctx, cam, w, L, (s0 + s1) / 2, extra);
   if (extra && extra.wallLights) for (const fl of extra.wallLights) fl(ctx, cam, w, s0, s1);
   ctx.restore();
-  const near = d < 45;
-  // plinth + string courses + cornice
-  const band = (y0, y1, k, dd = 0) => fillPoly(ctx, cam, [P3(w, s0, y0, dd), P3(w, s1, y0, dd), P3(w, s1, y1, dd), P3(w, s0, y1, dd)], rgb(shade(mul(base, k), P3(w, (s0 + s1) / 2, (y0 + y1) / 2), cam)));
+  const band = (y0, y1, k, dd = 0) => fillPoly(ctx, cam, [P3(w, s0, y0, dd), P3(w, s1, y0, dd), P3(w, s1, y1, dd), P3(w, s0, y1, dd)], col(mul(base, k), P3(w, (s0 + s1) / 2, (y0 + y1) / 2)));
   if (w.style === 'brick') {
-    if (near) for (let y = 0.25; y < hTop; y += 0.25) line3(ctx, cam, P3(w, s0, y, 0.001), P3(w, s1, y, 0.001), 'rgba(10,8,8,0.35)', Math.max(0.6, cam.scaleAt(mid) * 0.012));
+    if (near) {
+      for (let y = 0.075, row = 0; y < hTop; y += 0.075, row++) {
+        line3(ctx, cam, P3(w, s0, y, 0.001), P3(w, s1, y, 0.001), 'rgba(18,12,10,0.4)', lw(0.006));
+        if (close) for (let x = s0 + (row % 2) * 0.11; x < s1; x += 0.22) line3(ctx, cam, P3(w, x, y - 0.075, 0.001), P3(w, x, y, 0.001), 'rgba(18,12,10,0.3)', lw(0.005));
+      }
+      for (let k = 0; k < 18; k++) { const x = lerp(s0, s1, r()), y = r() * hTop; fillPoly(ctx, cam, [P3(w, x, y, 0.002), P3(w, x + 0.2, y, 0.002), P3(w, x + 0.2, y + 0.065, 0.002), P3(w, x, y + 0.065, 0.002)], `rgba(${r() < 0.5 ? '90,60,50' : '30,22,20'},0.35)`); }
+      const dp = [P3(w, s0 + 0.35, hTop, 0.08), P3(w, s0 + 0.35, 0, 0.08)]; line3(ctx, cam, dp[0], dp[1], rgb(fogged(hex('#1c1d20'), d)), lw(0.07));
+    }
     band(hTop - 0.25, hTop, 1.15, 0.05);
     return;
   }
-  band(0, 0.55, 0.78, 0.02);
-  for (const y of [4.1, 7.4, 10.7]) if (y < hTop - 0.8) band(y, y + 0.14, 1.28, 0.04);
-  band(hTop - 0.45, hTop, 1.2, 0.12);
-  if (near) for (let y = 0.9; y < 4.0; y += 0.42) line3(ctx, cam, P3(w, s0, y, 0.003), P3(w, s1, y, 0.003), 'rgba(0,0,0,0.16)', Math.max(0.5, cam.scaleAt(mid) * 0.01));
-  if (w.noWindows) return;
-  // upper-floor windows
-  const cx = (s0 + s1) / 2;
-  for (const fy of [4.8, 8.1, 11.4]) {
-    if (fy + 1.9 > hTop - 0.5) continue;
-    const lit = r() < 0.22;
-    const wq = [P3(w, cx - 0.6, fy), P3(w, cx + 0.6, fy), P3(w, cx + 0.6, fy + 1.85), P3(w, cx - 0.6, fy + 1.85)];
-    band(fy - 0.12, fy, 1.3, 0.05); // sill
-    const col = lit ? mix(WIN_LIT, FOG, 1 - Math.exp(-cam.depth(wq[0]) * 0.03)) : fogged(mix(GLASS, hex('#2a3342'), 0.25), cam.depth(wq[0]));
-    const s = fillPoly(ctx, cam, wq, rgb(col));
-    if (s && near) { // mullion + transom
-      line3(ctx, cam, P3(w, cx, fy, 0.01), P3(w, cx, fy + 1.85, 0.01), 'rgba(20,18,16,0.8)', Math.max(0.8, cam.scaleAt(mid) * 0.04));
-      line3(ctx, cam, P3(w, cx - 0.6, fy + 1.3, 0.01), P3(w, cx + 0.6, fy + 1.3, 0.01), 'rgba(20,18,16,0.8)', Math.max(0.8, cam.scaleAt(mid) * 0.035));
+  // stone coursing (rusticated ground floor) + joints
+  if (near) {
+    for (let y = 0.97, row = 0; y < 4.0; y += 0.42, row++) {
+      line3(ctx, cam, P3(w, s0, y, 0.003), P3(w, s1, y, 0.003), 'rgba(0,0,0,0.3)', lw(0.012));
+      if (close) for (let x = s0 + (row % 2) * 0.45; x < s1; x += 0.9) line3(ctx, cam, P3(w, x, y, 0.003), P3(w, x, y + 0.42, 0.003), 'rgba(0,0,0,0.22)', lw(0.01));
     }
-    if (lit && s) { const c = cam.project(P3(w, cx, fy + 1.1, 0.2)); glow(ctx, c[0], c[1], cam.scaleAt(mid) * 1.2, WIN_LIT, 0.12); }
+    if (close) for (let y = 4.35; y < hTop - 0.6; y += 0.5) line3(ctx, cam, P3(w, s0, y, 0.002), P3(w, s1, y, 0.002), 'rgba(0,0,0,0.1)', lw(0.006));
   }
-  // ground floor: door / shopfront / shutter
-  const kind = (w.seed * 3 + i) % 3;
+  band(0, 0.55, 0.72, 0.03);
+  for (const y of [4.1, 7.4, 10.7]) if (y < hTop - 0.8) { band(y, y + 0.16, 1.3, 0.06); band(y - 0.05, y, 0.7, 0.03); }
+  band(hTop - 0.5, hTop - 0.3, 1.1, 0.1); band(hTop - 0.3, hTop, 1.28, 0.2);
+  if (close) for (let x = s0 + 0.1; x < s1; x += 0.22) fillPoly(ctx, cam, [P3(w, x, hTop - 0.3, 0.2), P3(w, x + 0.1, hTop - 0.3, 0.2), P3(w, x + 0.1, hTop - 0.4, 0.15), P3(w, x, hTop - 0.4, 0.15)], col(mul(base, 1.25))); // dentils
+  if (w.noWindows) return;
+  const cx = (s0 + s1) / 2;
+  // --- upper floors
+  const floors = [4.8, 8.1, 11.4];
+  floors.forEach((fy, fi) => {
+    if (fy + 1.9 > hTop - 0.5) return;
+    let lit = r() < 0.24; const shutters = r() < 0.55, shutClosed = r() < 0.25, balcony = fi === 0 && r() < 0.55, juliet = !balcony && r() < 0.4, box = !balcony && r() < 0.3;
+    const x0 = cx - 0.6, x1 = cx + 0.6, y0 = fy, y1 = fy + 1.85;
+    // surround + reveal
+    quadF(x0 - 0.14, x1 + 0.14, y0 - 0.12, y1 + 0.18, 0.03, col(mul(base, 1.18)));
+    quadF(x0, x1, y0, y1, 0.0, col(mul(base, 0.55)));
+    const inset = 0.12, gx0 = x0 + 0.06, gx1 = x1 - 0.06, gy0 = y0 + 0.05, gy1 = y1 - 0.05;
+    let glint = 0;
+    if (WAVE && !lit && !(WAVE.skip && WAVE.skip(w, i, fi))) {
+      const wr = mulberry32(w.seed * 7919 + i * 31 + fi)();
+      const wp = P3(w, cx, fy);
+      const tOn = WAVE.t0 + (Math.hypot(wp[0] - WAVE.x, wp[2] - WAVE.z) + fy * 0.4) / WAVE.speed + wr * 0.35;
+      if (wr < 0.78 && WT > tOn) { lit = true; glint = clamp(1 - (WT - tOn) / 0.6); }
+    }
+    let glassCol = lit ? mix(WIN_LIT, FOG, 1 - Math.exp(-d * 0.03)) : fogged(mix(GLASS, hex('#2a3342'), 0.25), d);
+    if (glint > 0) glassCol = mix(glassCol, hex('#6aa0ff'), glint * 0.55);
+    quadF(gx0, gx1, gy0, gy1, -inset, rgb(glassCol));
+    if (lit && near) { // curtains and a hint of the room
+      quadF(gx0, gx0 + 0.32, gy0, gy1, -inset + 0.005, rgb(mix(glassCol, hex('#fff0d8'), 0.35)));
+      quadF(gx1 - 0.28, gx1, gy0, gy1, -inset + 0.005, rgb(mix(glassCol, hex('#fff0d8'), 0.3)));
+      if (r() < 0.5) quadF(cx - 0.12, cx + 0.14, gy0, gy0 + 0.55, -inset + 0.004, rgb(mix(glassCol, hex('#3a2a1c'), 0.7)));
+    } else if (near) { // reflection of the sky in dark glass
+      const a = cam.project(P3(w, gx0, gy1, -inset)), b = cam.project(P3(w, gx1, gy0, -inset));
+      if (a[2] > 0 && b[2] > 0) { const g = ctx.createLinearGradient(a[0], a[1], b[0], b[1]); g.addColorStop(0, 'rgba(120,140,170,0.14)'); g.addColorStop(0.5, 'rgba(120,140,170,0)'); ctx.fillStyle = g;
+        const qq = projectPoly(cam, [P3(w, gx0, gy0, -inset), P3(w, gx1, gy0, -inset), P3(w, gx1, gy1, -inset), P3(w, gx0, gy1, -inset)]); if (qq.length > 2) { pathPoly(ctx, qq); ctx.fill(); } }
+    }
+    if (near) {
+      line3(ctx, cam, P3(w, cx, gy0, -inset + 0.01), P3(w, cx, gy1, -inset + 0.01), 'rgba(24,22,20,0.9)', lw(0.035));
+      line3(ctx, cam, P3(w, gx0, fy + 1.3, -inset + 0.01), P3(w, gx1, fy + 1.3, -inset + 0.01), 'rgba(24,22,20,0.9)', lw(0.03));
+    }
+    if (lit) { const c = cam.project(P3(w, cx, fy + 1.1, 0.2)); glow(ctx, c[0], c[1], sc * 1.2, WIN_LIT, 0.1); }
+    band(fy - 0.16, fy - 0.04, 1.35, 0.12); // sill
+    if (shutters) { // louvered shutters, open against the wall (or closed)
+      const sCol = rgb(fogged([hex('#2f3a35'), hex('#3b3f44'), hex('#4a3b30')][(w.seed + i) % 3], d));
+      const panels = shutClosed ? [[x0, cx], [cx, x1]] : [[x0 - 0.66, x0 - 0.06], [x1 + 0.06, x1 + 0.66]];
+      for (const [a0, a1] of panels) {
+        quadF(a0, a1, y0, y1, shutClosed ? 0.02 : 0.05, sCol);
+        if (close) for (let y = y0 + 0.08; y < y1 - 0.05; y += 0.09) line3(ctx, cam, P3(w, a0 + 0.04, y, 0.07), P3(w, a1 - 0.04, y, 0.07), 'rgba(0,0,0,0.35)', lw(0.008));
+      }
+    }
+    if (balcony) { // stone slab, consoles, wrought-iron railing
+      const bx0 = x0 - 0.4, bx1 = x1 + 0.4, by = fy - 0.18;
+      fillPoly(ctx, cam, [P3(w, bx0, by, 0.62), P3(w, bx1, by, 0.62), P3(w, bx1, by + 0.14, 0.62), P3(w, bx0, by + 0.14, 0.62)], col(mul(base, 1.2)));
+      fillPoly(ctx, cam, [P3(w, bx0, by + 0.14, 0.02), P3(w, bx1, by + 0.14, 0.02), P3(w, bx1, by + 0.14, 0.62), P3(w, bx0, by + 0.14, 0.62)], col(mul(base, 1.35)));
+      for (const x of [bx0 + 0.15, bx1 - 0.15]) fillPoly(ctx, cam, [P3(w, x - 0.07, by, 0.02), P3(w, x + 0.07, by, 0.02), P3(w, x + 0.07, by - 0.35, 0.02), P3(w, x - 0.07, by - 0.35, 0.02)], col(mul(base, 1.05)));
+      const iron = rgb(fogged(hex('#101114'), d));
+      line3(ctx, cam, P3(w, bx0, by + 1.05, 0.58), P3(w, bx1, by + 1.05, 0.58), iron, lw(0.03));
+      line3(ctx, cam, P3(w, bx0, by + 0.22, 0.58), P3(w, bx1, by + 0.22, 0.58), iron, lw(0.02));
+      for (const side of [bx0, bx1]) line3(ctx, cam, P3(w, side, by + 1.05, 0.58), P3(w, side, by + 1.05, 0.03), iron, lw(0.025));
+      if (near) for (let x = bx0 + 0.1; x < bx1; x += close ? 0.11 : 0.22) line3(ctx, cam, P3(w, x, by + 0.14, 0.58), P3(w, x, by + 1.05, 0.58), iron, lw(0.012));
+      if (close) for (let x = bx0 + 0.3; x < bx1 - 0.2; x += 0.55) { const c = cam.project(P3(w, x, by + 0.62, 0.58)); ctx.strokeStyle = iron; ctx.lineWidth = lw(0.012); ctx.beginPath(); ctx.ellipse(c[0], c[1], sc * 0.12, sc * 0.18, 0, 0, TAU); ctx.stroke(); }
+      if (r() < 0.6) for (let k = 0; k < 10; k++) { const p = cam.project(P3(w, lerp(bx0 + 0.1, bx1 - 0.1, r()), by + 0.3 + r() * 0.35, 0.45)); if (p[2] > 0.3) { ctx.fillStyle = rgb(fogged(r() < 0.8 ? hex('#243024') : hex('#6e3a34'), d)); ctx.beginPath(); ctx.arc(p[0], p[1], sc * (0.06 + r() * 0.06), 0, TAU); ctx.fill(); } }
+    } else if (juliet) {
+      const iron = rgb(fogged(hex('#101114'), d));
+      line3(ctx, cam, P3(w, x0, fy + 0.95, 0.1), P3(w, x1, fy + 0.95, 0.1), iron, lw(0.025));
+      if (near) for (let x = x0 + 0.08; x < x1; x += 0.12) line3(ctx, cam, P3(w, x, fy - 0.02, 0.1), P3(w, x, fy + 0.95, 0.1), iron, lw(0.01));
+    } else if (box) {
+      fillPoly(ctx, cam, [P3(w, x0 + 0.05, fy - 0.02, 0.3), P3(w, x1 - 0.05, fy - 0.02, 0.3), P3(w, x1 - 0.05, fy + 0.2, 0.3), P3(w, x0 + 0.05, fy + 0.2, 0.3)], rgb(fogged(hex('#3a2e26'), d)));
+      for (let k = 0; k < 9; k++) { const p = cam.project(P3(w, lerp(x0 + 0.1, x1 - 0.1, r()), fy + 0.22 + r() * 0.2, 0.28)); if (p[2] > 0.3) { ctx.fillStyle = rgb(fogged(r() < 0.75 ? hex('#26331f') : hex('#7a3b33'), d)); ctx.beginPath(); ctx.arc(p[0], p[1], sc * (0.05 + r() * 0.05), 0, TAU); ctx.fill(); } }
+    }
+  });
+  // --- drainpipe on some bays
+  if ((w.seed + i) % 4 === 0) {
+    const x = s0 + 0.18, pc = rgb(fogged(hex('#1b1c1f'), d));
+    line3(ctx, cam, P3(w, x, hTop - 0.3, 0.12), P3(w, x, 0.0, 0.12), pc, lw(0.08));
+    if (near) for (let y = 1.5; y < hTop - 0.5; y += 2.2) line3(ctx, cam, P3(w, x - 0.07, y, 0.13), P3(w, x + 0.07, y, 0.13), pc, lw(0.03));
+  }
+  // --- ground floor: panelled door / painted shopfront with awning / roller shutter
+  let kind = (w.seed * 3 + i) % 3;
+  if (w.seed >= 7 && kind === 1) kind = (i % 2) ? 0 : 2; // narrow alleys: no shopfronts or awnings
   if (kind === 0) {
-    fillPoly(ctx, cam, [P3(w, cx - 0.62, 0.55), P3(w, cx + 0.62, 0.55), P3(w, cx + 0.62, 3.1), P3(w, cx - 0.62, 3.1)], rgb(fogged(hex('#211a15'), d)));
-    fillPoly(ctx, cam, [P3(w, cx - 0.62, 3.1), P3(w, cx + 0.62, 3.1), P3(w, cx + 0.62, 3.55), P3(w, cx - 0.62, 3.55)], rgb(fogged(r() < 0.5 ? mix(WIN_LIT, GLASS, 0.55) : GLASS, d)));
-    if (near) line3(ctx, cam, P3(w, cx, 0.6, 0.01), P3(w, cx, 3.05, 0.01), 'rgba(0,0,0,0.5)', Math.max(0.6, cam.scaleAt(mid) * 0.02));
+    quadF(cx - 0.85, cx + 0.85, 0.55, 3.75, 0.04, col(mul(base, 1.2)));
+    quadF(cx - 0.62, cx + 0.62, 0.55, 3.55, -0.1, rgb(fogged(hex('#130f0c'), d)));
+    quadF(cx - 0.58, cx + 0.58, 0.55, 3.05, -0.09, rgb(fogged(hex('#2a1f18'), d)));
+    quadF(cx - 0.58, cx + 0.58, 3.1, 3.5, -0.09, rgb(fogged(r() < 0.5 ? mix(WIN_LIT, GLASS, 0.5) : GLASS, d)));
+    if (near) {
+      for (const [a0, a1] of [[cx - 0.5, cx - 0.06], [cx + 0.06, cx + 0.5]]) for (const [b0, b1] of [[0.7, 1.6], [1.75, 2.9]])
+        quadF(a0, a1, b0, b1, -0.085, rgb(fogged(hex('#231a14'), d)));
+      line3(ctx, cam, P3(w, cx, 0.6, -0.08), P3(w, cx, 3.05, -0.08), 'rgba(0,0,0,0.6)', lw(0.02));
+      const k = cam.project(P3(w, cx - 0.12, 1.65, -0.07)); if (k[2] > 0.2) { ctx.fillStyle = 'rgba(190,150,90,0.9)'; ctx.beginPath(); ctx.arc(k[0], k[1], Math.max(1.2, sc * 0.03), 0, TAU); ctx.fill(); }
+    }
   } else if (kind === 1) {
-    const warm = r() < 0.45;
-    fillPoly(ctx, cam, [P3(w, s0 + 0.35, 0.6), P3(w, s1 - 0.35, 0.6), P3(w, s1 - 0.35, 3.3), P3(w, s0 + 0.35, 3.3)], rgb(fogged(warm ? mix(WIN_LIT, GLASS, 0.72) : mix(GLASS, hex('#1c232d'), 0.4), d)));
-    if (near) line3(ctx, cam, P3(w, cx, 0.6, 0.01), P3(w, cx, 3.3, 0.01), 'rgba(12,12,14,0.8)', Math.max(0.8, cam.scaleAt(mid) * 0.05));
+    const paint = rgb(fogged([hex('#233128'), hex('#3a1f23'), hex('#1f2a36')][(w.seed + i) % 3], d));
+    quadF(s0 + 0.25, s1 - 0.25, 0.55, 3.45, 0.06, paint);
+    const warm = r() < 0.55;
+    const gc = fogged(warm ? mix(WIN_LIT, GLASS, 0.62) : mix(GLASS, hex('#1c232d'), 0.4), d);
+    quadF(s0 + 0.4, s1 - 0.4, 1.0, 3.1, -0.02, rgb(gc));
+    if (warm && near) {
+      for (const y of [1.55, 2.15]) quadF(s0 + 0.45, s1 - 0.45, y, y + 0.04, -0.03, 'rgba(40,28,20,0.7)');
+      for (let k = 0; k < 7; k++) { const x = lerp(s0 + 0.55, s1 - 0.55, r()), y = [1.59, 2.19][k % 2]; quadF(x, x + 0.08 + r() * 0.1, y, y + 0.12 + r() * 0.2, -0.035, `rgba(${40 + r() * 40 | 0},${30 + r() * 20 | 0},20,0.8)`); }
+    }
+    if (near) line3(ctx, cam, P3(w, cx, 1.0, 0.07), P3(w, cx, 3.1, 0.07), paint, lw(0.06));
+    quadF(s0 + 0.25, s1 - 0.25, 3.1, 3.45, 0.07, paint); // fascia (no lettering)
+    // fabric awning with stripes and a scalloped valance
+    const ac = [[hex('#3d4a3f'), hex('#b8ab93')], [hex('#5a2a2c'), hex('#b8ab93')], [hex('#26303c'), hex('#a9a293')]][(w.seed + i) % 3];
+    const n = 8;
+    for (let k = 0; k < n; k++) {
+      const a0 = lerp(s0 + 0.2, s1 - 0.2, k / n), a1 = lerp(s0 + 0.2, s1 - 0.2, (k + 1) / n);
+      fillPoly(ctx, cam, [P3(w, a0, 3.7, 0.08), P3(w, a1, 3.7, 0.08), P3(w, a1, 3.05, 1.15), P3(w, a0, 3.05, 1.15)], rgb(shade(mul(ac[k % 2], 0.55), P3(w, cx, 3.3, 0.6), cam)));
+      if (near) fillPoly(ctx, cam, [P3(w, a0, 3.05, 1.15), P3(w, a1, 3.05, 1.15), P3(w, (a0 + a1) / 2, 2.88, 1.17)], rgb(shade(mul(ac[k % 2], 0.5), P3(w, cx, 3.0, 1.1), cam)));
+    }
   } else {
-    fillPoly(ctx, cam, [P3(w, s0 + 0.4, 0.55), P3(w, s1 - 0.4, 0.55), P3(w, s1 - 0.4, 3.0), P3(w, s0 + 0.4, 3.0)], rgb(fogged(hex('#2e3236'), d)));
-    if (near) for (let y = 0.7; y < 3.0; y += 0.16) line3(ctx, cam, P3(w, s0 + 0.4, y, 0.01), P3(w, s1 - 0.4, y, 0.01), 'rgba(0,0,0,0.25)', Math.max(0.5, cam.scaleAt(mid) * 0.01));
+    quadF(s0 + 0.4, s1 - 0.4, 0.55, 3.1, 0.01, rgb(fogged(hex('#2e3236'), d)));
+    quadF(s0 + 0.32, s1 - 0.32, 3.1, 3.3, 0.04, rgb(fogged(hex('#24272b'), d)));
+    if (near) for (let y = 0.7; y < 3.05; y += 0.12) line3(ctx, cam, P3(w, s0 + 0.4, y, 0.015), P3(w, s1 - 0.4, y, 0.015), 'rgba(0,0,0,0.28)', lw(0.008));
   }
 }
 
@@ -278,6 +395,7 @@ function drawLamp(ctx, cam, L, extra) {
   const k = (L.dim || 1) * (extra && extra.lampGain !== undefined ? extra.lampGain : 1);
   glow(ctx, p[0], p[1] - s * 0.15, s * 1.6, WARM, 0.32 * k);
   glow(ctx, p[0], p[1] - s * 0.15, s * 0.45, hex('#ffe2b8'), 0.5 * k);
+  moths(ctx, cam, [q[0], q[1] - 0.1, q[2]], WT, Math.round(q[2]));
   if (L.cone) { // visible beam in the haze
     const g0 = cam.project([q[0], q[1] - 0.2, q[2]]), g1 = cam.project([q[0] + L.out[0] * 1.2, 0, q[2]]);
     if (g0[2] > 0 && g1[2] > 0) beam(ctx, g0, g1, s * 0.16, cam.scaleAt([q[0], 0, q[2]]) * 1.9, WARM_SOFT, 0.2 * k);
@@ -293,10 +411,17 @@ function drawSky(ctx, cam) {
 }
 
 // Render the neighbourhood. actors: [{pos:[x,y,z], draw(ctx)}] depth-sorted with the walls.
+let WT = 0;
+export function setWorldTime(t) { WT = t; }
+// A wave of windows switching on, spreading outward from one point (the finale). null = off.
+let WAVE = null;
+export function setWindowWave(w) { WAVE = w; }
 export function renderWorld(ctx, cam, extra = {}) {
   ctx.save();
   drawSky(ctx, cam);
+  skyline(ctx, cam);
   drawGround(ctx, cam, extra);
+  if (extra.rain !== false) ripples(ctx, cam, WT, { x0: cam.pos[0] - 7, x1: cam.pos[0] + 7, z0: cam.pos[2] - 12, z1: cam.pos[2] + 12 });
   const items = [];
   for (const w of WALLS) for (const ch of wallChunks(w)) {
     const m = P3(w, (ch.s0 + ch.s1) / 2, 2);
@@ -308,10 +433,13 @@ export function renderWorld(ctx, cam, extra = {}) {
     const q = lampPos(L);
     if (cam.depth(q) > 0.2) items.push({ d: Math.hypot(q[0] - cam.pos[0], q[2] - cam.pos[2]) - 0.6, f: () => drawLamp(ctx, cam, L, extra) });
   }
+  if (extra.props !== false) for (const p of propItems(cam, WT)) items.push({ d: Math.hypot(p.pos[0] - cam.pos[0], p.pos[2] - cam.pos[2]) - (p.bias || 0), f: () => p.draw(ctx) });
   for (const a of extra.actors || []) items.push({ d: Math.hypot(a.pos[0] - cam.pos[0], a.pos[2] - cam.pos[2]) - (a.bias || 0), f: () => a.draw(ctx) });
   items.sort((a, b) => b.d - a.d);
   for (const it of items) it.f();
+  overhead(ctx, cam);
   if (extra.after) extra.after(ctx);
+  if (extra.rain !== false) rain(ctx, cam, WT, LAMPS.map((L) => ({ q: lampPos(L) })), extra.rainK ?? 1);
   // haze veil
   const hz = ctx.createLinearGradient(0, 0, 0, H);
   hz.addColorStop(0, 'rgba(27,34,48,0.10)'); hz.addColorStop(0.5, 'rgba(27,34,48,0.04)'); hz.addColorStop(1, 'rgba(10,12,16,0.18)');
