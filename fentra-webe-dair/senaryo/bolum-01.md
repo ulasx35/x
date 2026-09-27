@@ -1,88 +1,57 @@
 # WEB'E DAİR · Bölüm 1 — Adres, Bina, Yol
 
-Konu: domain, hosting, DNS · Format: 9:16, 1080×1920 · Tahmini süre: ~90–95 sn · Ses: enerjik erkek anlatıcı (ElevenLabs)
+Konu: domain, hosting, DNS · Format: 9:16, 1080×1920, 30 fps · Süre: 96,6 sn · Ses: Fatih Yıldırım, ElevenLabs Multilingual v2 (`assets/vo/bolum-01.mp3`)
 
-Hedef: Hiç bilmeyen biri izlediğinde "şimdi anladım" demeli. Her kavram iki kez gösterilir: önce **benzetme** (sinematik 3D şehir), yanında da **gerçekte ekranda neye benzediği** (telefon/tarayıcı ekranı).
+Hedef: Hiç bilmeyen biri izlediğinde "şimdi anladım" demeli. Her kavram iki kez gösterilir: önce **benzetme** (sinematik 3D şehir), yanında da **gerçekte ekranda neye benzediği** (köşedeki "GERÇEKTE" kartı).
 
 ## Ekran dili
 
 | Katman | Yeri | Görevi |
 |---|---|---|
-| **Şehir** (benzetme) | Tüm ekran, arka plan | Sinematik 3D Fentra şehri. Domain = tabela ve adres, hosting = bina, DNS = yol. Yumuşak kamera hareketleri, alan derinliği, ışık. |
-| **Gerçekte** ekranı | Köşede yüzen cam kart; önemli anlarda ortaya büyür | Anlatılan şeyin gerçek hayattaki görüntüsü: arama sonucu, adres çubuğu, hata sayfası, telefon rehberi. Üstünde küçük "GERÇEKTE" etiketi. |
-| **Terim kartı** | Alt üçte bir | Kavram ilk geçtiğinde: terim + tek cümlelik tanım (ör. "DOMAİN · Sitenizin internetteki adresi"). |
-| **Altyazı** | Alt | Söylenen kelime anında vurgulanır. Ses kapalı izleyen de anlar. |
+| **Şehir** (benzetme) | Tüm ekran | Gece, sinematik 3D Fentra şehri. Domain = tabela, hosting = sunucular ve bina, DNS = şehirde çizilen mavi rota. |
+| **GERÇEKTE** kartı | Sağ üst köşe | Arama sonucu, adres çubuğu, alan adının parçaları, dükkan adresi = site adresi, sitenin dosyaları, telefon rehberi, DNS kaydı. |
+| **Bölüm çubuğu** | Üst | 01 ADRES · 02 BİNA · 03 YOL; izleyici nerede olduğunu hep görür. |
+| **Terim kartı** | Alt üçte bir | DOMAIN, HOSTING, IP ADRESİ, DNS: terim + tek cümlelik tanım. |
+| **Altyazı** | Alt | Söylenen kelime anında maviyle vurgulanır; ses kapalı izleyen de anlar. |
+| **Şehirdeki etiketler** | 3D'ye bağlı | ADRES / BİNA / YOL işaretleri, SUNUCU, 7/24 AÇIK, SİZİN ALANINIZ, IP numaraları, "websiteniz.com ?" |
 
-**İmza geçiş:** Öğeler iki katman arasında uçar. Arama sonucundaki "websiteniz.com" yazısı köşe ekranından kopup 3D tabelaya dönüşür; sayfadaki fotoğraflar ve yazılar binaya taşınır; rehberdeki satır yola dönüşür. İzleyici gerçeğin benzetmeye dönüştüğünü gözüyle görür.
+Renk: Fentra mavisi (#1C73FD) yalnızca anlamın oturduğu anlarda yanar. Yazı: Manrope, adresler ve numaralar JetBrains Mono. Arama ekranı Google'ı çağrıştırır ama logo kullanılmaz. Örnek IP'ler belgeleme için ayrılmış adreslerdir (203.0.113.x, 198.51.100.x, 192.0.2.x).
 
-**Renk:** Fentra mavisi (#1C73FD) yalnızca anlamın oturduğu anlarda yanar. Hata ve risk anlarında kısa, ölçülü bir kırmızı.
+## Sahneler (kaydedilen sese göre)
 
-**Arama ekranı:** Google'ı çağrıştıran ama birebir kopyası olmayan sade bir arama arayüzü (Google logosu kullanılmadan).
+| Zaman | Anlatım | Görüntü |
+|---|---|---|
+| 0:00–0:10 | Google'a yazarsınız. Bir siteye dokunursunuz ve sayfa açılır. Bir saniye bile sürmez. Ama o bir saniyede, perde arkasında üç şey çalışır. | Telefonda arama yazılır (klavyede tuşlar yanar), sonuç çıkar, dokunulur, sayfa yüklenir; "0,8 sn" sayacı. "Perde arkasında" kamera ekranın içine dalar: şehir mavi bir dalgayla kurulur, ADRES · BİNA · YOL işaretleri belirir. |
+| 0:10–0:15 | Web'e Dair. Birinci bölüm: adres, bina ve yol. | WEB'E DAİR başlığı harf harf, BÖLÜM 01, ADRES · BİNA · YOL kelimeleriyle birlikte. |
+| 0:15–0:28 | Birincisi: domain, yani alan adı. Google sonuçlarında gördüğünüz, adres çubuğuna yazdığınız o isim: websiteniz.com. Dükkanınızın açık adresi neyse, sitenizin domain'i de odur. | 01 ADRES girişi, DOMAIN terim kartı. Kartta arama sonucundaki adres parlar, adres çubuğuna yazılır; yazı karttan kopup 3D tabelaya uçar, tabela kurulur ve yanar. Kartta "websiteniz | .com" (isim · uzantı), ardından "Dükkanın adresi: Çınar Sokak No: 12 = Sitenin adresi: websiteniz.com". |
+| 0:28–0:43 | İkincisi: hosting. Sitenizdeki yazılar, fotoğraflar, menünüz... Hepsi gece gündüz açık kalan özel bilgisayarlarda saklanır. Bunlara sunucu denir. Hosting ise bu sunucularda sitenize kiraladığınız alandır. Yani adresinizdeki bina. | 02 BİNA girişi, HOSTING terim kartı. Kartta site görünür; yazılar, fotoğraflar, menü sırayla işaretlenip kart olarak dışarı çıkar ve sunuculara uçar. Sunucular yerden yükselir, gece-gündüz geçişi (7/24 AÇIK), SUNUCU etiketi, rafta mavi "SİZİN ALANINIZ" bölümü; bina kat kat yükselir. |
+| 0:43–0:52 | Peki tarayıcı doğru binayı nasıl buluyor? Burada bir sorun var. Bilgisayarlar isimleri değil, numaraları tanır. Her sunucunun bir numarası vardır: IP adresi. | Kamera şehrin üstüne çıkar. Şehir kapısında "websiteniz.com ?"; "değil" kelimesinde isim kırmızıyla çizilir. Binaların üstünde numaralar belirir; binamızın numarası 203.0.113.24 maviyle öne çıkar. IP ADRESİ terim kartı. |
+| 0:52–1:06 | İşte üçüncüsü: DNS. Telefon rehberinizi düşünün. Bir isme dokunursunuz, numarayı ezberlemenize gerek kalmaz, telefon onu kendisi bulur. DNS de yazdığınız ismi numaraya çevirir ve sizi doğru binaya götürür. | 03 YOL girişi, DNS terim kartı. Kartta rehber: "Ofis"e dokunulur, numara görünür, arama ekranı açılır. Ardından DNS kaydı: "websiteniz.com → ???" numaraya çözülür (203.0.113.24), kayıt şehir kapısına uçar ve kapıdan binaya mavi bir rota çizilir; kapı yanar. |
+| 1:06–1:14 | Hosting'inizi değiştirseniz bile adresiniz aynı kalır. Sadece rehberdeki numara güncellenir. Bunun her yere ulaşması birkaç saat sürebilir. | Yeni bir bina yükselir, tabela uçarak yeni binaya taşınır ("ADRES AYNI"). Kartta numara 198.51.100.42 olur, "Güncellendi"; rota yeni binaya yeniden çizilir; mavi bir dalga şehre yayılır, "Dünyaya yayılıyor · birkaç saat". |
+| 1:14–1:20 | Şimdi o bir saniyeye tekrar bakalım. Adresi yazarsınız, DNS yolu bulur, hosting sayfayı açar. | Geri sarma. Solda telefon, sağda şehir: adres yazılır (DOMAIN), rotada ışık akar (DNS), binanın kapısı yanar ve sayfa açılır (HOSTING). |
+| 1:20–1:36 | İşte bu kadar basit. Domain adresiniz, hosting binanız ve DNS ise yol tarifiniz. Bu kartı kaydedin! Sıradaki bölümde: kapınızdaki kilit. Web'e Dair, Fentra'yla. | Sözlük kartı satır satır (Domain = Adresiniz, Hosting = Binanız, DNS = Yol tarifiniz, IP adresi = binanın numarası); "kaydedin"de yer imi dolar, KAYDET. Sıradaki bölüm: çizilen kilit, "Kapınızdaki kilit · SSL · HTTPS". Kapanış: WEB'E DAİR, Fentra logosu, @fentra.digital, ses logosu. |
 
-## Sahneler
-
-| # | Anlatım (altyazı metni) | Şehir (benzetme) | Gerçekte (köşe ekranı) | Terim kartı |
-|---|---|---|---|---|
-| 01 | Google'a yazarsınız, bir siteye dokunursunuz ve sayfa açılır. Bir saniye bile sürmez. Ama o bir saniyede, perde arkasında üç şey çalışır. | — | Ekranın ortasında telefon: aramaya "websiteniz" yazılır, sonuç çıkar, dokunulur, sayfa açılır. "Üç şey" dendiğinde kamera telefon ekranının içine dalar; pikseller dağılıp şehrin planına dönüşür, üç boş parsel yanar. | — |
-| 02 | Web'e Dair. Birinci bölüm: adres, bina, yol. | Seri açılışı: WEB'E DAİR başlığı ışık çizgilerinden kurulur; üç parselin üstünde Adres · Bina · Yol simgeleri. | — | — |
-| 03 | Birincisi: domain, yani alan adı. Google sonuçlarında gördüğünüz, adres çubuğuna yazdığınız o isim: websiteniz.com. Dükkanınızın açık adresi neyse, sitenizin domain'i de odur. | "websiteniz.com" yazısı köşe ekranından kopup ilk parselin önünde kendini kuran tabelaya yerleşir; kapıda adres levhası. | Arama sonucunda "websiteniz.com" satırı mavi parlar, ardından adres çubuğunda yazılır. Yazı ikiye ayrılır: "websiteniz" (isim, siz seçersiniz) · ".com" (uzantı; .com / .com.tr / .net döner). | DOMAİN · Alan adı: sitenizin internetteki adresi |
-| 04 | Ama dikkat! Domain satın alınmaz, kiralanır. Hem de yıllık. Yenilemeyi unutursanız, siteniz kapanır ve o adresi bir başkası alabilir. | Tabelanın çevresinde bir takvim halkası döner; süre dolunca tabelanın ışığı söner, üzerine "MÜSAİT" etiketi düşer, başka biri tabelayı alır. | Takvimde günler akar, "Süresi doldu" uyarısı belirir. | — |
-| 05 | Bir de şunu kontrol edin: Domain sizin adınıza mı kayıtlı? Siteyi yapan kişinin adına kayıtlıysa, adresiniz aslında sizin değil. | Tabelanın altına bir tapu levhası kazınır: "SİZ". | "Alan adı kayıt bilgisi" kartı: Kayıt sahibi "Siteyi yapan kişi" → üstü çizilir → "Siz" ✓ (mavi). | — |
-| 06 | İkincisi: hosting. Sitenizdeki yazılar, fotoğraflar, menünüz... Hepsi gece gündüz açık kalan özel bilgisayarlarda saklanır. Bunlara sunucu denir. Hosting ise bu sunucularda sitenize kiraladığınız alandır. Yani adresinizdeki bina. | Dosyalar parsele uçar ve bina kat kat yükselir. Cephe kesiti açılır: odalarda sayfalar, bodrumda gece gündüz ışıldayan sunucu kabinleri. | Açık sayfa parçalarına ayrılır: Yazılar · Fotoğraflar · Menü · İletişim formu kartları; kartlar köşe ekranından çıkıp binaya uçar. | HOSTING · Sitenizin dosyalarının durduğu yer (sunucuda kiralanan alan) |
-| 07 | Adres var ama bina yoksa ne olur? Müşteri gelir, boş bir arsa bulur. Ekranda da şunu görür: "Bu siteye ulaşılamıyor." | Bina çözülüp kaybolur; bir ziyaretçi ışığı tabelaya gelir, arkasında boş arsa. | Köşe ekranı ortaya büyür: tarayıcıda "Bu siteye ulaşılamıyor" hata sayfası. | — |
-| 08 | Peki tarayıcı doğru binayı nasıl buluyor? Burada bir sorun var. Bilgisayarlar isimleri değil, numaraları tanır. Her sunucunun bir numarası vardır: IP adresi. | Bina geri kurulur. Tüm binaların üstünde kapı numarası gibi numaralar belirir (ör. 203.0.113.24); "websiteniz.com" yazısı şehrin girişinde asılı kalır, yolu bilmiyor. | — | IP ADRESİ · Sunucunun numarası |
-| 09 | İşte üçüncüsü: DNS. Telefon rehberinizi düşünün. Bir isme dokunursunuz, numarayı ezberlemenize gerek kalmaz, telefon onu kendisi bulur. DNS de yazdığınız ismi numaraya çevirir ve sizi doğru binaya götürür. | Rehber satırı köşe ekranından çıkıp şehirde mavi bir rotaya dönüşür; ışık sokaklardan akar, doğru binanın kapısı yanar. | Telefon rehberi: "Ofis → 0212 000 00 00". Satır dönüşür: "websiteniz.com → 203.0.113.24". | DNS · İnternetin rehberi: ismi numaraya çevirir |
-| 10 | Hosting'inizi değiştirseniz bile adresiniz aynı kalır. Sadece rehberdeki numara güncellenir. Bunun her yere ulaşması birkaç saat sürebilir. | Rota eski binadan yeni binaya kıvrılır; mavi bir dalga şehir boyunca yayılır. | Rehberdeki numara yeni numaraya döner; küçük "güncelleniyor" göstergesi dolar. | — |
-| 11 | Şimdi o bir saniyeye tekrar bakalım. Adresi yazarsınız, DNS yolu bulur, hosting sayfayı açar. | Açılış ağır çekimde tekrar oynar, bu kez üç katman etiketli: yazılan adres (DOMAİN) → yanan rota (DNS) → açılan kapı (HOSTING). Kamera şehirden geri çekilip telefon ekranından dışarı çıkar. | Sayfa açılır. Açılışla aynı an; çember tamamlanır. | — |
-| 12 | Domain adresiniz, hosting binanız, DNS ise yol tarifiniz. Bu kartı kaydedin! Sıradaki bölümde: kapınızdaki kilit. Web'e Dair, Fentra'yla. | Sözlük kartı belirir, "kaydet" simgesi atar; kısa bir kilit görüntüsüyle sonraki bölüm tanıtılır. Fentra logosu ve ses logosu. | — | — |
-
-**Sözlük kartı:** Domain = adresiniz · Hosting = binanız · DNS = yol tarifiniz · IP adresi = binanın numarası
-
-## ElevenLabs metni
-
-Okunuşu düzeltilmiş hali budur; olduğu gibi yapıştırın. Her paragraf bir sahnedir, paragraflar arasındaki boş satır sahne geçişidir. Nokta tam durak ve es, virgül kısa nefes, iki nokta kısa bir bekleyiş verir. Üç nokta yalnızca bir yerde, sayılan şeylerin devam ettiğini göstermek için kullanıldı.
+## Seslendirme metni (kaydedilen hali)
 
 ```text
-Gugıl'a yazarsınız, bir siteye dokunursunuz ve sayfa açılır. Bir saniye bile sürmez. Ama o bir saniyede, perde arkasında üç şey çalışır.
+Gogıla yazarsınız. bir siteye dokunursunuz ve sayfa açılır. Bir saniye bile sürmez. Ama o bir saniyede, perde arkasında üç şey çalışır.
 
-Vebe Dair. Birinci bölüm: adres, bina, yol.
+Vebe Dair. Birinci bölüm: adres, bina ve yol.
 
-Birincisi: domeyn, yani alan adı. Gugıl sonuçlarında gördüğünüz, adres çubuğuna yazdığınız o isim: vebsiteniz nokta kom. Dükkanınızın açık adresi neyse, sitenizin domeyni de odur.
-
-Ama dikkat! Domeyn satın alınmaz, kiralanır. Hem de yıllık. Yenilemeyi unutursanız, siteniz kapanır ve o adresi bir başkası alabilir.
-
-Bir de şunu kontrol edin: Domeyn sizin adınıza mı kayıtlı? Siteyi yapan kişinin adına kayıtlıysa, adresiniz aslında sizin değil.
+Birincisi: domeyn, yani alan adı. Gogıl sonuçlarında gördüğünüz, adres çubuğuna yazdığınız o isim: vebsiteniz nokta kom. Dükkanınızın açık adresi neyse, sitenizin domeyni de odur.
 
 İkincisi: hosting. Sitenizdeki yazılar, fotoğraflar, menünüz... Hepsi gece gündüz açık kalan özel bilgisayarlarda saklanır. Bunlara sunucu denir. Hosting ise bu sunucularda sitenize kiraladığınız alandır. Yani adresinizdeki bina.
 
-Adres var ama bina yoksa ne olur? Müşteri gelir, boş bir arsa bulur. Ekranda da şunu görür: "Bu siteye ulaşılamıyor."
+Peki tarayıcı doğru binayı nasıl buluyor? Burada bir sorun var. Bilgisayarlar isimleri değil, numaraları tanır. Her sunucunun bir numarası vardır: aypi adresi.
 
-Peki tarayıcı doğru binayı nasıl buluyor? Burada bir sorun var. Bilgisayarlar isimleri değil, numaraları tanır. Her sunucunun bir numarası vardır: ay pi adresi.
-
-İşte üçüncüsü: di en es. Telefon rehberinizi düşünün. Bir isme dokunursunuz, numarayı ezberlemenize gerek kalmaz, telefon onu kendisi bulur. Di en es de yazdığınız ismi numaraya çevirir ve sizi doğru binaya götürür.
+İşte üçüncüsü: dienes. Telefon rehberinizi düşünün. Bir isme dokunursunuz, numarayı ezberlemenize gerek kalmaz, telefon onu kendisi bulur. Dienes de yazdığınız ismi numaraya çevirir ve sizi doğru binaya götürür.
 
 Hostinginizi değiştirseniz bile adresiniz aynı kalır. Sadece rehberdeki numara güncellenir. Bunun her yere ulaşması birkaç saat sürebilir.
 
-Şimdi o bir saniyeye tekrar bakalım. Adresi yazarsınız, di en es yolu bulur, hosting sayfayı açar.
+Şimdi obir saniyeye tekrar bakalım. Adresi yazarsınız, dienes yolu bulur, hosting sayfayı açar.
 
-Domeyn adresiniz, hosting binanız, di en es ise yol tarifiniz. Bu kartı kaydedin! Sıradaki bölümde: kapınızdaki kilit. Vebe Dair, Fentrayla.
+İşte bu kadar basit. Domeyn adresiniz, hosting binanız ve dienes ise yol tarifiniz.
+Bu kartı kaydedin! Sıradaki bölümde: kapınızdaki kilit. Vebe Dair, Fentrayla.
 ```
 
-Okunuş değişiklikleri: Google → "Gugıl", domain → "domeyn", websiteniz.com → "vebsiteniz nokta kom", DNS → "di en es", IP → "ay pi", Web'e Dair → "Vebe Dair", Fentra'yla → "Fentrayla". "Hosting" Türkçe okunuşuyla aynı yazıldığı için değiştirilmedi. Metinde şapkalı harf yoktur.
-
-## Ses ayarları (başlangıç noktası)
-
-- **Ses:** Voice Library'de Dil: Türkçe, Cinsiyet: Erkek; enerjik / reklam / anlatıcı tonundaki sesler.
-- **Model:** Eleven Multilingual v2 (Türkçede en tutarlı sonuç). Daha fazla enerji isterseniz Eleven v3 de denenebilir.
-- **Stability:** %35–45 (düştükçe daha canlı ve dalgalı)
-- **Similarity:** %75–80
-- **Style exaggeration:** %20–35
-- **Speaker boost:** açık
-- **Speed:** 1.0–1.1
-
-## Teslim
-
-- Tüm metni **tek seferde** üretin; ton ve enerji baştan sona tutarlı olur. Sahneleri sessizliklerden ben ayırırım.
-- Beğenmediğiniz bir paragraf olursa sadece onu tekrar üretip `sahne-07.mp3` gibi sahne numarasıyla adlandırın; ana dosyadaki o sahnenin yerine geçer.
-- Dosya: `bolum-01.wav` ya da `bolum-01.mp3` (planınızın izin verdiği en yüksek kalite).
-- Yer: bu klasör → `fentra-webe-dair/assets/vo/`
+Altyazılar doğru yazımla gösterilir (Google, domain, IP, DNS, Web'e Dair, Fentra'yla); iki metin `scripts/vo_text.py` içinde cümle cümle eşleştirilmiştir.

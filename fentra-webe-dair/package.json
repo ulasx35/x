@@ -1,0 +1,17 @@
+{
+  "name": "fentra-webe-dair",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cues": "python3 scripts/align.py",
+    "frames": "node scripts/render.mjs",
+    "audio": "python3 scripts/audio.py",
+    "encode": "python3 scripts/encode.py",
+    "build": "npm run cues && npm run frames && npm run audio && npm run encode"
+  },
+  "dependencies": {
+    "three": "0.170.0",
+    "@fontsource/manrope": "5.1.0",
+    "@fontsource/jetbrains-mono": "5.1.0"
+  }
+}
