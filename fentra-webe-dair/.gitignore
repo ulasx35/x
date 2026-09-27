@@ -2,3 +2,4 @@ node_modules/
 output/_*
 output/stills/
 output/frames/
+__pycache__/
