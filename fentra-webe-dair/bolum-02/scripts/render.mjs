@@ -76,6 +76,32 @@ if (stillsArg) {
     console.log(`still ${s}s  (${Date.now() - t0} ms)`);
   }
   await browser.close();
+} else if (args.includes('--chunked')) {
+  // resumable: fixed chunks rendered to output/_chunks/, skipped when already there; stops starting new
+  // chunks when the time budget would be exceeded, and joins them once all are done
+  const C = Number(arg('--chunk', 100)), BUDGET = Number(arg('--budget', 1560)) * 1000;
+  const total = Math.round((TO - FROM) * FPS), nChunks = Math.ceil(total / C);
+  const dir = path.join(OUT, '_chunks'); fs.mkdirSync(dir, { recursive: true });
+  const name = (k) => path.join(dir, `c_${String(k).padStart(4, '0')}.mp4`);
+  const todo = [...Array(nChunks).keys()].filter((k) => !fs.existsSync(name(k)));
+  const t0 = Date.now(), times = []; let next = 0;
+  await Promise.all([...Array(WORKERS)].map(async (_, w) => {
+    while (next < todo.length) {
+      const avg = times.length ? times.reduce((a, b) => a + b) / times.length : 600000;
+      if (Date.now() - t0 + avg > BUDGET) break;
+      const k = todo[next++], s0 = Date.now(), tmp = name(k).replace('.mp4', '.tmp.mp4');
+      await renderRange(k * C, Math.min(total, (k + 1) * C), tmp, `w${w} c${k}`);
+      fs.renameSync(tmp, name(k)); times.push(Date.now() - s0);
+    }
+  }));
+  const done = [...Array(nChunks).keys()].filter((k) => fs.existsSync(name(k)));
+  console.log(`chunks done ${done.length}/${nChunks}`);
+  if (done.length === nChunks) {
+    const list = path.join(dir, 'list.txt');
+    fs.writeFileSync(list, done.map((k) => `file '${name(k)}'`).join('\n'));
+    execFileSync(FF, ['-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', list, '-c', 'copy', OUTFILE], { stdio: 'inherit' });
+    console.log('video frames done:', OUTFILE);
+  }
 } else {
   const total = Math.round((TO - FROM) * FPS);
   if (WORKERS <= 1) await renderRange(0, total, OUTFILE, 'w0');

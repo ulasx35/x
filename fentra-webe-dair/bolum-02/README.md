@@ -38,7 +38,8 @@ The page is served from the project folder (`fentra-webe-dair/`), so it shares `
 
 ```bash
 python3 scripts/align.py                     # voice → cues
-node scripts/render.mjs --workers 2          # → output/_video.mp4 (~2.3 s per frame on 4 CPU cores)
+node scripts/render.mjs --chunked --workers 2  # resumable: 100-frame chunks in output/_chunks/, stops before
+                                             # ~26 min; run again until "chunks done 36/36" → output/_video.mp4
 python3 scripts/audio.py                     # → output/_audio.wav
 python3 scripts/encode.py                    # → final, share copy, preview
 node scripts/render.mjs --stills 33.8,76.5   # single frames → output/stills/
