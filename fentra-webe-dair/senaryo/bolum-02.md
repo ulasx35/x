@@ -1,6 +1,6 @@
 # WEB'E DAİR · Bölüm 2 — Kapınızdaki Kilit
 
-Konu: HTTP, HTTPS, SSL sertifikası · Format: 9:16, 1080×1920, 30 fps · Tahmini süre: ~95–100 sn · Ses: Bölüm 1 ile aynı (Fatih Yıldırım, ElevenLabs)
+Konu: HTTP, HTTPS, SSL sertifikası · Format: 9:16, 1080×1920, 30 fps · Süre: 119,9 sn · Ses: Fatih Yıldırım, ElevenLabs (`assets/vo/bolum-02.mp3`, metin olduğu gibi kaydedildi)
 
 Hedef: Hiç bilmeyen biri, "Güvenli değil" uyarısının ne demek olduğunu ve sitesinde neyi kontrol etmesi gerektiğini anlamalı. Bölüm 1'deki şehir aynen devam eder; bu bölüm şehre **kapıdaki kilidi** ekler.
 
