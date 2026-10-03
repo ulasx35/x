@@ -6,8 +6,8 @@ Her bölüm aynı şehre bir parça ekler; bölüm sonundaki "Sıradaki bölümd
 |---|---|---|---|---|
 | 1 | Adres, Bina, Yol | Domain, hosting, DNS | Tabela, bina ve sunucular, kapıdan binaya rota | Yayına hazır |
 | 2 | Kapınızdaki kilit | HTTP, HTTPS, SSL sertifikası | Kapıdaki asma kilit | Yayına hazır |
-| 3 | Kapınızdaki posta kutusu | Kurumsal e-posta, SPF, DKIM, DMARC | Kapıdaki posta kutusu, mühürlü mektuplar | Yapımda |
-| 4 | Kapınızdaki kuyruk | Site hızı: büyük görseller, hosting kalitesi, CDN, hız testi | Kapıdaki kuyruk, şehre açılan şubeler | Sırada |
+| 3 | Kapınızdaki posta kutusu | Kurumsal e-posta, SPF, DKIM, DMARC | Kapıdaki posta kutusu, mühürlü mektuplar | Yayına hazır |
+| 4 | Kapınızdaki kuyruk | Site hızı: büyük görseller, hosting kalitesi, CDN, hız testi | Kapıdaki kuyruk, şehre açılan şubeler | Metin hazır, seslendirme bekleniyor |
 | 5 | Yedek anahtar | Yedekleme ve güncellemeler: site çökerse ya da saldırıya uğrarsa | Kasadaki yedek anahtar | Planlandı |
 | 6 | Haritadaki yeriniz | Google İşletme Profili (sezon finali) | Şehir haritasındaki iğne | Planlandı |
 
