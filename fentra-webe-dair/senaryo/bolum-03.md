@@ -1,6 +1,6 @@
 # WEB'E DAİR · Bölüm 3 — Kapınızdaki Posta Kutusu
 
-Konu: kurumsal e-posta, SPF, DKIM, DMARC · Format: 9:16, 1080×1920, 30 fps · Tahmini süre: ~105–115 sn · Ses: Bölüm 1 ve 2 ile aynı (Fatih Yıldırım, ElevenLabs)
+Konu: kurumsal e-posta, SPF, DKIM, DMARC · Format: 9:16, 1080×1920, 30 fps · Süre: 102,4 sn · Ses: Fatih Yıldırım, ElevenLabs (`assets/vo/bolum-03.mp3`, metin olduğu gibi kaydedildi)
 
 Hedef: Hiç bilmeyen biri, neden kişisel bir adres yerine kendi alan adıyla biten bir e-posta kullanması gerektiğini ve sahte e-postaların nasıl engellendiğini anlamalı. Şehre bu bölümde **kapıdaki posta kutusu** eklenir.
 
