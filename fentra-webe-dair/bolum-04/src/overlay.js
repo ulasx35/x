@@ -134,7 +134,7 @@ export function createOverlay(root, city) {
   const tParts = [...title.querySelectorAll('#tIcon path, #tIcon circle')];
   tParts.forEach((p) => { const L = p.getTotalLength(); p.style.strokeDasharray = L; p.dataset.len = L; });
   const gloss = add(`<div id="gloss"><div class="hd"><div class="ttl"><b>WEB'E DAİR</b> · SÖZLÜK</div><div class="bm" id="bm">${ic('bookmark')}</div></div>
-    ${[['queue', 'Yavaş site', 'Kapıdaki kuyruk'], ['bolt', 'Görsel · Hosting · CDN', 'Kuyruğu eriten üç çözüm'], ['gauge', 'Hız testi', 'Sitenizin karnesi']].map(([i, k, v]) => `<div class="row"><div class="ico">${ic(i)}</div><div class="k" style="width:auto;font-size:30px;white-space:nowrap">${k}</div><div class="eqs">=</div><div class="v" style="font-size:29px">${v}</div></div>`).join('')}
+    ${[['queue', 'Yavaş site', 'Kapıdaki kuyruk'], ['bolt', 'Görsel · Hosting · CDN', 'Kuyruğu eriten üç çözüm'], ['gauge', 'Hız testi', 'Sitenizin karnesi']].map(([i, k, v]) => `<div class="row"><div class="ico">${ic(i)}</div><div class="k" style="width:auto;font-size:28px;white-space:nowrap">${k}</div><div class="eqs">=</div><div class="v" style="font-size:26px;white-space:nowrap">${v}</div></div>`).join('')}
     <div class="foot">${ic('clock')}<span>Hedef: telefonda <b>3 saniyenin</b> altında açılış.</span></div></div>`);
   const gRows = [...gloss.querySelectorAll('.row')], gFoot = gloss.querySelector('.foot'), bm = gloss.querySelector('#bm'), bmPath = bm.querySelector('path');
   const saveLbl = add('<div id="saveLbl">KAYDET</div>');
@@ -327,11 +327,11 @@ export function createOverlay(root, city) {
     place(sitesPin, city.anchors.heroFace, win(t, T.hYuz + 0.2, T.hKalite + 0.3, 0.3, 0.3), { lift: 0, dx: -40, scale: lerp(0.6, 1, pop(t, T.hYuz + 0.4)) });
     place(doorPin, city.anchors.door, win(t, T.hKapi - 0.1, T.hGenis - 0.05, 0.2, 0.2), { lift: 30, scale: lerp(0.6, 1, pop(t, T.hKapi)) });
     place(widePin, city.anchors.door, win(t, T.hGenis + 0.2, T.hEnd + 0.3, 0.25, 0.3), { lift: 40, scale: lerp(0.6, 1, pop(t, T.hGenis + 0.3)) });
-    place(visPin, () => city.anchors.farV(0), win(t, T.cUzak - 0.3, T.cCdn + 0.2, 0.25, 0.3), { lift: 30, scale: lerp(0.6, 1, pop(t, T.cUzak - 0.2)) });
+    place(visPin, () => city.anchors.farV(0).setY(0), win(t, T.cUzak - 0.3, T.cCdn + 0.2, 0.25, 0.3), { ax: 1, ay: 0, dx: 10, lift: -30, scale: lerp(0.6, 1, pop(t, T.cUzak - 0.2)) });
     place(farPin, [21, 2, 14], win(t, T.cUzak + 0.9, T.cCdn + 0.2, 0.25, 0.3), { lift: 20, scale: lerp(0.6, 1, pop(t, T.cUzak + 1.0)) });
     place(mainPin, city.anchors.heroTop, win(t, T.cKopya - 0.3, T.cEnd + 0.2, 0.25, 0.3), { lift: 40, scale: 0.85 * lerp(0.6, 1, pop(t, T.cKopya - 0.2)) });
     brPins.forEach((e, k) => { const b0 = T.cKopya - 0.4 + k * 0.32 + 1.5; place(e, () => city.anchors.branch(k), win(t, b0, T.cEnd + 0.2, 0.25, 0.3) * (k === 0 && t > T.cYakin ? 0 : 1), { lift: 20, scale: 0.85 * lerp(0.6, 1, pop(t, b0)) }); });
-    place(nearPin, () => city.anchors.branch(0), win(t, T.cYakin, T.cEnd + 0.2, 0.2, 0.3), { lift: 20, scale: 0.85 * lerp(0.6, 1, pop(t, T.cYakin + 0.1)) });
+    place(nearPin, () => city.anchors.branch(0).setY(0), win(t, T.cYakin, T.cEnd + 0.2, 0.2, 0.3), { ay: 0, lift: -24, scale: 0.85 * lerp(0.6, 1, pop(t, T.cYakin + 0.1)) });
     const scv = city.score(t);
     scorePin.textContent = String(Math.round(scv));
     scorePin.style.background = scv < 50 ? 'rgba(217,48,37,0.95)' : scv < 90 ? 'rgba(214,138,0,0.95)' : 'rgba(31,157,85,0.95)';
