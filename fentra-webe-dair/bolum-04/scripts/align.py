@@ -77,7 +77,7 @@ for i in range(I + 1):
     for j in range(J + 1):
         if not np.isfinite(C[i, j]): continue
         for a in (1, 2, 3):
-            for b in (1, 2, 3):
+            for b in (1, 2, 3, 4, 5):
                 if i + a > I or j + b > J: continue
                 dur = segs[i + a - 1][1] - segs[i][0]
                 c = 4 * np.log(dur / (rate * S[j:j + b].sum())) ** 2 + 0.35 * (a - 1) + 0.25 * (b - 1)

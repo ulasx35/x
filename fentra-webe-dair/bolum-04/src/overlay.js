@@ -312,7 +312,7 @@ export function createOverlay(root, city) {
       [0, 1, 2].forEach((k) => {
         const e = $r('is' + k), a0 = T.xNeyin - 0.1 + k * 0.22;
         const kk = outQuint(prog(t, a0, a0 + 0.35)); show(e, kk); tf(e, `translateX(${(1 - kk) * 30}px)`);
-        e.classList.toggle('ok', t > T.xGor - 0.1 + k * 0.3);
+        e.classList.toggle("ok", t > T.xGor - 0.2 + k * 0.25);
       });
     }
 

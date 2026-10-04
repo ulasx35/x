@@ -237,7 +237,7 @@ export function createCity(canvas) {
     cars.forEach((c, k) => {
       let u = ((c.ph + c.dir * c.speed * t) % (2 * EDGE) + 2 * EDGE) % (2 * EDGE) - EDGE;
       if (c.alongX) { p.set(u, 0, c.c); q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2); } else { p.set(c.c, 0, u); q.identity(); }
-      s.setScalar(alpha < 0.01 ? 0.001 : 1);
+      s.setScalar(alpha < 0.01 || p.distanceTo(camera.position) < 75 ? 0.001 : 1);   // no cars right under a close-up camera
       m4.compose(p, q, s); carMesh.setMatrixAt(k, m4);
     });
     carMesh.instanceMatrix.needsUpdate = true;
@@ -572,7 +572,7 @@ export function createCity(canvas) {
   const pathLen = (pts) => pts.slice(1).reduce((a, p, i) => a + p.distanceTo(pts[i]), 0);
   const RED = new THREE.Color('#ff4d45'), WARM = new THREE.Color('#ffd9a8'), PCOL = new THREE.Color('#b9c6dc'), PRED = new THREE.Color('#ff8a80');
   const U_CRATE0 = uForZ(47);
-  const score = (t) => (t < T.xPuan ? 0 : 42 * outCubic(prog(t, T.xPuan - 0.1, T.xPuan + 1.0))) + 52 * inOut(prog(t, T.xGor - 0.1, T.xEnd + 0.4));
+  const score = (t) => (t < T.xPuan ? 0 : 42 * outCubic(prog(t, T.xPuan - 0.1, T.xPuan + 1.0))) + 52 * inOut(prog(t, T.xGor - 0.2, T.xEnd + 0.15));
 
   function setPerson(P, pos, a, { tint = 0, glow = 0, walk = 0, t = 0, scale = 1 } = {}) {
     P.m.visible = a > 0.01;
