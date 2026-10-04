@@ -1,6 +1,13 @@
 # WEB'E DAİR · Bölüm 4 — "Kapınızdaki kuyruk" (site hızı: görseller, hosting, CDN, hız testi)
 
-**Status:** visuals, camera, overlays and sound design are built on a **provisional timeline** predicted from the script's syllables (`scripts/align.py` falls back to it while `assets/vo/bolum-04.mp3` is missing). Once the recording is in, `align.py` re-times everything to the real voice.
+**Output:** `output/webe-dair-bolum-04.mp4`, 1080×1920 (9:16), 30 fps, 116.5 s, H.264 + AAC, -14 LUFS.
+
+- `output/webe-dair-bolum-04-paylasim.mp4`: the same resolution under 30 MB.
+- `output/webe-dair-bolum-04-preview.mp4`: a light 720p copy.
+
+Captions for Instagram and TikTok: `../senaryo/paylasim-bolum-04.md`.
+
+`scripts/align.py` predicts a provisional timeline from the script's syllables while `assets/vo/bolum-04.mp3` is missing. This let the visuals be built before the recording, and they were then re-timed to the real voice.
 
 Script and storyboard: `../senaryo/bolum-04.md`. Season plan: `../senaryo/sezon-1.md`.
 
