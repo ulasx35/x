@@ -1,6 +1,6 @@
 # WEB'E DAİR · Bölüm 4 — Kapınızdaki Kuyruk
 
-Konu: site hızı, büyük görseller, hosting kalitesi, CDN, hız testi · Format: 9:16, 1080×1920, 30 fps · Süre: ~100 sn · Ses: Fatih Yıldırım, ElevenLabs
+Konu: site hızı, büyük görseller, hosting kalitesi, CDN, hız testi · Format: 9:16, 1080×1920, 30 fps · Süre: 116,5 sn · Ses: Fatih Yıldırım, ElevenLabs (`assets/vo/bolum-04.mp3`, metin olduğu gibi kaydedildi)
 
 Hedef: Hiç bilmeyen biri, yavaş bir sitenin müşteri kaybettirdiğini, sitenin neden yavaşladığını ve bunun nasıl düzeltildiğini anlamalı. Şehre bu bölümde **kapıdaki kuyruk** ve **şehre açılan şubeler** eklenir.
 
