@@ -1,0 +1,2842 @@
+{
+ "provisional": true,
+ "voDuration": 113.29,
+ "duration": 116.19,
+ "scenes": {
+  "hook": {
+   "start": 0.05,
+   "end": 7.332
+  },
+  "title": {
+   "start": 7.852,
+   "end": 11.48
+  },
+  "bridge": {
+   "start": 12.0,
+   "end": 19.346
+  },
+  "what": {
+   "start": 19.866,
+   "end": 38.741
+  },
+  "image": {
+   "start": 39.261,
+   "end": 54.116
+  },
+  "hosting": {
+   "start": 54.636,
+   "end": 68.78
+  },
+  "cdn": {
+   "start": 69.3,
+   "end": 83.445
+  },
+  "test": {
+   "start": 83.965,
+   "end": 95.928
+  },
+  "recap": {
+   "start": 96.448,
+   "end": 105.169
+  },
+  "outro": {
+   "start": 105.689,
+   "end": 112.99
+  }
+ },
+ "sentences": [
+  {
+   "scene": "hook",
+   "idx": 0,
+   "caption": "Bir reklama tıkladınız.",
+   "start": 0.05,
+   "end": 1.519,
+   "phrases": [
+    0
+   ]
+  },
+  {
+   "scene": "hook",
+   "idx": 1,
+   "caption": "Sayfa açılıyor, açılıyor ama ekran bembeyaz.",
+   "start": 1.959,
+   "end": 5.24,
+   "phrases": [
+    1,
+    2
+   ]
+  },
+  {
+   "scene": "hook",
+   "idx": 2,
+   "caption": "Siz kaç saniye beklersiniz?",
+   "start": 5.68,
+   "end": 7.332,
+   "phrases": [
+    3
+   ]
+  },
+  {
+   "scene": "title",
+   "idx": 0,
+   "caption": "Web'e Dair.",
+   "start": 7.852,
+   "end": 8.587,
+   "phrases": [
+    4
+   ]
+  },
+  {
+   "scene": "title",
+   "idx": 1,
+   "caption": "Dördüncü bölüm: kapınızdaki kuyruk.",
+   "start": 9.027,
+   "end": 11.48,
+   "phrases": [
+    5,
+    6
+   ]
+  },
+  {
+   "scene": "bridge",
+   "idx": 0,
+   "caption": "Sitenizin adresi, binası, yolu, kilidi ve posta kutusu hazır.",
+   "start": 12.0,
+   "end": 16.703,
+   "phrases": [
+    7,
+    8,
+    9,
+    10
+   ]
+  },
+  {
+   "scene": "bridge",
+   "idx": 1,
+   "caption": "Peki kapıda uzun bir kuyruk varsa?",
+   "start": 17.143,
+   "end": 19.346,
+   "phrases": [
+    11
+   ]
+  },
+  {
+   "scene": "what",
+   "idx": 0,
+   "caption": "Telefondan gelen ziyaretçilerin yarısından fazlası, üç saniyeden uzun süren bir sayfayı beklemeden kapatır.",
+   "start": 19.866,
+   "end": 27.186,
+   "phrases": [
+    12,
+    13
+   ]
+  },
+  {
+   "scene": "what",
+   "idx": 1,
+   "caption": "Yavaş bir site, kapısında uzun kuyruk olan bir dükkan gibidir.",
+   "start": 27.626,
+   "end": 31.642,
+   "phrases": [
+    14,
+    15
+   ]
+  },
+  {
+   "scene": "what",
+   "idx": 2,
+   "caption": "Müşteri bir süre bekler, sonra yan dükkana gider.",
+   "start": 32.082,
+   "end": 35.18,
+   "phrases": [
+    16,
+    17
+   ]
+  },
+  {
+   "scene": "what",
+   "idx": 3,
+   "caption": "Google da hızlı açılan siteleri öne çıkarır.",
+   "start": 35.62,
+   "end": 38.741,
+   "phrases": [
+    18
+   ]
+  },
+  {
+   "scene": "image",
+   "idx": 0,
+   "caption": "Peki bir site neden yavaşlar?",
+   "start": 39.261,
+   "end": 41.097,
+   "phrases": [
+    19
+   ]
+  },
+  {
+   "scene": "image",
+   "idx": 1,
+   "caption": "En sık sebep, büyük görsellerdir.",
+   "start": 41.557,
+   "end": 43.553,
+   "phrases": [
+    20,
+    21
+   ]
+  },
+  {
+   "scene": "image",
+   "idx": 2,
+   "caption": "Telefonla çekilmiş tek bir fotoğraf, bütün sayfadan daha ağır olabilir.",
+   "start": 43.993,
+   "end": 48.743,
+   "phrases": [
+    22,
+    23
+   ]
+  },
+  {
+   "scene": "image",
+   "idx": 3,
+   "caption": "Görseller küçültülüp sıkıştırılınca, aynı görüntü çok daha hızlı açılır.",
+   "start": 49.183,
+   "end": 54.116,
+   "phrases": [
+    24,
+    25
+   ]
+  },
+  {
+   "scene": "hosting",
+   "idx": 0,
+   "caption": "İkinci sebep: hosting.",
+   "start": 54.636,
+   "end": 56.172,
+   "phrases": [
+    26,
+    27
+   ]
+  },
+  {
+   "scene": "hosting",
+   "idx": 1,
+   "caption": "Ucuz ve kalabalık bir sunucuda, yüzlerce site aynı kaynakları paylaşır.",
+   "start": 56.612,
+   "end": 61.545,
+   "phrases": [
+    28,
+    29
+   ]
+  },
+  {
+   "scene": "hosting",
+   "idx": 2,
+   "caption": "Bina aynı, kapı tek, kuyruk uzun.",
+   "start": 61.985,
+   "end": 64.325,
+   "phrases": [
+    30,
+    31,
+    32
+   ]
+  },
+  {
+   "scene": "hosting",
+   "idx": 3,
+   "caption": "Kaliteli bir hosting, sitenize geniş ve hızlı bir kapı açar.",
+   "start": 64.765,
+   "end": 68.78,
+   "phrases": [
+    33,
+    34
+   ]
+  },
+  {
+   "scene": "cdn",
+   "idx": 0,
+   "caption": "Peki ziyaretçiniz uzaktaysa?",
+   "start": 69.3,
+   "end": 71.32,
+   "phrases": [
+    35
+   ]
+  },
+  {
+   "scene": "cdn",
+   "idx": 1,
+   "caption": "Burada CDN devreye girer.",
+   "start": 71.78,
+   "end": 73.8,
+   "phrases": [
+    36
+   ]
+  },
+  {
+   "scene": "cdn",
+   "idx": 2,
+   "caption": "CDN, sitenizin kopyalarını farklı şehirlerdeki sunuculara dağıtır.",
+   "start": 74.24,
+   "end": 79.357,
+   "phrases": [
+    37,
+    38
+   ]
+  },
+  {
+   "scene": "cdn",
+   "idx": 3,
+   "caption": "Böylece herkes, kendisine en yakın şubeden hizmet alır.",
+   "start": 79.797,
+   "end": 83.445,
+   "phrases": [
+    39,
+    40
+   ]
+  },
+  {
+   "scene": "test",
+   "idx": 0,
+   "caption": "İyi haber şu: Sitenizin hızını ücretsiz ölçebilirsiniz.",
+   "start": 83.965,
+   "end": 88.071,
+   "phrases": [
+    41,
+    42
+   ]
+  },
+  {
+   "scene": "test",
+   "idx": 1,
+   "caption": "Google'ın hız testine adresinizi yazın.",
+   "start": 88.511,
+   "end": 91.081,
+   "phrases": [
+    43
+   ]
+  },
+  {
+   "scene": "test",
+   "idx": 2,
+   "caption": "Puanınızı ve sitenizi neyin yavaşlattığını hemen görürsünüz.",
+   "start": 91.521,
+   "end": 95.928,
+   "phrases": [
+    44
+   ]
+  },
+  {
+   "scene": "recap",
+   "idx": 0,
+   "caption": "Kısacası: Yavaş site, kapıdaki uzun kuyruk.",
+   "start": 96.448,
+   "end": 99.795,
+   "phrases": [
+    45,
+    46,
+    47
+   ]
+  },
+  {
+   "scene": "recap",
+   "idx": 1,
+   "caption": "Hafif görseller, kaliteli hosting ve CDN ise kuyruğu eriten üç çözüm.",
+   "start": 100.235,
+   "end": 105.169,
+   "phrases": [
+    48,
+    49
+   ]
+  },
+  {
+   "scene": "outro",
+   "idx": 0,
+   "caption": "Bu kartı kaydedin!",
+   "start": 105.689,
+   "end": 106.79,
+   "phrases": [
+    50
+   ]
+  },
+  {
+   "scene": "outro",
+   "idx": 1,
+   "caption": "Sıradaki bölümde: yedek anahtar, yani yedekleme.",
+   "start": 107.39,
+   "end": 111.105,
+   "phrases": [
+    51,
+    52,
+    53
+   ]
+  },
+  {
+   "scene": "outro",
+   "idx": 2,
+   "caption": "Web'e Dair, Fentra'yla.",
+   "start": 111.545,
+   "end": 112.99,
+   "phrases": [
+    54,
+    55
+   ]
+  }
+ ],
+ "phrases": [
+  {
+   "scene": "hook",
+   "sent": 0,
+   "spoken": "Bir reklama tıkladınız.",
+   "caption": "Bir reklama tıkladınız.",
+   "start": 0.05,
+   "end": 1.519,
+   "words": [
+    0,
+    1,
+    2
+   ]
+  },
+  {
+   "scene": "hook",
+   "sent": 1,
+   "spoken": "Sayfa açılıyor,",
+   "caption": "Sayfa açılıyor,",
+   "start": 1.959,
+   "end": 3.06,
+   "words": [
+    3,
+    4
+   ]
+  },
+  {
+   "scene": "hook",
+   "sent": 1,
+   "spoken": "açılıyor ama ekran bembeyaz.",
+   "caption": "açılıyor ama ekran bembeyaz.",
+   "start": 3.22,
+   "end": 5.24,
+   "words": [
+    5,
+    6,
+    7,
+    8
+   ]
+  },
+  {
+   "scene": "hook",
+   "sent": 2,
+   "spoken": "Siz kaç saniye beklersiniz?",
+   "caption": "Siz kaç saniye beklersiniz?",
+   "start": 5.68,
+   "end": 7.332,
+   "words": [
+    9,
+    10,
+    11,
+    12
+   ]
+  },
+  {
+   "scene": "title",
+   "sent": 0,
+   "spoken": "Vebe Dair.",
+   "caption": "Web'e Dair.",
+   "start": 7.852,
+   "end": 8.587,
+   "words": [
+    13,
+    14
+   ]
+  },
+  {
+   "scene": "title",
+   "sent": 1,
+   "spoken": "Dördüncü bölüm:",
+   "caption": "Dördüncü bölüm:",
+   "start": 9.027,
+   "end": 9.945,
+   "words": [
+    15,
+    16
+   ]
+  },
+  {
+   "scene": "title",
+   "sent": 1,
+   "spoken": "kapınızdaki kuyruk.",
+   "caption": "kapınızdaki kuyruk.",
+   "start": 10.195,
+   "end": 11.48,
+   "words": [
+    17,
+    18
+   ]
+  },
+  {
+   "scene": "bridge",
+   "sent": 0,
+   "spoken": "Sitenizin adresi,",
+   "caption": "Sitenizin adresi,",
+   "start": 12.0,
+   "end": 13.285,
+   "words": [
+    19,
+    20
+   ]
+  },
+  {
+   "scene": "bridge",
+   "sent": 0,
+   "spoken": "binası,",
+   "caption": "binası,",
+   "start": 13.445,
+   "end": 13.996,
+   "words": [
+    21
+   ]
+  },
+  {
+   "scene": "bridge",
+   "sent": 0,
+   "spoken": "yolu,",
+   "caption": "yolu,",
+   "start": 14.156,
+   "end": 14.523,
+   "words": [
+    22
+   ]
+  },
+  {
+   "scene": "bridge",
+   "sent": 0,
+   "spoken": "kilidi ve posta kutusu hazır.",
+   "caption": "kilidi ve posta kutusu hazır.",
+   "start": 14.683,
+   "end": 16.703,
+   "words": [
+    23,
+    24,
+    25,
+    26,
+    27
+   ]
+  },
+  {
+   "scene": "bridge",
+   "sent": 1,
+   "spoken": "Peki kapıda uzun bir kuyruk varsa?",
+   "caption": "Peki kapıda uzun bir kuyruk varsa?",
+   "start": 17.143,
+   "end": 19.346,
+   "words": [
+    28,
+    29,
+    30,
+    31,
+    32,
+    33
+   ]
+  },
+  {
+   "scene": "what",
+   "sent": 0,
+   "spoken": "Telefondan gelen ziyaretçilerin yarısından fazlası,",
+   "caption": "Telefondan gelen ziyaretçilerin yarısından fazlası,",
+   "start": 19.866,
+   "end": 23.354,
+   "words": [
+    34,
+    35,
+    36,
+    37,
+    38
+   ]
+  },
+  {
+   "scene": "what",
+   "sent": 0,
+   "spoken": "üç saniyeden uzun süren bir sayfayı beklemeden kapatır.",
+   "caption": "üç saniyeden uzun süren bir sayfayı beklemeden kapatır.",
+   "start": 23.514,
+   "end": 27.186,
+   "words": [
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46
+   ]
+  },
+  {
+   "scene": "what",
+   "sent": 1,
+   "spoken": "Yavaş bir site,",
+   "caption": "Yavaş bir site,",
+   "start": 27.626,
+   "end": 28.544,
+   "words": [
+    47,
+    48,
+    49
+   ]
+  },
+  {
+   "scene": "what",
+   "sent": 1,
+   "spoken": "kapısında uzun kuyruk olan bir dükkan gibidir.",
+   "caption": "kapısında uzun kuyruk olan bir dükkan gibidir.",
+   "start": 28.704,
+   "end": 31.642,
+   "words": [
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56
+   ]
+  },
+  {
+   "scene": "what",
+   "sent": 2,
+   "spoken": "Müşteri bir süre bekler,",
+   "caption": "Müşteri bir süre bekler,",
+   "start": 32.082,
+   "end": 33.551,
+   "words": [
+    57,
+    58,
+    59,
+    60
+   ]
+  },
+  {
+   "scene": "what",
+   "sent": 2,
+   "spoken": "sonra yan dükkana gider.",
+   "caption": "sonra yan dükkana gider.",
+   "start": 33.711,
+   "end": 35.18,
+   "words": [
+    61,
+    62,
+    63,
+    64
+   ]
+  },
+  {
+   "scene": "what",
+   "sent": 3,
+   "spoken": "Gogıl da hızlı açılan siteleri öne çıkarır.",
+   "caption": "Google da hızlı açılan siteleri öne çıkarır.",
+   "start": 35.62,
+   "end": 38.741,
+   "words": [
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71
+   ]
+  },
+  {
+   "scene": "image",
+   "sent": 0,
+   "spoken": "Peki bir site neden yavaşlar?",
+   "caption": "Peki bir site neden yavaşlar?",
+   "start": 39.261,
+   "end": 41.097,
+   "words": [
+    72,
+    73,
+    74,
+    75,
+    76
+   ]
+  },
+  {
+   "scene": "image",
+   "sent": 1,
+   "spoken": "En sık sebep,",
+   "caption": "En sık sebep,",
+   "start": 41.557,
+   "end": 42.291,
+   "words": [
+    77,
+    78,
+    79
+   ]
+  },
+  {
+   "scene": "image",
+   "sent": 1,
+   "spoken": "büyük görsellerdir.",
+   "caption": "büyük görsellerdir.",
+   "start": 42.451,
+   "end": 43.553,
+   "words": [
+    80,
+    81
+   ]
+  },
+  {
+   "scene": "image",
+   "sent": 2,
+   "spoken": "Telefonla çekilmiş tek bir fotoğraf,",
+   "caption": "Telefonla çekilmiş tek bir fotoğraf,",
+   "start": 43.993,
+   "end": 46.196,
+   "words": [
+    82,
+    83,
+    84,
+    85,
+    86
+   ]
+  },
+  {
+   "scene": "image",
+   "sent": 2,
+   "spoken": "bütün sayfadan daha ağır olabilir.",
+   "caption": "bütün sayfadan daha ağır olabilir.",
+   "start": 46.356,
+   "end": 48.743,
+   "words": [
+    87,
+    88,
+    89,
+    90,
+    91
+   ]
+  },
+  {
+   "scene": "image",
+   "sent": 3,
+   "spoken": "Görseller küçültülüp sıkıştırılınca,",
+   "caption": "Görseller küçültülüp sıkıştırılınca,",
+   "start": 49.183,
+   "end": 51.57,
+   "words": [
+    92,
+    93,
+    94
+   ]
+  },
+  {
+   "scene": "image",
+   "sent": 3,
+   "spoken": "aynı görüntü çok daha hızlı açılır.",
+   "caption": "aynı görüntü çok daha hızlı açılır.",
+   "start": 51.73,
+   "end": 54.116,
+   "words": [
+    95,
+    96,
+    97,
+    98,
+    99,
+    100
+   ]
+  },
+  {
+   "scene": "hosting",
+   "sent": 0,
+   "spoken": "İkinci sebep:",
+   "caption": "İkinci sebep:",
+   "start": 54.636,
+   "end": 55.554,
+   "words": [
+    101,
+    102
+   ]
+  },
+  {
+   "scene": "hosting",
+   "sent": 0,
+   "spoken": "hosting.",
+   "caption": "hosting.",
+   "start": 55.804,
+   "end": 56.172,
+   "words": [
+    103
+   ]
+  },
+  {
+   "scene": "hosting",
+   "sent": 1,
+   "spoken": "Ucuz ve kalabalık bir sunucuda,",
+   "caption": "Ucuz ve kalabalık bir sunucuda,",
+   "start": 56.612,
+   "end": 58.815,
+   "words": [
+    104,
+    105,
+    106,
+    107,
+    108
+   ]
+  },
+  {
+   "scene": "hosting",
+   "sent": 1,
+   "spoken": "yüzlerce site aynı kaynakları paylaşır.",
+   "caption": "yüzlerce site aynı kaynakları paylaşır.",
+   "start": 58.975,
+   "end": 61.545,
+   "words": [
+    109,
+    110,
+    111,
+    112,
+    113
+   ]
+  },
+  {
+   "scene": "hosting",
+   "sent": 2,
+   "spoken": "Bina aynı,",
+   "caption": "Bina aynı,",
+   "start": 61.985,
+   "end": 62.72,
+   "words": [
+    114,
+    115
+   ]
+  },
+  {
+   "scene": "hosting",
+   "sent": 2,
+   "spoken": "kapı tek,",
+   "caption": "kapı tek,",
+   "start": 62.88,
+   "end": 63.43,
+   "words": [
+    116,
+    117
+   ]
+  },
+  {
+   "scene": "hosting",
+   "sent": 2,
+   "spoken": "kuyruk uzun.",
+   "caption": "kuyruk uzun.",
+   "start": 63.59,
+   "end": 64.325,
+   "words": [
+    118,
+    119
+   ]
+  },
+  {
+   "scene": "hosting",
+   "sent": 3,
+   "spoken": "Kaliteli bir hosting,",
+   "caption": "Kaliteli bir hosting,",
+   "start": 64.765,
+   "end": 66.05,
+   "words": [
+    120,
+    121,
+    122
+   ]
+  },
+  {
+   "scene": "hosting",
+   "sent": 3,
+   "spoken": "sitenize geniş ve hızlı bir kapı açar.",
+   "caption": "sitenize geniş ve hızlı bir kapı açar.",
+   "start": 66.21,
+   "end": 68.78,
+   "words": [
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129
+   ]
+  },
+  {
+   "scene": "cdn",
+   "sent": 0,
+   "spoken": "Peki ziyaretçiniz uzaktaysa?",
+   "caption": "Peki ziyaretçiniz uzaktaysa?",
+   "start": 69.3,
+   "end": 71.32,
+   "words": [
+    130,
+    131,
+    132
+   ]
+  },
+  {
+   "scene": "cdn",
+   "sent": 1,
+   "spoken": "Burada si di en devreye girer.",
+   "caption": "Burada CDN devreye girer.",
+   "start": 71.78,
+   "end": 73.8,
+   "words": [
+    133,
+    134,
+    135,
+    136
+   ]
+  },
+  {
+   "scene": "cdn",
+   "sent": 2,
+   "spoken": "Si di en,",
+   "caption": "CDN,",
+   "start": 74.24,
+   "end": 74.79,
+   "words": [
+    137
+   ]
+  },
+  {
+   "scene": "cdn",
+   "sent": 2,
+   "spoken": "sitenizin kopyalarını farklı şehirlerdeki sunuculara dağıtır.",
+   "caption": "sitenizin kopyalarını farklı şehirlerdeki sunuculara dağıtır.",
+   "start": 74.95,
+   "end": 79.357,
+   "words": [
+    138,
+    139,
+    140,
+    141,
+    142,
+    143
+   ]
+  },
+  {
+   "scene": "cdn",
+   "sent": 3,
+   "spoken": "Böylece herkes,",
+   "caption": "Böylece herkes,",
+   "start": 79.797,
+   "end": 80.715,
+   "words": [
+    144,
+    145
+   ]
+  },
+  {
+   "scene": "cdn",
+   "sent": 3,
+   "spoken": "kendisine en yakın şubeden hizmet alır.",
+   "caption": "kendisine en yakın şubeden hizmet alır.",
+   "start": 80.875,
+   "end": 83.445,
+   "words": [
+    146,
+    147,
+    148,
+    149,
+    150,
+    151
+   ]
+  },
+  {
+   "scene": "test",
+   "sent": 0,
+   "spoken": "İyi haber şu:",
+   "caption": "İyi haber şu:",
+   "start": 83.965,
+   "end": 84.883,
+   "words": [
+    152,
+    153,
+    154
+   ]
+  },
+  {
+   "scene": "test",
+   "sent": 0,
+   "spoken": "Sitenizin hızını ücretsiz ölçebilirsiniz.",
+   "caption": "Sitenizin hızını ücretsiz ölçebilirsiniz.",
+   "start": 85.133,
+   "end": 88.071,
+   "words": [
+    155,
+    156,
+    157,
+    158
+   ]
+  },
+  {
+   "scene": "test",
+   "sent": 1,
+   "spoken": "Gogılın hız testine adresinizi yazın.",
+   "caption": "Google'ın hız testine adresinizi yazın.",
+   "start": 88.511,
+   "end": 91.081,
+   "words": [
+    159,
+    160,
+    161,
+    162,
+    163
+   ]
+  },
+  {
+   "scene": "test",
+   "sent": 2,
+   "spoken": "Puanınızı ve sitenizi neyin yavaşlattığını hemen görürsünüz.",
+   "caption": "Puanınızı ve sitenizi neyin yavaşlattığını hemen görürsünüz.",
+   "start": 91.521,
+   "end": 95.928,
+   "words": [
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170
+   ]
+  },
+  {
+   "scene": "recap",
+   "sent": 0,
+   "spoken": "Kısacası:",
+   "caption": "Kısacası:",
+   "start": 96.448,
+   "end": 97.182,
+   "words": [
+    171
+   ]
+  },
+  {
+   "scene": "recap",
+   "sent": 0,
+   "spoken": "Yavaş site,",
+   "caption": "Yavaş site,",
+   "start": 97.432,
+   "end": 98.166,
+   "words": [
+    172,
+    173
+   ]
+  },
+  {
+   "scene": "recap",
+   "sent": 0,
+   "spoken": "kapıdaki uzun kuyruk.",
+   "caption": "kapıdaki uzun kuyruk.",
+   "start": 98.326,
+   "end": 99.795,
+   "words": [
+    174,
+    175,
+    176
+   ]
+  },
+  {
+   "scene": "recap",
+   "sent": 1,
+   "spoken": "Hafif görseller,",
+   "caption": "Hafif görseller,",
+   "start": 100.235,
+   "end": 101.153,
+   "words": [
+    177,
+    178
+   ]
+  },
+  {
+   "scene": "recap",
+   "sent": 1,
+   "spoken": "kaliteli hosting ve si di en ise kuyruğu eriten üç çözüm.",
+   "caption": "kaliteli hosting ve CDN ise kuyruğu eriten üç çözüm.",
+   "start": 101.313,
+   "end": 105.169,
+   "words": [
+    179,
+    180,
+    181,
+    182,
+    183,
+    184,
+    185,
+    186,
+    187
+   ]
+  },
+  {
+   "scene": "outro",
+   "sent": 0,
+   "spoken": "Bu kartı kaydedin!",
+   "caption": "Bu kartı kaydedin!",
+   "start": 105.689,
+   "end": 106.79,
+   "words": [
+    188,
+    189,
+    190
+   ]
+  },
+  {
+   "scene": "outro",
+   "sent": 1,
+   "spoken": "Sıradaki bölümde:",
+   "caption": "Sıradaki bölümde:",
+   "start": 107.39,
+   "end": 108.676,
+   "words": [
+    191,
+    192
+   ]
+  },
+  {
+   "scene": "outro",
+   "sent": 1,
+   "spoken": "yedek anahtar,",
+   "caption": "yedek anahtar,",
+   "start": 108.926,
+   "end": 109.844,
+   "words": [
+    193,
+    194
+   ]
+  },
+  {
+   "scene": "outro",
+   "sent": 1,
+   "spoken": "yani yedekleme.",
+   "caption": "yani yedekleme.",
+   "start": 110.004,
+   "end": 111.105,
+   "words": [
+    195,
+    196
+   ]
+  },
+  {
+   "scene": "outro",
+   "sent": 2,
+   "spoken": "Vebe Dair,",
+   "caption": "Web'e Dair,",
+   "start": 111.545,
+   "end": 112.28,
+   "words": [
+    197,
+    198
+   ]
+  },
+  {
+   "scene": "outro",
+   "sent": 2,
+   "spoken": "Fentrayla.",
+   "caption": "Fentra'yla.",
+   "start": 112.44,
+   "end": 112.99,
+   "words": [
+    199
+   ]
+  }
+ ],
+ "words": [
+  {
+   "w": "Bir",
+   "start": 0.05,
+   "end": 0.234,
+   "phrase": 0
+  },
+  {
+   "w": "reklama",
+   "start": 0.234,
+   "end": 0.784,
+   "phrase": 0
+  },
+  {
+   "w": "tıkladınız.",
+   "start": 0.784,
+   "end": 1.519,
+   "phrase": 0
+  },
+  {
+   "w": "Sayfa",
+   "start": 1.959,
+   "end": 2.326,
+   "phrase": 1
+  },
+  {
+   "w": "açılıyor,",
+   "start": 2.326,
+   "end": 3.06,
+   "phrase": 1
+  },
+  {
+   "w": "açılıyor",
+   "start": 3.22,
+   "end": 3.955,
+   "phrase": 2
+  },
+  {
+   "w": "ama",
+   "start": 3.955,
+   "end": 4.322,
+   "phrase": 2
+  },
+  {
+   "w": "ekran",
+   "start": 4.322,
+   "end": 4.689,
+   "phrase": 2
+  },
+  {
+   "w": "bembeyaz.",
+   "start": 4.689,
+   "end": 5.24,
+   "phrase": 2
+  },
+  {
+   "w": "Siz",
+   "start": 5.68,
+   "end": 5.864,
+   "phrase": 3
+  },
+  {
+   "w": "kaç",
+   "start": 5.864,
+   "end": 6.047,
+   "phrase": 3
+  },
+  {
+   "w": "saniye",
+   "start": 6.047,
+   "end": 6.598,
+   "phrase": 3
+  },
+  {
+   "w": "beklersiniz?",
+   "start": 6.598,
+   "end": 7.332,
+   "phrase": 3
+  },
+  {
+   "w": "Web'e",
+   "start": 7.852,
+   "end": 8.22,
+   "phrase": 4
+  },
+  {
+   "w": "Dair.",
+   "start": 8.22,
+   "end": 8.587,
+   "phrase": 4
+  },
+  {
+   "w": "Dördüncü",
+   "start": 9.027,
+   "end": 9.578,
+   "phrase": 5
+  },
+  {
+   "w": "bölüm:",
+   "start": 9.578,
+   "end": 9.945,
+   "phrase": 5
+  },
+  {
+   "w": "kapınızdaki",
+   "start": 10.195,
+   "end": 11.113,
+   "phrase": 6
+  },
+  {
+   "w": "kuyruk.",
+   "start": 11.113,
+   "end": 11.48,
+   "phrase": 6
+  },
+  {
+   "w": "Sitenizin",
+   "start": 12.0,
+   "end": 12.734,
+   "phrase": 7
+  },
+  {
+   "w": "adresi,",
+   "start": 12.734,
+   "end": 13.285,
+   "phrase": 7
+  },
+  {
+   "w": "binası,",
+   "start": 13.445,
+   "end": 13.996,
+   "phrase": 8
+  },
+  {
+   "w": "yolu,",
+   "start": 14.156,
+   "end": 14.523,
+   "phrase": 9
+  },
+  {
+   "w": "kilidi",
+   "start": 14.683,
+   "end": 15.234,
+   "phrase": 10
+  },
+  {
+   "w": "ve",
+   "start": 15.234,
+   "end": 15.418,
+   "phrase": 10
+  },
+  {
+   "w": "posta",
+   "start": 15.418,
+   "end": 15.785,
+   "phrase": 10
+  },
+  {
+   "w": "kutusu",
+   "start": 15.785,
+   "end": 16.336,
+   "phrase": 10
+  },
+  {
+   "w": "hazır.",
+   "start": 16.336,
+   "end": 16.703,
+   "phrase": 10
+  },
+  {
+   "w": "Peki",
+   "start": 17.143,
+   "end": 17.51,
+   "phrase": 11
+  },
+  {
+   "w": "kapıda",
+   "start": 17.51,
+   "end": 18.061,
+   "phrase": 11
+  },
+  {
+   "w": "uzun",
+   "start": 18.061,
+   "end": 18.428,
+   "phrase": 11
+  },
+  {
+   "w": "bir",
+   "start": 18.428,
+   "end": 18.612,
+   "phrase": 11
+  },
+  {
+   "w": "kuyruk",
+   "start": 18.612,
+   "end": 18.979,
+   "phrase": 11
+  },
+  {
+   "w": "varsa?",
+   "start": 18.979,
+   "end": 19.346,
+   "phrase": 11
+  },
+  {
+   "w": "Telefondan",
+   "start": 19.866,
+   "end": 20.6,
+   "phrase": 12
+  },
+  {
+   "w": "gelen",
+   "start": 20.6,
+   "end": 20.967,
+   "phrase": 12
+  },
+  {
+   "w": "ziyaretçilerin",
+   "start": 20.967,
+   "end": 22.069,
+   "phrase": 12
+  },
+  {
+   "w": "yarısından",
+   "start": 22.069,
+   "end": 22.803,
+   "phrase": 12
+  },
+  {
+   "w": "fazlası,",
+   "start": 22.803,
+   "end": 23.354,
+   "phrase": 12
+  },
+  {
+   "w": "üç",
+   "start": 23.514,
+   "end": 23.698,
+   "phrase": 13
+  },
+  {
+   "w": "saniyeden",
+   "start": 23.698,
+   "end": 24.432,
+   "phrase": 13
+  },
+  {
+   "w": "uzun",
+   "start": 24.432,
+   "end": 24.799,
+   "phrase": 13
+  },
+  {
+   "w": "süren",
+   "start": 24.799,
+   "end": 25.166,
+   "phrase": 13
+  },
+  {
+   "w": "bir",
+   "start": 25.166,
+   "end": 25.35,
+   "phrase": 13
+  },
+  {
+   "w": "sayfayı",
+   "start": 25.35,
+   "end": 25.901,
+   "phrase": 13
+  },
+  {
+   "w": "beklemeden",
+   "start": 25.901,
+   "end": 26.635,
+   "phrase": 13
+  },
+  {
+   "w": "kapatır.",
+   "start": 26.635,
+   "end": 27.186,
+   "phrase": 13
+  },
+  {
+   "w": "Yavaş",
+   "start": 27.626,
+   "end": 27.993,
+   "phrase": 14
+  },
+  {
+   "w": "bir",
+   "start": 27.993,
+   "end": 28.177,
+   "phrase": 14
+  },
+  {
+   "w": "site,",
+   "start": 28.177,
+   "end": 28.544,
+   "phrase": 14
+  },
+  {
+   "w": "kapısında",
+   "start": 28.704,
+   "end": 29.439,
+   "phrase": 15
+  },
+  {
+   "w": "uzun",
+   "start": 29.439,
+   "end": 29.806,
+   "phrase": 15
+  },
+  {
+   "w": "kuyruk",
+   "start": 29.806,
+   "end": 30.173,
+   "phrase": 15
+  },
+  {
+   "w": "olan",
+   "start": 30.173,
+   "end": 30.54,
+   "phrase": 15
+  },
+  {
+   "w": "bir",
+   "start": 30.54,
+   "end": 30.724,
+   "phrase": 15
+  },
+  {
+   "w": "dükkan",
+   "start": 30.724,
+   "end": 31.091,
+   "phrase": 15
+  },
+  {
+   "w": "gibidir.",
+   "start": 31.091,
+   "end": 31.642,
+   "phrase": 15
+  },
+  {
+   "w": "Müşteri",
+   "start": 32.082,
+   "end": 32.633,
+   "phrase": 16
+  },
+  {
+   "w": "bir",
+   "start": 32.633,
+   "end": 32.817,
+   "phrase": 16
+  },
+  {
+   "w": "süre",
+   "start": 32.817,
+   "end": 33.184,
+   "phrase": 16
+  },
+  {
+   "w": "bekler,",
+   "start": 33.184,
+   "end": 33.551,
+   "phrase": 16
+  },
+  {
+   "w": "sonra",
+   "start": 33.711,
+   "end": 34.078,
+   "phrase": 17
+  },
+  {
+   "w": "yan",
+   "start": 34.078,
+   "end": 34.262,
+   "phrase": 17
+  },
+  {
+   "w": "dükkana",
+   "start": 34.262,
+   "end": 34.813,
+   "phrase": 17
+  },
+  {
+   "w": "gider.",
+   "start": 34.813,
+   "end": 35.18,
+   "phrase": 17
+  },
+  {
+   "w": "Google",
+   "start": 35.62,
+   "end": 35.987,
+   "phrase": 18
+  },
+  {
+   "w": "da",
+   "start": 35.987,
+   "end": 36.171,
+   "phrase": 18
+  },
+  {
+   "w": "hızlı",
+   "start": 36.171,
+   "end": 36.538,
+   "phrase": 18
+  },
+  {
+   "w": "açılan",
+   "start": 36.538,
+   "end": 37.089,
+   "phrase": 18
+  },
+  {
+   "w": "siteleri",
+   "start": 37.089,
+   "end": 37.823,
+   "phrase": 18
+  },
+  {
+   "w": "öne",
+   "start": 37.823,
+   "end": 38.19,
+   "phrase": 18
+  },
+  {
+   "w": "çıkarır.",
+   "start": 38.19,
+   "end": 38.741,
+   "phrase": 18
+  },
+  {
+   "w": "Peki",
+   "start": 39.261,
+   "end": 39.628,
+   "phrase": 19
+  },
+  {
+   "w": "bir",
+   "start": 39.628,
+   "end": 39.812,
+   "phrase": 19
+  },
+  {
+   "w": "site",
+   "start": 39.812,
+   "end": 40.179,
+   "phrase": 19
+  },
+  {
+   "w": "neden",
+   "start": 40.179,
+   "end": 40.546,
+   "phrase": 19
+  },
+  {
+   "w": "yavaşlar?",
+   "start": 40.546,
+   "end": 41.097,
+   "phrase": 19
+  },
+  {
+   "w": "En",
+   "start": 41.557,
+   "end": 41.74,
+   "phrase": 20
+  },
+  {
+   "w": "sık",
+   "start": 41.74,
+   "end": 41.924,
+   "phrase": 20
+  },
+  {
+   "w": "sebep,",
+   "start": 41.924,
+   "end": 42.291,
+   "phrase": 20
+  },
+  {
+   "w": "büyük",
+   "start": 42.451,
+   "end": 42.818,
+   "phrase": 21
+  },
+  {
+   "w": "görsellerdir.",
+   "start": 42.818,
+   "end": 43.553,
+   "phrase": 21
+  },
+  {
+   "w": "Telefonla",
+   "start": 43.993,
+   "end": 44.727,
+   "phrase": 22
+  },
+  {
+   "w": "çekilmiş",
+   "start": 44.727,
+   "end": 45.278,
+   "phrase": 22
+  },
+  {
+   "w": "tek",
+   "start": 45.278,
+   "end": 45.462,
+   "phrase": 22
+  },
+  {
+   "w": "bir",
+   "start": 45.462,
+   "end": 45.645,
+   "phrase": 22
+  },
+  {
+   "w": "fotoğraf,",
+   "start": 45.645,
+   "end": 46.196,
+   "phrase": 22
+  },
+  {
+   "w": "bütün",
+   "start": 46.356,
+   "end": 46.723,
+   "phrase": 23
+  },
+  {
+   "w": "sayfadan",
+   "start": 46.723,
+   "end": 47.274,
+   "phrase": 23
+  },
+  {
+   "w": "daha",
+   "start": 47.274,
+   "end": 47.641,
+   "phrase": 23
+  },
+  {
+   "w": "ağır",
+   "start": 47.641,
+   "end": 48.009,
+   "phrase": 23
+  },
+  {
+   "w": "olabilir.",
+   "start": 48.009,
+   "end": 48.743,
+   "phrase": 23
+  },
+  {
+   "w": "Görseller",
+   "start": 49.183,
+   "end": 49.734,
+   "phrase": 24
+  },
+  {
+   "w": "küçültülüp",
+   "start": 49.734,
+   "end": 50.468,
+   "phrase": 24
+  },
+  {
+   "w": "sıkıştırılınca,",
+   "start": 50.468,
+   "end": 51.57,
+   "phrase": 24
+  },
+  {
+   "w": "aynı",
+   "start": 51.73,
+   "end": 52.097,
+   "phrase": 25
+  },
+  {
+   "w": "görüntü",
+   "start": 52.097,
+   "end": 52.648,
+   "phrase": 25
+  },
+  {
+   "w": "çok",
+   "start": 52.648,
+   "end": 52.831,
+   "phrase": 25
+  },
+  {
+   "w": "daha",
+   "start": 52.831,
+   "end": 53.198,
+   "phrase": 25
+  },
+  {
+   "w": "hızlı",
+   "start": 53.198,
+   "end": 53.565,
+   "phrase": 25
+  },
+  {
+   "w": "açılır.",
+   "start": 53.565,
+   "end": 54.116,
+   "phrase": 25
+  },
+  {
+   "w": "İkinci",
+   "start": 54.636,
+   "end": 55.187,
+   "phrase": 26
+  },
+  {
+   "w": "sebep:",
+   "start": 55.187,
+   "end": 55.554,
+   "phrase": 26
+  },
+  {
+   "w": "hosting.",
+   "start": 55.804,
+   "end": 56.172,
+   "phrase": 27
+  },
+  {
+   "w": "Ucuz",
+   "start": 56.612,
+   "end": 56.979,
+   "phrase": 28
+  },
+  {
+   "w": "ve",
+   "start": 56.979,
+   "end": 57.163,
+   "phrase": 28
+  },
+  {
+   "w": "kalabalık",
+   "start": 57.163,
+   "end": 57.897,
+   "phrase": 28
+  },
+  {
+   "w": "bir",
+   "start": 57.897,
+   "end": 58.081,
+   "phrase": 28
+  },
+  {
+   "w": "sunucuda,",
+   "start": 58.081,
+   "end": 58.815,
+   "phrase": 28
+  },
+  {
+   "w": "yüzlerce",
+   "start": 58.975,
+   "end": 59.526,
+   "phrase": 29
+  },
+  {
+   "w": "site",
+   "start": 59.526,
+   "end": 59.893,
+   "phrase": 29
+  },
+  {
+   "w": "aynı",
+   "start": 59.893,
+   "end": 60.26,
+   "phrase": 29
+  },
+  {
+   "w": "kaynakları",
+   "start": 60.26,
+   "end": 60.994,
+   "phrase": 29
+  },
+  {
+   "w": "paylaşır.",
+   "start": 60.994,
+   "end": 61.545,
+   "phrase": 29
+  },
+  {
+   "w": "Bina",
+   "start": 61.985,
+   "end": 62.352,
+   "phrase": 30
+  },
+  {
+   "w": "aynı,",
+   "start": 62.352,
+   "end": 62.72,
+   "phrase": 30
+  },
+  {
+   "w": "kapı",
+   "start": 62.88,
+   "end": 63.247,
+   "phrase": 31
+  },
+  {
+   "w": "tek,",
+   "start": 63.247,
+   "end": 63.43,
+   "phrase": 31
+  },
+  {
+   "w": "kuyruk",
+   "start": 63.59,
+   "end": 63.958,
+   "phrase": 32
+  },
+  {
+   "w": "uzun.",
+   "start": 63.958,
+   "end": 64.325,
+   "phrase": 32
+  },
+  {
+   "w": "Kaliteli",
+   "start": 64.765,
+   "end": 65.499,
+   "phrase": 33
+  },
+  {
+   "w": "bir",
+   "start": 65.499,
+   "end": 65.683,
+   "phrase": 33
+  },
+  {
+   "w": "hosting,",
+   "start": 65.683,
+   "end": 66.05,
+   "phrase": 33
+  },
+  {
+   "w": "sitenize",
+   "start": 66.21,
+   "end": 66.944,
+   "phrase": 34
+  },
+  {
+   "w": "geniş",
+   "start": 66.944,
+   "end": 67.311,
+   "phrase": 34
+  },
+  {
+   "w": "ve",
+   "start": 67.311,
+   "end": 67.495,
+   "phrase": 34
+  },
+  {
+   "w": "hızlı",
+   "start": 67.495,
+   "end": 67.862,
+   "phrase": 34
+  },
+  {
+   "w": "bir",
+   "start": 67.862,
+   "end": 68.046,
+   "phrase": 34
+  },
+  {
+   "w": "kapı",
+   "start": 68.046,
+   "end": 68.413,
+   "phrase": 34
+  },
+  {
+   "w": "açar.",
+   "start": 68.413,
+   "end": 68.78,
+   "phrase": 34
+  },
+  {
+   "w": "Peki",
+   "start": 69.3,
+   "end": 69.667,
+   "phrase": 35
+  },
+  {
+   "w": "ziyaretçiniz",
+   "start": 69.667,
+   "end": 70.585,
+   "phrase": 35
+  },
+  {
+   "w": "uzaktaysa?",
+   "start": 70.585,
+   "end": 71.32,
+   "phrase": 35
+  },
+  {
+   "w": "Burada",
+   "start": 71.78,
+   "end": 72.331,
+   "phrase": 36
+  },
+  {
+   "w": "CDN",
+   "start": 72.331,
+   "end": 72.882,
+   "phrase": 36
+  },
+  {
+   "w": "devreye",
+   "start": 72.882,
+   "end": 73.433,
+   "phrase": 36
+  },
+  {
+   "w": "girer.",
+   "start": 73.433,
+   "end": 73.8,
+   "phrase": 36
+  },
+  {
+   "w": "CDN,",
+   "start": 74.24,
+   "end": 74.79,
+   "phrase": 37
+  },
+  {
+   "w": "sitenizin",
+   "start": 74.95,
+   "end": 75.684,
+   "phrase": 38
+  },
+  {
+   "w": "kopyalarını",
+   "start": 75.684,
+   "end": 76.603,
+   "phrase": 38
+  },
+  {
+   "w": "farklı",
+   "start": 76.603,
+   "end": 76.97,
+   "phrase": 38
+  },
+  {
+   "w": "şehirlerdeki",
+   "start": 76.97,
+   "end": 77.888,
+   "phrase": 38
+  },
+  {
+   "w": "sunuculara",
+   "start": 77.888,
+   "end": 78.806,
+   "phrase": 38
+  },
+  {
+   "w": "dağıtır.",
+   "start": 78.806,
+   "end": 79.357,
+   "phrase": 38
+  },
+  {
+   "w": "Böylece",
+   "start": 79.797,
+   "end": 80.348,
+   "phrase": 39
+  },
+  {
+   "w": "herkes,",
+   "start": 80.348,
+   "end": 80.715,
+   "phrase": 39
+  },
+  {
+   "w": "kendisine",
+   "start": 80.875,
+   "end": 81.609,
+   "phrase": 40
+  },
+  {
+   "w": "en",
+   "start": 81.609,
+   "end": 81.793,
+   "phrase": 40
+  },
+  {
+   "w": "yakın",
+   "start": 81.793,
+   "end": 82.16,
+   "phrase": 40
+  },
+  {
+   "w": "şubeden",
+   "start": 82.16,
+   "end": 82.711,
+   "phrase": 40
+  },
+  {
+   "w": "hizmet",
+   "start": 82.711,
+   "end": 83.078,
+   "phrase": 40
+  },
+  {
+   "w": "alır.",
+   "start": 83.078,
+   "end": 83.445,
+   "phrase": 40
+  },
+  {
+   "w": "İyi",
+   "start": 83.965,
+   "end": 84.332,
+   "phrase": 41
+  },
+  {
+   "w": "haber",
+   "start": 84.332,
+   "end": 84.699,
+   "phrase": 41
+  },
+  {
+   "w": "şu:",
+   "start": 84.699,
+   "end": 84.883,
+   "phrase": 41
+  },
+  {
+   "w": "Sitenizin",
+   "start": 85.133,
+   "end": 85.867,
+   "phrase": 42
+  },
+  {
+   "w": "hızını",
+   "start": 85.867,
+   "end": 86.418,
+   "phrase": 42
+  },
+  {
+   "w": "ücretsiz",
+   "start": 86.418,
+   "end": 86.969,
+   "phrase": 42
+  },
+  {
+   "w": "ölçebilirsiniz.",
+   "start": 86.969,
+   "end": 88.071,
+   "phrase": 42
+  },
+  {
+   "w": "Google'ın",
+   "start": 88.511,
+   "end": 89.062,
+   "phrase": 43
+  },
+  {
+   "w": "hız",
+   "start": 89.062,
+   "end": 89.245,
+   "phrase": 43
+  },
+  {
+   "w": "testine",
+   "start": 89.245,
+   "end": 89.796,
+   "phrase": 43
+  },
+  {
+   "w": "adresinizi",
+   "start": 89.796,
+   "end": 90.714,
+   "phrase": 43
+  },
+  {
+   "w": "yazın.",
+   "start": 90.714,
+   "end": 91.081,
+   "phrase": 43
+  },
+  {
+   "w": "Puanınızı",
+   "start": 91.521,
+   "end": 92.439,
+   "phrase": 44
+  },
+  {
+   "w": "ve",
+   "start": 92.439,
+   "end": 92.623,
+   "phrase": 44
+  },
+  {
+   "w": "sitenizi",
+   "start": 92.623,
+   "end": 93.357,
+   "phrase": 44
+  },
+  {
+   "w": "neyin",
+   "start": 93.357,
+   "end": 93.724,
+   "phrase": 44
+  },
+  {
+   "w": "yavaşlattığını",
+   "start": 93.724,
+   "end": 94.826,
+   "phrase": 44
+  },
+  {
+   "w": "hemen",
+   "start": 94.826,
+   "end": 95.194,
+   "phrase": 44
+  },
+  {
+   "w": "görürsünüz.",
+   "start": 95.194,
+   "end": 95.928,
+   "phrase": 44
+  },
+  {
+   "w": "Kısacası:",
+   "start": 96.448,
+   "end": 97.182,
+   "phrase": 45
+  },
+  {
+   "w": "Yavaş",
+   "start": 97.432,
+   "end": 97.799,
+   "phrase": 46
+  },
+  {
+   "w": "site,",
+   "start": 97.799,
+   "end": 98.166,
+   "phrase": 46
+  },
+  {
+   "w": "kapıdaki",
+   "start": 98.326,
+   "end": 99.06,
+   "phrase": 47
+  },
+  {
+   "w": "uzun",
+   "start": 99.06,
+   "end": 99.428,
+   "phrase": 47
+  },
+  {
+   "w": "kuyruk.",
+   "start": 99.428,
+   "end": 99.795,
+   "phrase": 47
+  },
+  {
+   "w": "Hafif",
+   "start": 100.235,
+   "end": 100.602,
+   "phrase": 48
+  },
+  {
+   "w": "görseller,",
+   "start": 100.602,
+   "end": 101.153,
+   "phrase": 48
+  },
+  {
+   "w": "kaliteli",
+   "start": 101.313,
+   "end": 102.047,
+   "phrase": 49
+  },
+  {
+   "w": "hosting",
+   "start": 102.047,
+   "end": 102.415,
+   "phrase": 49
+  },
+  {
+   "w": "ve",
+   "start": 102.415,
+   "end": 102.598,
+   "phrase": 49
+  },
+  {
+   "w": "CDN",
+   "start": 102.598,
+   "end": 103.149,
+   "phrase": 49
+  },
+  {
+   "w": "ise",
+   "start": 103.149,
+   "end": 103.516,
+   "phrase": 49
+  },
+  {
+   "w": "kuyruğu",
+   "start": 103.516,
+   "end": 104.067,
+   "phrase": 49
+  },
+  {
+   "w": "eriten",
+   "start": 104.067,
+   "end": 104.618,
+   "phrase": 49
+  },
+  {
+   "w": "üç",
+   "start": 104.618,
+   "end": 104.802,
+   "phrase": 49
+  },
+  {
+   "w": "çözüm.",
+   "start": 104.802,
+   "end": 105.169,
+   "phrase": 49
+  },
+  {
+   "w": "Bu",
+   "start": 105.689,
+   "end": 105.873,
+   "phrase": 50
+  },
+  {
+   "w": "kartı",
+   "start": 105.873,
+   "end": 106.239,
+   "phrase": 50
+  },
+  {
+   "w": "kaydedin!",
+   "start": 106.239,
+   "end": 106.79,
+   "phrase": 50
+  },
+  {
+   "w": "Sıradaki",
+   "start": 107.39,
+   "end": 108.125,
+   "phrase": 51
+  },
+  {
+   "w": "bölümde:",
+   "start": 108.125,
+   "end": 108.676,
+   "phrase": 51
+  },
+  {
+   "w": "yedek",
+   "start": 108.926,
+   "end": 109.293,
+   "phrase": 52
+  },
+  {
+   "w": "anahtar,",
+   "start": 109.293,
+   "end": 109.844,
+   "phrase": 52
+  },
+  {
+   "w": "yani",
+   "start": 110.004,
+   "end": 110.371,
+   "phrase": 53
+  },
+  {
+   "w": "yedekleme.",
+   "start": 110.371,
+   "end": 111.105,
+   "phrase": 53
+  },
+  {
+   "w": "Web'e",
+   "start": 111.545,
+   "end": 111.912,
+   "phrase": 54
+  },
+  {
+   "w": "Dair,",
+   "start": 111.912,
+   "end": 112.28,
+   "phrase": 54
+  },
+  {
+   "w": "Fentra'yla.",
+   "start": 112.44,
+   "end": 112.99,
+   "phrase": 55
+  }
+ ],
+ "chunks": [
+  {
+   "words": [
+    0,
+    1,
+    2
+   ],
+   "start": 0.05,
+   "end": 1.519,
+   "hide": 1.919
+  },
+  {
+   "words": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "start": 1.959,
+   "end": 5.24,
+   "hide": 5.64
+  },
+  {
+   "words": [
+    9,
+    10,
+    11,
+    12
+   ],
+   "start": 5.68,
+   "end": 7.332,
+   "hide": 8.032
+  },
+  {
+   "words": [
+    19,
+    20,
+    21,
+    22
+   ],
+   "start": 12.0,
+   "end": 14.523,
+   "hide": 14.643
+  },
+  {
+   "words": [
+    23,
+    24,
+    25,
+    26,
+    27
+   ],
+   "start": 14.683,
+   "end": 16.703,
+   "hide": 17.103
+  },
+  {
+   "words": [
+    28,
+    29,
+    30,
+    31,
+    32,
+    33
+   ],
+   "start": 17.143,
+   "end": 19.346,
+   "hide": 19.826
+  },
+  {
+   "words": [
+    34,
+    35,
+    36
+   ],
+   "start": 19.866,
+   "end": 22.069,
+   "hide": 22.029
+  },
+  {
+   "words": [
+    37,
+    38
+   ],
+   "start": 22.069,
+   "end": 23.354,
+   "hide": 23.474
+  },
+  {
+   "words": [
+    39,
+    40,
+    41,
+    42
+   ],
+   "start": 23.514,
+   "end": 25.166,
+   "hide": 25.126
+  },
+  {
+   "words": [
+    43,
+    44,
+    45,
+    46
+   ],
+   "start": 25.166,
+   "end": 27.186,
+   "hide": 27.586
+  },
+  {
+   "words": [
+    47,
+    48,
+    49,
+    50
+   ],
+   "start": 27.626,
+   "end": 29.439,
+   "hide": 29.399
+  },
+  {
+   "words": [
+    51,
+    52,
+    53,
+    54,
+    55,
+    56
+   ],
+   "start": 29.439,
+   "end": 31.642,
+   "hide": 32.042
+  },
+  {
+   "words": [
+    57,
+    58,
+    59,
+    60
+   ],
+   "start": 32.082,
+   "end": 33.551,
+   "hide": 33.671
+  },
+  {
+   "words": [
+    61,
+    62,
+    63,
+    64
+   ],
+   "start": 33.711,
+   "end": 35.18,
+   "hide": 35.58
+  },
+  {
+   "words": [
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71
+   ],
+   "start": 35.62,
+   "end": 38.741,
+   "hide": 39.221
+  },
+  {
+   "words": [
+    72,
+    73,
+    74,
+    75,
+    76
+   ],
+   "start": 39.261,
+   "end": 41.097,
+   "hide": 41.517
+  },
+  {
+   "words": [
+    77,
+    78,
+    79,
+    80,
+    81
+   ],
+   "start": 41.557,
+   "end": 43.553,
+   "hide": 43.953
+  },
+  {
+   "words": [
+    82,
+    83,
+    84,
+    85,
+    86
+   ],
+   "start": 43.993,
+   "end": 46.196,
+   "hide": 46.316
+  },
+  {
+   "words": [
+    87,
+    88,
+    89,
+    90,
+    91
+   ],
+   "start": 46.356,
+   "end": 48.743,
+   "hide": 49.143
+  },
+  {
+   "words": [
+    92,
+    93,
+    94
+   ],
+   "start": 49.183,
+   "end": 51.57,
+   "hide": 51.69
+  },
+  {
+   "words": [
+    95,
+    96,
+    97,
+    98,
+    99,
+    100
+   ],
+   "start": 51.73,
+   "end": 54.116,
+   "hide": 54.596
+  },
+  {
+   "words": [
+    101,
+    102,
+    103
+   ],
+   "start": 54.636,
+   "end": 56.172,
+   "hide": 56.572
+  },
+  {
+   "words": [
+    104,
+    105,
+    106,
+    107,
+    108
+   ],
+   "start": 56.612,
+   "end": 58.815,
+   "hide": 58.935
+  },
+  {
+   "words": [
+    109,
+    110,
+    111,
+    112,
+    113
+   ],
+   "start": 58.975,
+   "end": 61.545,
+   "hide": 61.945
+  },
+  {
+   "words": [
+    114,
+    115,
+    116,
+    117,
+    118,
+    119
+   ],
+   "start": 61.985,
+   "end": 64.325,
+   "hide": 64.725
+  },
+  {
+   "words": [
+    120,
+    121,
+    122
+   ],
+   "start": 64.765,
+   "end": 66.05,
+   "hide": 66.17
+  },
+  {
+   "words": [
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129
+   ],
+   "start": 66.21,
+   "end": 68.78,
+   "hide": 69.26
+  },
+  {
+   "words": [
+    130,
+    131,
+    132
+   ],
+   "start": 69.3,
+   "end": 71.32,
+   "hide": 71.74
+  },
+  {
+   "words": [
+    133,
+    134,
+    135,
+    136
+   ],
+   "start": 71.78,
+   "end": 73.8,
+   "hide": 74.2
+  },
+  {
+   "words": [
+    137,
+    138,
+    139
+   ],
+   "start": 74.24,
+   "end": 76.603,
+   "hide": 76.563
+  },
+  {
+   "words": [
+    140,
+    141,
+    142,
+    143
+   ],
+   "start": 76.603,
+   "end": 79.357,
+   "hide": 79.757
+  },
+  {
+   "words": [
+    144,
+    145,
+    146
+   ],
+   "start": 79.797,
+   "end": 81.609,
+   "hide": 81.569
+  },
+  {
+   "words": [
+    147,
+    148,
+    149,
+    150,
+    151
+   ],
+   "start": 81.609,
+   "end": 83.445,
+   "hide": 83.925
+  },
+  {
+   "words": [
+    152,
+    153,
+    154,
+    155,
+    156
+   ],
+   "start": 83.965,
+   "end": 86.418,
+   "hide": 86.378
+  },
+  {
+   "words": [
+    157,
+    158
+   ],
+   "start": 86.418,
+   "end": 88.071,
+   "hide": 88.471
+  },
+  {
+   "words": [
+    159,
+    160,
+    161,
+    162,
+    163
+   ],
+   "start": 88.511,
+   "end": 91.081,
+   "hide": 91.481
+  },
+  {
+   "words": [
+    164,
+    165,
+    166,
+    167
+   ],
+   "start": 91.521,
+   "end": 93.724,
+   "hide": 93.684
+  },
+  {
+   "words": [
+    168,
+    169,
+    170
+   ],
+   "start": 93.724,
+   "end": 95.928,
+   "hide": 96.408
+  },
+  {
+   "words": [
+    171,
+    172,
+    173,
+    174,
+    175,
+    176
+   ],
+   "start": 96.448,
+   "end": 99.795,
+   "hide": 100.195
+  },
+  {
+   "words": [
+    177,
+    178,
+    179,
+    180,
+    181,
+    182,
+    183
+   ],
+   "start": 100.235,
+   "end": 103.516,
+   "hide": 103.476
+  },
+  {
+   "words": [
+    184,
+    185,
+    186,
+    187
+   ],
+   "start": 103.516,
+   "end": 105.169,
+   "hide": 105.649
+  },
+  {
+   "words": [
+    188,
+    189,
+    190
+   ],
+   "start": 105.689,
+   "end": 106.79,
+   "hide": 107.35
+  },
+  {
+   "words": [
+    191,
+    192,
+    193,
+    194,
+    195,
+    196
+   ],
+   "start": 107.39,
+   "end": 111.105,
+   "hide": 111.705
+  }
+ ]
+}
