@@ -10,10 +10,8 @@ const K = [
   { t: T.hookEnd, p: [40, 230, 270], q: [-10, 0, 20], f: 38, hold: true },
   { t: T.title + 1.2, p: [95, 115, 150], q: [-8, 0, 10], f: 36 },
   { t: T.titleEnd + 0.4, p: [72, 80, 118], q: [-10, 1, 14], f: 36 },
-  { t: T.bBina + 0.2, p: [52, 58, 100], q: [-8, 5, 12], f: 36 },
-  { t: T.bKilit + 0.3, p: [30, 26, 64], q: [-2, 3, 8], f: 36 },
-  { t: T.bPosta + 0.2, p: [14, 13, 42], q: [2, 2.4, 9], f: 36 },
-  { t: T.bKuyruk + 0.5, p: [5, 10, 40], q: [0, 2.5, 9], f: 36 },
+  { t: T.bHazir + 0.4, p: [36, 34, 76], q: [-4, 4, 10], f: 36 },
+  { t: T.bGuven + 0.3, p: [8, 11, 40], q: [0, 2.6, 9], f: 36 },
   // the whole building on the left, the card on the right: it shakes, breaks and falls
   { t: T.bCok + 0.2, p: [-14, 22, 76], q: [7, 11, 0], f: 36, hold: true },
   { t: T.cSil, p: [-14.3, 22.5, 77], q: [7, 11, 0], f: 36 },

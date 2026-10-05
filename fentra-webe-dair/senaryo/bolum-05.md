@@ -1,6 +1,6 @@
 # WEB'E DAİR · Bölüm 5 — Yedek Anahtar
 
-Konu: yedekleme ve güncellemeler (site çökerse ya da saldırıya uğrarsa) · Format: 9:16, 1080×1920, 30 fps · Süre: ~115 sn · Ses: Fatih Yıldırım, ElevenLabs
+Konu: yedekleme ve güncellemeler (site çökerse ya da saldırıya uğrarsa) · Format: 9:16, 1080×1920, 30 fps · Süre: ~114 sn · Ses: Fatih Yıldırım, ElevenLabs
 
 Hedef: Hiç bilmeyen biri, sitenin neden çökebileceğini, yedeğin ne olduğunu ve nerede durması gerektiğini, güncellemelerin neden ertelenmemesi gerektiğini anlamalı. Şehre bu bölümde **kasadaki yedek anahtar** eklenir.
 
@@ -14,7 +14,7 @@ Bölüm çubuğu: 01 ÇÖKÜŞ · 02 YEDEK · 03 GÜNCELLEME
 |---|---|---|---|---|
 | 01 | Bir sabah sitenizi açtınız. Sayfalar yok, ürünler yok, yıllarca yazdığınız her şey gitmiş. Yedeğiniz var mı? | — | Ekranın ortasında telefon: adres çubuğunda websiteniz.com, sayfa boş; ürün kartları birer birer silinir, "Sayfa bulunamadı" belirir, "?" çıkar. | — |
 | 02 | Web'e Dair. Beşinci bölüm: yedek anahtar. | Başlık ışık çizgilerinden kurulur, altında bir anahtar çizilir. | — | — |
-| 03 | Sitenizin adresi, binası, yolu, kilidi ve posta kutusu hazır. Kapıda kuyruk da yok. Peki bina bir gün çökerse? | Kamera önceki bölümlerin şehrinden geçer: tabela, bina, rota, kilit ve posta kutusu sırayla yanar; insanlar kapıdan rahatça girer. Son cümlede bina sarsılır, camları kırmızıya döner. | — | — |
+| 03 | Siteniz hazır, hızlı ve güvende. Peki bina bir gün çökerse? | Kamera önceki bölümlerin şehrinden hızla geçer: tabela, bina, rota, kilit ve posta kutusu art arda yanar; "hızlı" sözünde insanlar kapıdan rahatça girer. Son cümlede bina sarsılır, camları kırmızıya döner. | — | — |
 | 04 | Siteler pek çok sebeple çökebilir. Sunucu arızalanır, bir güncelleme yanlış gider ya da kötü niyetli biri içeri sızar. Bazen de bir dosyayı yanlışlıkla siz silersiniz. | Sunucu ışıkları kırmızı yanıp söner; bir kat kayar; kapıya karanlık bir gölge yaklaşır; bir kat silinir. Ardından bina kat kat çöker. | Dört sebep sırayla işaretlenir: sunucu arızası, hatalı güncelleme, saldırı, yanlışlıkla silme. | — |
 | 05 | Yedek, sitenizin tam bir kopyasıdır: dosyalar, görseller ve veritabanı. Tıpkı kasada saklanan bir yedek anahtar gibi. Bir şey olursa, kopyayı geri yükler ve sitenizi dakikalar içinde eski haline getirirsiniz. | Enkazın yanında bir kasa belirir ve açılır: içinde parlayan bir anahtar ve binanın küçük bir kopyası. "Geri yükler" sözünde kasadan çıkan ışıkla bina kat kat yeniden yükselir. | Hosting paneli: tarihli yedekler listesi; "Geri yükle"ye basılır, ilerleme çubuğu dolar, "Site geri yüklendi · 4 dk". | YEDEK · Sitenizin tam kopyası: dosyalar, görseller, veritabanı. |
 | 06 | Ama yedeği aynı binada saklamayın. Bina yanarsa, kasa da yanar. En az bir kopya, başka bir yerde, örneğin bulutta dursun. | Binanın içindeki kasa kırmızıya döner; şehrin başka bir köşesinde ikinci bir kasa belirir ve ışıklı bir yolla kopya oraya taşınır. | Yedek konumları: "Aynı sunucu ✕", "Başka sunucu ✓", "Bulut ✓". | — |
@@ -35,7 +35,7 @@ Bir sabah sitenizi açtınız. Sayfalar yok, ürünler yok, yıllarca yazdığı
 
 Vebe Dair. Beşinci bölüm: yedek anahtar.
 
-Sitenizin adresi, binası, yolu, kilidi ve posta kutusu hazır. Kapıda kuyruk da yok. Peki bina bir gün çökerse?
+Siteniz hazır, hızlı ve güvende. Peki bina bir gün çökerse?
 
 Siteler pek çok sebeple çökebilir. Sunucu arızalanır, bir güncelleme yanlış gider ya da kötü niyetli biri içeri sızar. Bazen de bir dosyayı yanlışlıkla siz silersiniz.
 

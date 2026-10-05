@@ -7,10 +7,9 @@ export const T = {
   gitmis: at('hook', 1, 'gitmiş'), yedeginiz: at('hook', 2, 'Yedeğiniz'), hookEnd: scene('hook').end,
   // title
   title: at('title', 0, "Web'e"), ep: at('title', 1, 'Beşinci'), tAnahtar: at('title', 1, 'anahtar'), titleEnd: scene('title').end,
-  // bridge — everything is ready, no queue; but what if the building falls?
-  b0: at('bridge', 0, 'Sitenizin'), bAdres: at('bridge', 0, 'adresi'), bBina: at('bridge', 0, 'binası'), bYol: at('bridge', 0, 'yolu'),
-  bKilit: at('bridge', 0, 'kilidi'), bPosta: at('bridge', 0, 'posta'), bKuyruk: at('bridge', 1, 'Kapıda'), bPeki: at('bridge', 2, 'Peki'),
-  bCok: at('bridge', 2, 'çökerse'), bEnd: scene('bridge').end,
+  // bridge — the site is ready, fast and safe; but what if the building falls? (the pins of earlier episodes light up on "hazır")
+  b0: at('bridge', 0, 'Siteniz'), bHazir: at('bridge', 0, 'hazır'), bHizli: at('bridge', 0, 'hızlı'), bGuven: at('bridge', 0, 'güvende'),
+  bPeki: at('bridge', 1, 'Peki'), bCok: at('bridge', 1, 'çökerse'), bEnd: scene('bridge').end,
   // 01 the crash
   c0: at('crash', 0, 'Siteler'), cSunucu: at('crash', 1, 'Sunucu'), cGuncel: at('crash', 1, 'güncelleme'), cKotu: at('crash', 1, 'kötü'),
   cSizar: at('crash', 1, 'sızar'), cBazen: at('crash', 2, 'Bazen'), cDosya: at('crash', 2, 'dosyayı'), cSil: at('crash', 2, 'silersiniz'),
@@ -35,3 +34,5 @@ export const T = {
   save: at('outro', 0, 'Bu'), saveW: at('outro', 0, 'kaydedin'), next: at('outro', 1, 'Sıradaki'), harita: at('outro', 1, 'haritadaki'),
   endCard: at('outro', 2, "Web'e"), fentra: at('outro', 2, "Fentra'yla"), END: DURATION,
 };
+// the five pins of earlier episodes light up in a quick cascade on "hazır"; "Kuyruk yok" on "hızlı"; the lock pulses on "güvende"
+Object.assign(T, { bAdres: T.bHazir - 0.2, bBina: T.bHazir + 0.05, bYol: T.bHazir + 0.3, bPosta: T.bHazir + 0.55, bKuyruk: T.bHizli, bKilit: T.bGuven });

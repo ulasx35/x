@@ -13,8 +13,7 @@ SCENES = [
         S("Beşinci bölüm: yedek anahtar."),
     ]),
     ("bridge", [
-        S("Sitenizin adresi, binası, yolu, kilidi ve posta kutusu hazır."),
-        S("Kapıda kuyruk da yok."),
+        S("Siteniz hazır, hızlı ve güvende."),
         S("Peki bina bir gün çökerse?"),
     ]),
     ("crash", [

@@ -203,7 +203,7 @@ export function createOverlay(root, city) {
     tParts.forEach((p, k) => { p.style.strokeDashoffset = +p.dataset.len * (1 - outCubic(prog(t, T.tAnahtar - 0.5 + k * 0.1, T.tAnahtar + 0.2 + k * 0.1))); });
 
     // ---- bridge pins
-    const mA = win(t, T.bAdres - 0.2, T.bKuyruk + 0.1, 0.25, 0.4);
+    const mA = win(t, T.bAdres - 0.2, T.bPeki + 0.1, 0.25, 0.4);
     [['adres', city.anchors.sign, T.bAdres], ['bina', city.anchors.heroTop, T.bBina], ['yol', [-20, 1, 14], T.bYol], ['kilit', city.anchors.lock, T.bKilit], ['posta', city.anchors.mailbox, T.bPosta]].forEach(([k, a, t0]) => {
       const kk = prog(t, t0 - 0.1, t0 + 0.3);
       place(mk[k], a, mA * kk, { lift: 100 * outBack(kk, 1.5), scale: lerp(0.6, 1, outBack(kk, 1.8)) * (1 + 0.15 * pk(t, t0 + 0.2, 0.25)) });

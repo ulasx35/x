@@ -41,8 +41,8 @@ T = dict(
     sayfalar=at("hook", 1, "Sayfalar"), urunler=at("hook", 1, "ürünler"), yillarca=at("hook", 1, "yıllarca"), gitmis=at("hook", 1, "gitmiş"),
     yedeginiz=at("hook", 2, "Yedeğiniz"), hookEnd=SC["hook"]["end"],
     title=at("title", 0, "Web'e"), ep=at("title", 1, "Beşinci"), tAnahtar=at("title", 1, "anahtar"), titleEnd=SC["title"]["end"],
-    b0=at("bridge", 0, "Sitenizin"), bAdres=at("bridge", 0, "adresi"), bBina=at("bridge", 0, "binası"), bYol=at("bridge", 0, "yolu"),
-    bKilit=at("bridge", 0, "kilidi"), bPosta=at("bridge", 0, "posta"), bKuyruk=at("bridge", 1, "Kapıda"), bCok=at("bridge", 2, "çökerse"),
+    b0=at("bridge", 0, "Siteniz"), bHazir=at("bridge", 0, "hazır"), bHizli=at("bridge", 0, "hızlı"), bGuven=at("bridge", 0, "güvende"),
+    bCok=at("bridge", 1, "çökerse"),
     c0=at("crash", 0, "Siteler"), cSunucu=at("crash", 1, "Sunucu"), cGuncel=at("crash", 1, "güncelleme"), cKotu=at("crash", 1, "kötü"),
     cSizar=at("crash", 1, "sızar"), cDosya=at("crash", 2, "dosyayı"), cSil=at("crash", 2, "silersiniz"),
     k0=at("backup", 0, "Yedek"), kKopya=at("backup", 0, "kopyasıdır"), kDosya=at("backup", 0, "dosyalar"), kGorsel=at("backup", 0, "görseller"),
@@ -59,6 +59,7 @@ T = dict(
     save=at("outro", 0, "Bu"), saveW=at("outro", 0, "kaydedin"), next=at("outro", 1, "Sıradaki"), harita=at("outro", 1, "haritadaki"),
     endCard=at("outro", 2, "Web'e"), fentra=at("outro", 2, "Fentra'yla"),
 )
+T.update(bAdres=T["bHazir"] - 0.2, bBina=T["bHazir"] + 0.05, bYol=T["bHazir"] + 0.3, bPosta=T["bHazir"] + 0.55, bKuyruk=T["bHizli"], bKilit=T["bGuven"])
 FALL0 = T["cSil"] + 0.1; REST0 = T["kGeri"] + 0.25; REST1 = REST0 + 2.4; NEWLOCK = T["uYedek"] + 0.85
 
 # ------------------------------------------------------------------ dsp helpers
