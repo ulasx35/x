@@ -60,7 +60,7 @@ T = dict(
     endCard=at("outro", 2, "Web'e"), fentra=at("outro", 2, "Fentra'yla"),
 )
 T.update(bAdres=T["bHazir"] - 0.2, bBina=T["bHazir"] + 0.05, bYol=T["bHazir"] + 0.3, bPosta=T["bHazir"] + 0.55, bKuyruk=T["bHizli"], bKilit=T["bGuven"])
-FALL0 = T["cSil"] + 0.1; REST0 = T["kGeri"] + 0.25; REST1 = REST0 + 2.4; NEWLOCK = T["uYedek"] + 0.85
+FALL0 = T["cSil"] + 0.1; REST0 = T["kGeri"] + 0.25; REST1 = REST0 + 2.4; NEWLOCK = T["uYedek"] + 0.5
 
 # ------------------------------------------------------------------ dsp helpers
 def sos(kind, f, order=2): return butter(order, f, kind, fs=SR, output="sos")

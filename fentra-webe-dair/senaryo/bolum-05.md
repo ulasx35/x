@@ -1,6 +1,6 @@
 # WEB'E DAİR · Bölüm 5 — Yedek Anahtar
 
-Konu: yedekleme ve güncellemeler (site çökerse ya da saldırıya uğrarsa) · Format: 9:16, 1080×1920, 30 fps · Süre: ~114 sn · Ses: Fatih Yıldırım, ElevenLabs
+Konu: yedekleme ve güncellemeler (site çökerse ya da saldırıya uğrarsa) · Format: 9:16, 1080×1920, 30 fps · Süre: 109,4 sn · Ses: Fatih Yıldırım, ElevenLabs (`assets/vo/bolum-05.mp3`, metin olduğu gibi kaydedildi)
 
 Hedef: Hiç bilmeyen biri, sitenin neden çökebileceğini, yedeğin ne olduğunu ve nerede durması gerektiğini, güncellemelerin neden ertelenmemesi gerektiğini anlamalı. Şehre bu bölümde **kasadaki yedek anahtar** eklenir.
 

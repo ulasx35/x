@@ -676,7 +676,7 @@ export function createCity(canvas) {
   // when the building falls, and when the backup brings it back
   const FALL0 = T.cSil + 0.1, FALL1 = FALL0 + 1.5;
   const REST0 = T.kGeri + 0.25, REST1 = REST0 + 2.4;
-  const NEWLOCK = T.uYedek + 0.85;
+  const NEWLOCK = T.uYedek + 0.5;
   const levels = hero.group.children.slice(0, 8), heroRoof = hero.group.children[8], heroCrown = hero.group.children[9];
   const LVL_R = levels.map((_, f) => ({ dx: (hash(f * 3.1 + 1) - 0.5) * 7, dz: (hash(f * 5.3 + 2) - 0.3) * 6, rz: (hash(f * 7.7 + 3) - 0.5) * 1.1, rx: (hash(f * 2.9 + 4) - 0.5) * 0.7 }));
   const WHITE = new THREE.Color('#ffffff'), REDG = new THREE.Color('#ff4d45'), ORANGE = new THREE.Color('#ff8a3d'), GREEN = new THREE.Color('#37d67a');
@@ -836,7 +836,7 @@ export function createCity(canvas) {
         return;
       }
       const t0 = T.uSaldir - 0.4 + k * 0.25, tOut = NEWLOCK + 0.5 + k * 0.12;
-      const side = -3.65 + (k - 1.5) * 1.1, sIn = 1.6 + (k % 2) * 0.9;
+      const side = -3.65 + [-2.7, -1.6, 1.5, 2.6][k], sIn = 2.6 + (k % 2) * 0.9;     // either side of the lock, leaving it in view
       let s = lerp(15 + k * 2, sIn, smooth(prog(t, t0, t0 + 2.0)));
       if (t > tOut) s = lerp(sIn, 18, smooth(prog(t, tOut, tOut + 2.2)));
       const a = win(t, t0, tOut + 2.0, 0.4, 0.8);
@@ -865,7 +865,7 @@ export function createCity(canvas) {
     // ---- the keys
     const kRise = outBack(prog(t, T.kKasa - 0.2, T.kKasa + 0.4), 1.6);
     const toLock = smooth(prog(t, T.aDene - 0.1, T.aDene + 0.8));
-    const gA = Math.max(win(t, T.kKasa - 0.2, T.kOlur + 0.3, 0.25, 0.4), win(t, T.aDene - 0.4, T.aDenen + 0.2, 0.3, 0.4));
+    const gA = Math.max(win(t, T.kKasa - 0.2, T.kOlur + 0.3, 0.25, 0.4), win(t, T.aDene - 0.4, T.aDenen, 0.3, 0.35));
     goldKey.g.visible = gA > 0.002; goldKey.mat.opacity = gA;
     if (goldKey.g.visible) {
       if (toLock <= 0) {

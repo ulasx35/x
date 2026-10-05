@@ -1,6 +1,6 @@
 # WEB'E DAİR · Bölüm 5 — "Yedek anahtar" (yedekleme ve güncellemeler)
 
-**Status:** visuals, camera, overlays and sound design are built on a provisional timeline predicted from the script's syllables. `scripts/align.py` falls back to it while `assets/vo/bolum-05.mp3` is missing, and re-times everything once the recording is in.
+**Status:** aligned to the recorded voice-over (`assets/vo/bolum-05.mp3`, 106.4 s; the film runs 109.4 s). The visuals were built first on a provisional timeline predicted from the script.
 
 Script and storyboard: `../senaryo/bolum-05.md`. Season plan: `../senaryo/sezon-1.md`.
 

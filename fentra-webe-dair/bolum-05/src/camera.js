@@ -34,7 +34,7 @@ const K = [
   // 03 the rusty lock, attackers from the square, a new lock
   { t: T.uYazilim, p: [-2, 6, 30], q: [-1.5, 2.6, 8], f: 36, hold: true },
   { t: T.uSaldir + 0.6, p: [2, 8, 34], q: [-2, 2.6, 9], f: 36 },
-  { t: T.uEnd, p: [1, 7, 31], q: [-2.5, 2.6, 8], f: 36, hold: true },
+  { t: T.uEnd + 0.6, p: [2.3, 8.4, 34.5], q: [-2.3, 2.6, 9], f: 36, hold: true },
   // pull back: the safe, the cloud and the building
   { t: T.hOto, p: [12, 11, 62], q: [-3, 10, 11], f: 36, hold: true },
   { t: T.hEnd, p: [14, 13, 68], q: [-3, 10, 10], f: 36, hold: true },

@@ -38,7 +38,7 @@ const pk = (t, c, w) => Math.exp(-Math.pow((t - c) / w, 2));
 export function createOverlay(root, city) {
   const add = (h) => { const e = typeof h === 'string' ? el(h) : h; root.appendChild(e); return e; };
   const canvas = city.canvas;
-  const NEWLOCK = T.uYedek + 0.85;                     // same moment as in world.js
+  const NEWLOCK = T.uYedek + 0.5;                      // same moment as in world.js
   const dark = add('<div id="dark"></div>');
   const vig = add('<div id="vig"></div>');
   const shadeTop = add('<div id="shadeTop"></div>');
@@ -278,7 +278,7 @@ export function createOverlay(root, city) {
 
     // ---- pins
     const cA = [[T.cSunucu, T.cKotu + 0.3, 'racks'], [T.cGuncel, T.cKotu + 0.8, 'floor5'], [T.cKotu, T.cSizar + 0.5, 'attacker'], [T.cDosya + 0.1, T.cSil + 0.2, 'floor3']];
-    causePins.forEach((e, k) => { const [a0, a1, an] = cA[k]; place(e, city.anchors[an], win(t, a0 - 0.1, a1, 0.2, 0.3), { lift: 20, scale: lerp(0.6, 1, pop(t, a0)) }); });
+    causePins.forEach((e, k) => { const [a0, a1, an] = cA[k]; place(e, city.anchors[an], win(t, a0 - 0.1, a1, 0.2, 0.3), { lift: an === 'attacker' ? 150 : 20, scale: lerp(0.6, 1, pop(t, a0)) }); });
     [T.kDosya, T.kGorsel, T.kVeri].forEach((w, k) => place(contentPins[k], city.anchors.holo, win(t, w - 0.1, T.kKasa + 0.2, 0.2, 0.3), { dx: 120, ax: 0, ay: 0.5, dy: 40 + k * 74, scale: lerp(0.6, 1, pop(t, w)) }));
     place(keyPin, city.anchors.key, win(t, T.kAnahtar - 0.25, T.kOlur, 0.25, 0.3), { lift: 30, scale: lerp(0.6, 1, pop(t, T.kAnahtar - 0.1)) });
     place(samePin, city.anchors.ghostSafe, win(t, T.oAyni, T.oBaska, 0.25, 0.3), { lift: 20, scale: lerp(0.6, 1, pop(t, T.oAyni + 0.1)) });
@@ -288,7 +288,7 @@ export function createOverlay(root, city) {
     place(badPin, city.anchors.lock, win(t, T.aUymayan, T.aEnd + 0.4, 0.2, 0.3), { lift: 20, scale: lerp(0.6, 1, pop(t, T.aUymayan + 0.1)) });
     place(oldPin, city.anchors.lock, win(t, T.uEski - 0.1, NEWLOCK - 0.1, 0.25, 0.25), { lift: 20, scale: lerp(0.6, 1, pop(t, T.uEski)) });
     place(atkPin, city.anchors.attackers, win(t, T.uSaldir + 0.2, NEWLOCK + 0.6, 0.25, 0.3), { lift: 20, scale: lerp(0.6, 1, pop(t, T.uSaldir + 0.3)) });
-    place(newPin, city.anchors.lock, win(t, NEWLOCK + 0.2, T.uEnd + 0.4, 0.25, 0.3), { lift: 20, scale: lerp(0.6, 1, pop(t, NEWLOCK + 0.3)) });
+    place(newPin, city.anchors.lock, win(t, NEWLOCK + 0.2, T.h0 + 1.0, 0.25, 0.35), { lift: 20, scale: lerp(0.6, 1, pop(t, NEWLOCK + 0.3)) });
 
     // ---- glossary, save, next, end
     const gA = win(t, T.r0 - 0.45, T.next - 0.05, 0.4, 0.4);
