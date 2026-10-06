@@ -1,6 +1,11 @@
 # WEB'E DAİR · Bölüm 5 — "Yedek anahtar" (yedekleme ve güncellemeler)
 
-**Status:** aligned to the recorded voice-over (`assets/vo/bolum-05.mp3`, 106.4 s; the film runs 109.4 s). The visuals were built first on a provisional timeline predicted from the script.
+**Output:** `output/webe-dair-bolum-05.mp4`, 1080×1920 (9:16), 30 fps, 109.4 s, H.264 + AAC, -14 LUFS.
+
+- `output/webe-dair-bolum-05-paylasim.mp4`: the same resolution under 30 MB.
+- `output/webe-dair-bolum-05-preview.mp4`: a light 720p copy.
+
+Captions for Instagram and TikTok: `../senaryo/paylasim-bolum-05.md`. The visuals were built first on a provisional timeline predicted from the script, then re-timed to the recorded voice (`assets/vo/bolum-05.mp3`).
 
 Script and storyboard: `../senaryo/bolum-05.md`. Season plan: `../senaryo/sezon-1.md`.
 
