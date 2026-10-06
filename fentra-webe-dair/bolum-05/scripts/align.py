@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from vo_text import SCENES
 
 ROOT = Path(__file__).resolve().parent.parent            # bolum-05/
-VO = ROOT.parent / "assets/vo/bolum-05.mp3"
+VO = ROOT.parent / "assets/vo" / f"{ROOT.name}.mp3"
 TAIL = 3.2  # seconds after the last word for the end frame and sonic logo
 
 VOW = set("aeıioöuüAEIİOÖUÜ")

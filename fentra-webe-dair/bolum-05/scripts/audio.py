@@ -194,12 +194,14 @@ def rewind(dur=1.0):
 
 
 # ------------------------------------------------------------------ voice
-VOFILE = ROOT.parent / "assets/vo/bolum-04.mp3"
+VOFILE = ROOT.parent / "assets/vo" / f"{ROOT.name}.mp3"         # bolum-05/ -> assets/vo/bolum-05.mp3
 meter = pyln.Meter(SR)
 if VOFILE.exists():
     raw = subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), "-v", "quiet", "-i", str(VOFILE), "-ac", "1", "-ar", str(SR),
                           "-f", "f32le", "-"], capture_output=True, check=True).stdout
     vo = np.frombuffer(raw, np.float32).astype(np.float64)
+    # the recording must be the one the cues were aligned to
+    assert abs(len(vo) / SR - C["voDuration"]) < 0.05, f"{VOFILE.name} is {len(vo) / SR:.2f}s but the cues were aligned to a {C['voDuration']}s recording"
     vo = hp(vo, 75, 2)
     vo = np.concatenate([vo, np.zeros(max(0, N - len(vo)))])[:N]
     vo *= 10 ** ((-17.0 - meter.integrated_loudness(vo)) / 20)
