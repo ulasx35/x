@@ -9,6 +9,6 @@ Her bölüm aynı şehre bir parça ekler; bölüm sonundaki "Sıradaki bölümd
 | 3 | Kapınızdaki posta kutusu | Kurumsal e-posta, SPF, DKIM, DMARC | Kapıdaki posta kutusu, mühürlü mektuplar | Yayına hazır |
 | 4 | Kapınızdaki kuyruk | Site hızı: büyük görseller, hosting kalitesi, CDN, hız testi | Kapıdaki kuyruk, şehre açılan şubeler | Yayına hazır |
 | 5 | Yedek anahtar | Yedekleme ve güncellemeler: site çökerse ya da saldırıya uğrarsa | Kasadaki yedek anahtar | Yayına hazır |
-| 6 | Haritadaki yeriniz | Google İşletme Profili (sezon finali) | Şehir haritasındaki iğne | Sırada |
+| 6 | Haritadaki yeriniz | Google İşletme Profili (sezon finali) | Şehir haritasındaki iğne | Metin hazır, seslendirme bekleniyor |
 
 Sezon 2 (Görünürlük): SEO temelleri, yerel arama, içerik, yapay zekâ aramalarında görünmek (GEO). Fentra'nın WEB · SEO · GEO hizmetlerine bağlanır.
