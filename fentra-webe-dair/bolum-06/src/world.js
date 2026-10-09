@@ -822,7 +822,7 @@ export function createCity(canvas) {
     rivals.forEach((P, k) => {
       const d = outBack(prog(t, RIV0 + k * 0.12, RIV0 + k * 0.12 + 0.45), 1.5);
       const near = clamp((camera.position.distanceTo(P.base) - 20) / 8);   // no pin filling the frame in close-ups
-      const a = clamp(d * 3) * near * (k === 0 ? 1 : 1 - 0.6 * smooth(prog(t, T.k0 + 0.8, T.k0 + 1.6)) * (1 - win(t, T.w0, T.wEnd + 0.3, 0.4, 0.5)));
+      const a = clamp(d * 3) * near * (k === 0 ? 1 : 1 - smooth(prog(t, T.k0 + 0.8, T.k0 + 1.6)) * (1 - win(t, T.w0, T.wEnd + 0.3, 0.4, 0.5)));   // others' pins: on the map and in the why scene
       P.g.visible = a > 0.002;
       const s = P.scale * (1 + 0.12 * Math.sin(t * 2 + k));
       P.g.position.copy(P.base).add(new THREE.Vector3(0, 0.3 * Math.sin(t * 1.6 + k) + 12 * (1 - clamp(d)), 0));

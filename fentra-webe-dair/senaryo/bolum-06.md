@@ -1,6 +1,6 @@
 # WEB'E DAİR · Bölüm 6 — Haritadaki Yeriniz (sezon finali)
 
-Konu: Google İşletme Profili (harita kaydı, doğrulama, eksiksiz ve tutarlı bilgi, yorumlar, güncel saatler) · Format: 9:16, 1080×1920, 30 fps · Süre: ~110 sn · Ses: Fatih Yıldırım, ElevenLabs
+Konu: Google İşletme Profili (harita kaydı, doğrulama, eksiksiz ve tutarlı bilgi, yorumlar, güncel saatler) · Format: 9:16, 1080×1920, 30 fps · Süre: 102,4 sn · Ses: Fatih Yıldırım, ElevenLabs
 
 Hedef: Hiç bilmeyen biri, Google İşletme Profili'nin ne olduğunu, neden sitesi olsa bile haritada görünmesi gerektiğini, nasıl kurulduğunu ve yorumlarla saatlerin neden önemli olduğunu anlamalı. Şehre bu bölümde **haritadaki iğne** eklenir; sezon, şehrin tamamlanmasıyla kapanır.
 

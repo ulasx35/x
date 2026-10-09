@@ -176,7 +176,7 @@ export function createOverlay(root, city) {
   function update(t) {
     show(dark, 1 - smooth(prog(t, T.hookEnd - 0.1, T.title + 0.3)));
     const blurTitle = 6 * win(t, T.hookEnd, T.titleEnd + 0.25, 0.4, 0.45);
-    const gl = smooth(prog(t, T.save - 0.5, T.save + 0.3));
+    const gl = smooth(prog(t, T.save - 0.3, T.save + 0.4));
     const bl = blurTitle + 9 * gl * (1 - 0.35 * smooth(prog(t, T.endCard - 0.3, T.endCard + 0.6)));
     const br = 1 - 0.35 * gl - 0.2 * smooth(prog(t, T.endCard - 0.3, T.endCard + 0.6));
     canvas.style.filter = bl > 0.05 || br < 0.999 ? `blur(${bl.toFixed(2)}px) brightness(${br.toFixed(3)})` : 'none';
@@ -296,21 +296,23 @@ export function createOverlay(root, city) {
     const sAnch = [city.anchors.sign, city.anchors.heroTop, city.anchors.route, city.anchors.lock, city.anchors.mailbox, city.anchors.gauge, city.anchors.safe, city.anchors.heroPin];
     sPins.forEach((e, k) => { const t0 = T.gSezon - 0.1 + k * ((T.gTamam - T.gSezon) / 8); place(e, sAnch[k], win(t, t0, T.save - 0.2, 0.2, 0.35), { lift: 20 + (k % 2) * 46, scale: 0.8 * lerp(0.6, 1, pop(t, t0 + 0.1)) }); });
     const dn = outBack(prog(t, T.gTamam - 0.05, T.gTamam + 0.4), 1.7);
-    show(done, win(t, T.gTamam - 0.1, T.save - 0.1, 0.15, 0.35)); tf(done, `translate(-50%, -50%) scale(${lerp(0.5, 1, clamp(dn))}) rotate(${-6 + 6 * clamp(dn)}deg)`);
+    show(done, win(t, T.gTamam - 0.1, T.save + 0.05, 0.15, 0.35)); tf(done, `translate(-50%, -50%) scale(${lerp(0.5, 1, clamp(dn))}) rotate(${-6 + 6 * clamp(dn)}deg)`);
 
     // ---- the season card, save, next season, end
-    const gA = win(t, T.save - 0.45, T.next - 0.05, 0.4, 0.4);
-    show(gloss, gA); tf(gloss, `translateY(${(1 - outQuint(prog(t, T.save - 0.45, T.save + 0.1))) * 60}px) translateX(${-inOut(prog(t, T.next - 0.45, T.next - 0.05)) * 120}px)`);
-    gRows.forEach((r, k) => { const kk = outQuint(prog(t, T.save - 0.35 + k * 0.07, T.save + 0.05 + k * 0.07)); show(r, kk); tf(r, `translateX(${(1 - kk) * 50}px)`); r.style.borderColor = `rgba(91,156,255,${k === 7 ? 0.7 : 0.12})`; });
+    // the season card stays up through "Sıradaki sezonda:"; the next-season panel follows on "Google'da"
+    const G0 = T.save - 0.2, G1 = T.next + 0.95, N0 = T.next + 0.75;
+    const gA = win(t, G0, G1, 0.4, 0.4);
+    show(gloss, gA); tf(gloss, `translateY(${(1 - outQuint(prog(t, G0, G0 + 0.55))) * 60}px) translateX(${-inOut(prog(t, G1 - 0.4, G1)) * 120}px)`);
+    gRows.forEach((r, k) => { const kk = outQuint(prog(t, G0 + 0.1 + k * 0.07, G0 + 0.5 + k * 0.07)); show(r, kk); tf(r, `translateX(${(1 - kk) * 50}px)`); r.style.borderColor = `rgba(91,156,255,${k === 7 ? 0.7 : 0.12})`; });
     const stK = outBack(prog(t, T.saveW + 0.35, T.saveW + 0.7), 1.8); show(stamp, clamp(stK * 3)); tf(stamp, `rotate(-12deg) scale(${lerp(1.6, 1, clamp(stK))})`);
     const sv = prog(t, T.saveW - 0.05, T.saveW + 0.3);
     bmPath.style.fill = sv > 0.3 ? '#1c73fd' : 'transparent'; bmPath.style.stroke = sv > 0.3 ? '#1c73fd' : 'currentColor';
     tf(bm, `scale(${1 + 0.35 * Math.sin(clamp(sv) * Math.PI)})`);
     bm.style.borderColor = sv > 0.3 ? '#1c73fd' : 'rgba(255,255,255,0.25)';
     bm.style.boxShadow = sv > 0.3 ? '0 0 40px rgba(28,115,253,0.6)' : 'none';
-    show(saveLbl, win(t, T.saveW, T.next - 0.1, 0.25, 0.3)); tf(saveLbl, `translate(968px, ${318 - 30 * outBack(prog(t, T.saveW, T.saveW + 0.35), 2)}px) translate(-100%, -100%)`);   // above the season card's bookmark
-    show(next, win(t, T.next - 0.2, T.endCard - 0.05, 0.35, 0.35)); tf(next, `translateX(${(1 - outQuint(prog(t, T.next - 0.2, T.next + 0.3))) * 100}px)`);
-    kParts.forEach((p, k) => { p.style.strokeDashoffset = +p.dataset.len * (1 - outCubic(prog(t, T.next + 0.6 + k * 0.12, T.next + 1.3 + k * 0.12))); });
+    show(saveLbl, win(t, T.saveW, G1 - 0.1, 0.25, 0.3)); tf(saveLbl, `translate(968px, ${318 - 30 * outBack(prog(t, T.saveW, T.saveW + 0.35), 2)}px) translate(-100%, -100%)`);   // above the season card's bookmark
+    show(next, win(t, N0 - 0.2, T.endCard - 0.05, 0.35, 0.35)); tf(next, `translateX(${(1 - outQuint(prog(t, N0 - 0.2, N0 + 0.3))) * 100}px)`);
+    kParts.forEach((p, k) => { p.style.strokeDashoffset = +p.dataset.len * (1 - outCubic(prog(t, N0 + 0.6 + k * 0.12, N0 + 1.3 + k * 0.12))); });
     show(endf, smooth(prog(t, T.endCard - 0.15, T.endCard + 0.3)));
     const e1 = outQuint(prog(t, T.endCard - 0.15, T.endCard + 0.45));
     tf(eT, `translateY(${(1 - e1) * 40}px)`); eT.style.filter = e1 < 0.99 ? `blur(${(1 - e1) * 12}px)` : 'none';

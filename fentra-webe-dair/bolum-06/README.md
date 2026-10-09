@@ -1,11 +1,11 @@
 # WEB'E DAİR · Bölüm 6 — "Haritadaki yeriniz" (Google İşletme Profili, sezon finali)
 
-**Output:** `output/webe-dair-bolum-06.mp4`, 1080×1920 (9:16), 30 fps, H.264 + AAC, -14 LUFS.
+**Output:** `output/webe-dair-bolum-06.mp4`, 1080×1920 (9:16), 30 fps, 102.4 s, H.264 + AAC, -14 LUFS.
 
 - `output/webe-dair-bolum-06-paylasim.mp4`: the same resolution under 30 MB.
 - `output/webe-dair-bolum-06-preview.mp4`: a light 720p copy.
 
-The visuals are built on a provisional timeline predicted from the script (about 106 s). They are re-timed to the recorded voice once `assets/vo/bolum-06.mp3` exists.
+Captions for Instagram and TikTok: `../senaryo/paylasim-bolum-06.md`. The visuals were built first on a provisional timeline predicted from the script, then re-timed to the recorded voice (`assets/vo/bolum-06.mp3`).
 
 Script and storyboard: `../senaryo/bolum-06.md`. Season plan: `../senaryo/sezon-1.md`.
 

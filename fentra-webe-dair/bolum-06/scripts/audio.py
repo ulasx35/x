@@ -411,13 +411,14 @@ SEASON = [72, 74, 76, 77, 79, 81, 83, 84]
 for k, m in enumerate(SEASON): place(FX, T["gSezon"] - 0.1 + k * ((T["gTamam"] - T["gSezon"]) / 8) + 0.1, pan(pluck(m, 0.45, 1.3), ((k % 3) - 1) * 0.35), 0.15)
 place(FX, T["gTamam"] - 0.03, S(bell(84, 2.2), bell(88, 2.2) * 0.7, bell(91, 2.2) * 0.6, bell(96, 2.2) * 0.4), 0.26)
 # season card, stamp, next season
-place(FX, T["save"] - 0.5, whoosh(0.6, True), 0.16)
-for k in range(8): place(FX, T["save"] - 0.35 + k * 0.07, pan(tick(3600 + 200 * k), (k - 3.5) / 5), 0.07)
+G0, N0 = T["save"] - 0.2, T["next"] + 0.75                  # season card in; next-season panel in (as overlay.js)
+place(FX, G0 - 0.3, whoosh(0.6, True), 0.16)
+for k in range(8): place(FX, G0 + 0.1 + k * 0.07, pan(tick(3600 + 200 * k), (k - 3.5) / 5), 0.07)
 place(FX, T["saveW"] - 0.02, S(blip(1300, 2000, 0.07), tick(3000)), 0.28)
 place(FX, T["saveW"] + 0.12, bell(91, 1.0, 0.5), 0.1)
 place(FX, T["saveW"] + 0.45, S(thump(1.2), clunk(0.8), impact(0.15)), 0.24)        # the stamp
-place(FX, T["next"] - 0.3, whoosh(0.6, True), 0.18)
-for k in range(4): place(FX, T["next"] + 0.6 + k * 0.12, pluck(79 + 2 * k, 0.35, 1.2), 0.1)
+place(FX, N0 - 0.3, whoosh(0.6, True), 0.18)
+for k in range(4): place(FX, N0 + 0.6 + k * 0.12, pluck(79 + 2 * k, 0.35, 1.2), 0.1)
 place(FX, T["nSeo"] + 0.1, S(blip(700, 1400, 0.1), pluck(88, 0.4, 1.2)), 0.14)
 FX = verb(FX, IR_ROOM, 0.2)
 

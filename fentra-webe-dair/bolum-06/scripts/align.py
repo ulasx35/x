@@ -80,7 +80,8 @@ for i in range(I + 1):
             for b in (1, 2, 3, 4, 5):
                 if i + a > I or j + b > J: continue
                 dur = segs[i + a - 1][1] - segs[i][0]
-                c = 4 * np.log(dur / (rate * S[j:j + b].sum())) ** 2 + 0.35 * (a - 1) + 0.25 * (b - 1)
+                gaps = sum(segs[m + 1][0] - segs[m][1] for m in range(i, i + a - 1))   # pauses inside one phrase are rare
+                c = 4 * np.log(dur / (rate * S[j:j + b].sum())) ** 2 + 0.35 * (a - 1) + 2.0 * gaps + 0.25 * (b - 1)
                 if C[i, j] + c < C[i + a, j + b]:
                     C[i + a, j + b] = C[i, j] + c; back[(i + a, j + b)] = (i, j)
 path, cur = [], (I, J)
@@ -89,6 +90,13 @@ while cur != (0, 0):
 for (i0, j0), (i1, j1) in reversed(path):
     t0, t1 = segs[i0][0], segs[i1 - 1][1]
     w = S[j0:j1] / S[j0:j1].sum(); edges = t0 + np.concatenate([[0], np.cumsum(w)]) * (t1 - t0)
+    if not PROVISIONAL:                             # phrases read in one breath: move each inner edge to the nearest real dip
+        for m in range(1, len(edges) - 1):
+            c0, r = int(edges[m] * SR / HOP), 30
+            lo, hi = max(int(t0 * SR / HOP) + 5, c0 - r), min(int(t1 * SR / HOP) - 5, c0 + r)
+            if hi - lo > 3:
+                sm = np.convolve(db[lo:hi], np.ones(3) / 3, mode="same"); k = int(np.argmin(sm))
+                if sm[k] < db.max() - 30: edges[m] = (lo + k) * HOP / SR
     for m, j in enumerate(range(j0, j1)):
         phr[j]["start"], phr[j]["end"] = round(float(edges[m]), 3), round(float(edges[m + 1]), 3)
 
