@@ -12,3 +12,4 @@ Her bölüm aynı şehre bir parça ekler; bölüm sonundaki "Sıradaki bölümd
 | 6 | Haritadaki yeriniz | Google İşletme Profili (sezon finali) | Şehir haritasındaki iğne | Yayına hazır |
 
 Sezon 2 (Görünürlük): SEO temelleri, yerel arama, içerik, yapay zekâ aramalarında görünmek (GEO). Fentra'nın WEB · SEO · GEO hizmetlerine bağlanır.
+Plan: `sezon-2.md`.
