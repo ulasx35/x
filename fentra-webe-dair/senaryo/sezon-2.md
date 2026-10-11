@@ -7,7 +7,7 @@ Dosya adları `s2-bolum-NN` biçimindedir (klasör, senaryo, ses dosyası ve vid
 | Bölüm | Başlık | Konu | Şehre eklenen | Durum |
 |---|---|---|---|---|
 | 1 | Şehrin rehberi | Google nasıl çalışır: tarama, dizin, sıralama; SEO nedir; `site:` ile kontrol | Bağlantı yaylarını izleyen gezginler, kayıt defteri binası, ana cadde | Yayına hazır |
-| 2 | Müşterinin kelimeleri | Anahtar kelimeler: müşterinin gerçekten yazdığı kelimeler, uzun aramalar, her sayfaya bir konu | Sokak tabelalarındaki kelimeler | Plan |
+| 2 | Müşterinin kelimeleri | Anahtar kelimeler: müşterinin dili, kelimeleri ücretsiz bulmak, uzun aramalar, her sayfaya bir konu, kelime doldurma | Tabelalardaki kelimeler | Metin hazır, seslendirme bekleniyor |
 | 3 | Vitrindeki yazı | Sayfa başlığı ve açıklama: arama sonucunda görünen satırlar, tıklanma | Ana caddedeki vitrin camları | Plan |
 | 4 | Dükkanın içi | İçerik: sorulara cevap veren sayfalar, sık sorulan sorular, güncel içerik | Dükkanın içindeki danışma masası ve raflar | Plan |
 | 5 | Mahallenin tavsiyesi | Bağlantılar ve yerel arama: başka sitelerin sizi göstermesi, rehber kayıtları, tutarlı bilgi | Diğer binalardan size uzanan yol okları | Plan |
