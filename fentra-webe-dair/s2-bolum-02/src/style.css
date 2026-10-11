@@ -848,5 +848,5 @@ svg.ic { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width
 .ans svg { color: #6b7487; }
 .qfly.long { font-size: 26px !important; }
 /* the episode card */
-#gloss.s22 .row .k { width: 290px; font-size: 34px; white-space: nowrap; }
-#gloss.s22 .row .v { font-size: 32px; }
+#gloss.s22 .row .k { width: 262px; font-size: 32px; white-space: nowrap; flex: none; }
+#gloss.s22 .row .v { font-size: 30px; line-height: 1.15; white-space: normal; }
