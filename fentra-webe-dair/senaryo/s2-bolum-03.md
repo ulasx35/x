@@ -1,6 +1,6 @@
 # WEB'E DAİR · Sezon 2 · Bölüm 3 — Vitrindeki Yazı
 
-Konu: Arama sonucunda görünen sayfa başlığı ve açıklama: neden önemli oldukları, kötü örnekler ("Anasayfa", boş açıklama), iyi başlığın kuralları (ne, nerede, en önemli kelime başta, yaklaşık 60 karakter), iyi açıklamanın kuralları (neden siz, yaklaşık 150 karakter, Google'ın bazen kendi yazması), her sayfaya farklı başlık ve açıklama, yönetim panelinden değiştirmek · Format: 9:16, 1080×1920, 30 fps · Süre: ~110 sn · Ses: Fatih Yıldırım, ElevenLabs
+Konu: Arama sonucunda görünen sayfa başlığı ve açıklama: neden önemli oldukları, kötü örnekler ("Anasayfa", boş açıklama), iyi başlığın kuralları (ne, nerede, en önemli kelime başta, yaklaşık 60 karakter), iyi açıklamanın kuralları (neden siz, yaklaşık 150 karakter, Google'ın bazen kendi yazması), her sayfaya farklı başlık ve açıklama, yönetim panelinden değiştirmek · Format: 9:16, 1080×1920, 30 fps · Süre: 108,5 sn · Ses: Fatih Yıldırım, ElevenLabs
 
 Hedef: Hiç bilmeyen biri, arama sonucunda sitesinden hangi iki satırın göründüğünü, bunların neden "vitrin" olduğunu, iyi bir başlık ve açıklamanın nasıl yazıldığını ve bunları nereden değiştireceğini anlamalı. Şehre bu bölümde **vitrinler** eklenir.
 
